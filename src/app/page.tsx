@@ -75,7 +75,7 @@ export default async function Home() {
       .collection("products")
       .where("isSpotlight", "==", true)
       .get();
-      
+
     spotlightProducts = spotlightSnapshot.docs
       .map(doc => ({ id: doc.id, ...doc.data() } as any))
       .filter(p => p.spotlightExpiry && new Date(p.spotlightExpiry) > new Date());
@@ -93,7 +93,7 @@ export default async function Home() {
             shopMap.set(doc.id, doc.data());
           }
         });
-        
+
         spotlightProducts = spotlightProducts.map(p => {
           const shop = shopMap.get(p.shopId);
           // markets was mapped as doc.data(), assuming id was included if it's there. 
@@ -116,7 +116,7 @@ export default async function Home() {
     <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8">
       <div className="flex flex-col items-center mt-12 mb-2">
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-gray-900 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-          <span>Welcome to</span>
+          <span>Welcom to</span>
           <div className="bg-brand-50 p-2 sm:p-3 rounded-2xl shadow-sm">
             <Logo className="w-10 h-10 sm:w-14 sm:h-14 text-brand-600" />
           </div>
@@ -136,7 +136,7 @@ export default async function Home() {
               </svg>
               <h2 className="text-2xl font-bold text-gray-900">Spotlight Products</h2>
             </div>
-            
+
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
               {spotlightProducts.map(product => (
                 <div key={product.id} className="bg-white rounded-xl shadow-sm border border-yellow-200 overflow-hidden hover:shadow-md transition relative flex flex-col group">
@@ -146,12 +146,12 @@ export default async function Home() {
                     </svg>
                     Spotlight
                   </div>
-                  
+
                   {product.imageUrl || (product.imageUrls && product.imageUrls.length > 0) ? (
-                    <img 
-                      src={product.imageUrl || product.imageUrls[0]} 
-                      alt={product.name} 
-                      className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" 
+                    <img
+                      src={product.imageUrl || product.imageUrls[0]}
+                      alt={product.name}
+                      className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <div className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-200 transition-colors">
