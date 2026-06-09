@@ -29,7 +29,7 @@ export async function GET(req: Request) {
       });
 
       // Attach shop names
-      const shopIds = [...new Set(chats.map(c => c.shopId))];
+      const shopIds = Array.from(new Set(chats.map(c => c.shopId)));
       if (shopIds.length > 0) {
         // Need to batch if there are many shops, but usually < 30
         const shopsSnapshot = await adminDb.collection("shops").where("id", "in", shopIds.slice(0, 30)).get();

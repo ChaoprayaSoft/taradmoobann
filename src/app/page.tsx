@@ -84,7 +84,7 @@ export default async function Home() {
     spotlightProducts = spotlightProducts.sort(() => 0.5 - Math.random()).slice(0, 8);
 
     if (spotlightProducts.length > 0) {
-      const shopIds = [...new Set(spotlightProducts.map(p => p.shopId))];
+      const shopIds = Array.from(new Set(spotlightProducts.map(p => p.shopId)));
       if (shopIds.length > 0) {
         const shopDocs = await Promise.all(shopIds.map(id => adminDb.collection("shops").doc(id).get()));
         const shopMap = new Map();
