@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
@@ -15,6 +16,7 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 export const requestForToken = async () => {
   const messagingSupported = await isSupported();
@@ -23,7 +25,7 @@ export const requestForToken = async () => {
   const messaging = getMessaging(app);
   try {
     const currentToken = await getToken(messaging, { 
-      // vapidKey: 'YOUR_VAPID_KEY_HERE_FROM_FIREBASE_CONSOLE' 
+      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
     });
     
     if (currentToken) {

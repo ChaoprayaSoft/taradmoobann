@@ -1,26 +1,108 @@
-export default function ShopperDashboard() {
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
+import { redirect } from "next/navigation";
+import { adminDb } from "@/lib/firebaseAdmin";
+import ShopperDashboardClient from "./ShopperDashboardClient";
+
+export default async function ShopperDashboard() {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    redirect("/");
+  }
+
+  const userEmail = session.user?.email || "";
+
+  let allMarkets: any[] = [];
+  let allShops: any[] = [];
+  let memberships: any[] = [];
+  let userAddresses: string[] = [];
+  let orders: any[] = [];
+  let userCoins: number = 0;
+  let userMaxShopSlots: number = 1;
+
+  try {
+    const marketSnapshot = await adminDb.collection("markets").get();
+    allMarkets = marketSnapshot.docs.map(doc => doc.data());
+    allMarkets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const allShopsSnapshot = await adminDb.collection("shops").get();
+    allShops = allShopsSnapshot.docs.map(doc => doc.data());
+
+    // Fetch user's memberships
+    const membershipSnapshot = await adminDb
+      .collection("market_memberships")
+      .where("userEmail", "==", userEmail)
+      .get();
+    
+    memberships = membershipSnapshot.docs.map(doc => doc.data());
+
+    // Fetch user's shops
+    const shopsSnapshot = await adminDb
+      .collection("shops")
+      .where("ownerEmail", "==", userEmail)
+      .get();
+    
+    const ownedShops = shopsSnapshot.docs.map(doc => doc.data());
+
+    // Automatically grant "approved" membership for any market where the user owns a shop
+    ownedShops.forEach(shop => {
+      // Check if they already have an explicit membership for this market
+      const existingMembership = memberships.find(m => m.marketId === shop.marketId);
+      
+      if (!existingMembership) {
+        // Create an implicit approved membership
+        memberships.push({
+          id: `implicit_shop_owner_${shop.id}`,
+          marketId: shop.marketId,
+          userEmail,
+          status: "approved",
+          applicationNote: "Auto-approved as a Shop Owner",
+          createdAt: shop.createdAt,
+        });
+      } else if (existingMembership.status !== "approved") {
+        // Upgrade existing membership to approved
+        existingMembership.status = "approved";
+        existingMembership.applicationNote = "Auto-approved as a Shop Owner";
+      }
+    });
+
+    // Fetch user's profile/addresses
+    const userProfileSnapshot = await adminDb.collection("users").doc(userEmail).get();
+    if (userProfileSnapshot.exists) {
+      const data = userProfileSnapshot.data();
+      userAddresses = data?.addresses || [];
+      if (data?.address && userAddresses.length === 0) {
+        userAddresses = [data.address]; // Fallback for old single address format
+      }
+      userCoins = data?.coins || 0;
+      userMaxShopSlots = data?.maxShopSlots !== undefined && data.maxShopSlots < 2 
+        ? data.maxShopSlots + 1 
+        : (data?.maxShopSlots || 1);
+    }
+
+    // Fetch user's orders
+    const orderSnapshot = await adminDb
+      .collection("orders")
+      .where("shopperEmail", "==", userEmail)
+      .get();
+      
+    orders = orderSnapshot.docs.map(doc => doc.data());
+    orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  } catch (error) {
+    console.error("Error fetching data for Shopper Dashboard:", error);
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">My Orders & Favorites</h1>
-        <p className="text-gray-500 mt-1">Track your active orders and find your favorite shops.</p>
-      </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4 text-brand-600">Active Order Status</h2>
-        <div className="bg-brand-50 border border-brand-100 rounded-md p-4 text-brand-900">
-          <p className="text-sm">You do not have any active orders currently. Go explore the market!</p>
-        </div>
-      </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4">Favorite Shops</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-            No Favorites
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+    <ShopperDashboardClient 
+      allMarkets={allMarkets}
+      initialShops={allShops}
+      memberships={memberships} 
+      initialAddresses={userAddresses} 
+      initialOrders={orders} 
+      userCoins={userCoins}
+      userMaxShopSlots={userMaxShopSlots}
+    />
+  );
 }

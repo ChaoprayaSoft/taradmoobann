@@ -1,34 +1,45 @@
-export default function AdminDashboard() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-500 mt-1">Manage all markets, shops, and users.</p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Total Markets</h2>
-          <p className="text-4xl font-bold text-brand-600 mt-2">0</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Total Users</h2>
-          <p className="text-4xl font-bold text-brand-600 mt-2">0</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Total Shops</h2>
-          <p className="text-4xl font-bold text-brand-600 mt-2">0</p>
-        </div>
-      </div>
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
+import { redirect } from "next/navigation";
+import { adminDb } from "@/lib/firebaseAdmin";
+import AdminDashboardClient from "./AdminDashboardClient";
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium">Recent Activity Logs</h3>
-        </div>
-        <div className="p-6 text-center text-gray-500">
-          No activities found yet.
-        </div>
-      </div>
-    </div>
-  )
+export default async function AdminDashboard() {
+  const session = await getServerSession(authOptions);
+  
+  // Route Protection: Redirect if not logged in or not an admin
+  const roles = (session?.user as any)?.roles || [];
+  if (!session || !roles.includes("admin")) {
+    redirect("/");
+  }
+
+  // Fetch existing markets on the server side
+  let markets: any[] = [];
+  let shops: any[] = [];
+  let orders: any[] = [];
+  let ads: any[] = [];
+  let adsSettings: any = { maxAds: 3 };
+  
+  try {
+    const snapshot = await adminDb.collection("markets").orderBy("createdAt", "desc").get();
+    markets = snapshot.docs.map(doc => doc.data());
+    
+    const shopsSnapshot = await adminDb.collection("shops").get();
+    shops = shopsSnapshot.docs.map(doc => doc.data());
+    
+    const ordersSnapshot = await adminDb.collection("orders").orderBy("createdAt", "desc").get();
+    orders = ordersSnapshot.docs.map(doc => doc.data());
+    
+    const adsSnapshot = await adminDb.collection("ads").orderBy("createdAt", "desc").get();
+    ads = adsSnapshot.docs.map(doc => doc.data());
+    
+    const settingsDoc = await adminDb.collection("settings").doc("ads").get();
+    if (settingsDoc.exists) {
+      adsSettings = settingsDoc.data();
+    }
+  } catch (error) {
+    console.error("Error fetching data for Admin Dashboard:", error);
+  }
+
+  return <AdminDashboardClient initialMarkets={markets} initialShops={shops} initialOrders={orders} initialAds={ads} initialAdsSettings={adsSettings} />;
 }

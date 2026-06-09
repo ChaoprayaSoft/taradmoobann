@@ -1,31 +1,90 @@
-export default function ShopOwnerDashboard() {
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Shop Dashboard</h1>
-          <p className="text-gray-500 mt-1">Manage your products and active orders.</p>
-        </div>
-        <button className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition">
-          + Add Product
-        </button>
-      </div>
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
+import { redirect } from "next/navigation";
+import { adminDb } from "@/lib/firebaseAdmin";
+import ShopOwnerDashboardClient from "./ShopOwnerDashboardClient";
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold mb-4">Incoming Orders</h2>
-          <div className="text-gray-500 text-sm">
-            No active orders right now.
-          </div>
-        </div>
+export default async function ShopOwnerDashboard() {
+  const session = await getServerSession(authOptions);
+  
+  // Route Protection: Redirect if not logged in or not a shop_owner/admin
+  const roles = (session?.user as any)?.roles || [];
+  if (!session || (!roles.includes("shop_owner") && !roles.includes("admin"))) {
+    redirect("/");
+  }
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold mb-4">Your Products</h2>
-          <div className="text-gray-500 text-sm">
-            You haven't added any products yet.
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+  const userEmail = session.user?.email || "";
+
+  // Fetch shops owned by the user
+  let ownedShops: any[] = [];
+  let products: any[] = [];
+  let markets: any[] = [];
+  let orders: any[] = [];
+  let initialCoins = 0;
+  let userMaxShopSlots = 1;
+  
+  try {
+    const shopSnapshot = await adminDb
+      .collection("shops")
+      .where("ownerEmail", "==", userEmail)
+      .get();
+      
+    ownedShops = shopSnapshot.docs.map(doc => doc.data());
+    
+    // Sort so approved shops appear first, then by date
+    ownedShops.sort((a, b) => {
+      if (a.status === "approved" && b.status !== "approved") return -1;
+      if (a.status !== "approved" && b.status === "approved") return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    if (ownedShops.length > 0) {
+      const shopIds = ownedShops.map(s => s.id);
+      const marketIds = Array.from(new Set(ownedShops.map(s => s.marketId)));
+      
+      // Fetch markets for these shops
+      if (marketIds.length > 0) {
+        const marketSnapshot = await adminDb
+          .collection("markets")
+          .where("id", "in", marketIds)
+          .get();
+        markets = marketSnapshot.docs.map(doc => doc.data());
+      }
+      
+      // Fetch all products for all owned shops
+      const productSnapshot = await adminDb
+        .collection("products")
+        .where("shopId", "in", shopIds)
+        .get();
+        
+      products = productSnapshot.docs.map(doc => doc.data());
+      products.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      // Fetch all orders for all owned shops
+      const orderSnapshot = await adminDb
+        .collection("orders")
+        .where("shopId", "in", shopIds)
+        .get();
+        
+      orders = orderSnapshot.docs.map(doc => doc.data());
+      orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    // Fetch user coins
+    if (userEmail) {
+      const userSnap = await adminDb.collection("users").where("email", "==", userEmail).limit(1).get();
+      if (!userSnap.empty) {
+        const userData = userSnap.docs[0].data();
+        initialCoins = userData.coins || 0;
+        userMaxShopSlots = userData.maxShopSlots !== undefined && userData.maxShopSlots < 2 
+          ? userData.maxShopSlots + 1 
+          : (userData?.maxShopSlots || 1);
+      }
+    }
+
+  } catch (error) {
+    console.error("Error fetching data for Shop Owner Dashboard:", error);
+  }
+
+  return <ShopOwnerDashboardClient userEmail={userEmail} initialShops={ownedShops} initialProducts={products} initialMarkets={markets} initialOrders={orders} initialCoins={initialCoins} userMaxShopSlots={userMaxShopSlots} />;
 }

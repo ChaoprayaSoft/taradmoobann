@@ -1,0 +1,1185 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { storage } from "@/lib/firebase";
+
+export default function AdminDashboardClient({ 
+  initialMarkets,
+  initialShops = [],
+  initialOrders = [],
+  initialAds = [],
+  initialAdsSettings = null
+}: { 
+  initialMarkets: any[],
+  initialShops?: any[],
+  initialOrders?: any[],
+  initialAds?: any[],
+  initialAdsSettings?: any
+}) {
+  const router = useRouter();
+  const [markets, setMarkets] = useState(initialMarkets);
+  const [isCreating, setIsCreating] = useState(false);
+  const [editingMarket, setEditingMarket] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [activeTab, setActiveTab] = useState<"markets" | "shops" | "chats" | "ads">("markets");
+
+  const completedOrders = initialOrders.filter(o => o.status === "Completed");
+  const totalRevenue = completedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+  const activeMarketsCount = markets.filter(m => m.operatingStatus !== "closed").length;
+  const approvedShopsCount = initialShops.filter(s => s.status === "approved").length;
+
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    coverImage: "",
+    ownerEmail: "",
+    operatingStatus: "always_open",
+    validDates: "",
+  });
+
+  const [file, setFile] = useState<File | null>(null);
+
+  // Shop state
+  const [shopsList, setShopsList] = useState(initialShops || []);
+  const [editingShop, setEditingShop] = useState<any | null>(null);
+  const [shopFormData, setShopFormData] = useState({ operatingStatus: "always_open", validDates: "" });
+  const [shopUpdating, setShopUpdating] = useState(false);
+  const [selectedMarketFilter, setSelectedMarketFilter] = useState("all");
+
+  const filteredShops = selectedMarketFilter === "all" 
+    ? shopsList 
+    : shopsList.filter(s => s.marketId === selectedMarketFilter);
+
+  // Ads state
+  const [adsList, setAdsList] = useState(initialAds || []);
+  const [adsSettings, setAdsSettings] = useState({
+    maxAds: initialAdsSettings?.maxAds || 3,
+    carouselSpeed: initialAdsSettings?.carouselSpeed || 5
+  });
+  const [isCreatingAd, setIsCreatingAd] = useState(false);
+  const [editingAd, setEditingAd] = useState<any | null>(null);
+  const [adFormData, setAdFormData] = useState({
+    title: "",
+    description: "",
+    imageUrl: "",
+    linkUrl: "",
+    status: "ON",
+    placement: "Main Page",
+    validUntil: ""
+  });
+  const [adFile, setAdFile] = useState<File | null>(null);
+  const [adLoading, setAdLoading] = useState(false);
+
+  // Chat State
+  const [chats, setChats] = useState<any[]>([]);
+  const [selectedChat, setSelectedChat] = useState<any | null>(null);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+
+  useEffect(() => {
+    // Fetch immediately
+    fetchChats();
+    // Poll every 5 seconds globally so the notification banner can update
+    const interval = setInterval(fetchChats, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (selectedChat) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selectedChat?.messages]);
+
+  const fetchChats = async () => {
+    try {
+      const res = await fetch("/api/chat/admin");
+      const data = await res.json();
+      setChats(data);
+      // Update selected chat if it exists
+      if (selectedChat) {
+        const updated = data.find((c: any) => c.userEmail === selectedChat.userEmail);
+        if (updated) setSelectedChat(updated);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAdminReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || !selectedChat) return;
+
+    setChatLoading(true);
+    const textToSend = chatInput;
+    setChatInput("");
+
+    try {
+      // Optimistic update
+      const tempMsg = { text: textToSend, sender: "admin", timestamp: new Date().toISOString() };
+      setSelectedChat((prev: any) => ({ ...prev, messages: [...prev.messages, tempMsg] }));
+
+      await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textToSend, targetEmail: selectedChat.userEmail }),
+      });
+      await fetchChats();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const handleDeleteChat = async () => {
+    if (!chatToDelete) return;
+    try {
+      const res = await fetch(`/api/chat/admin?email=${encodeURIComponent(chatToDelete)}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        if (selectedChat?.userEmail === chatToDelete) {
+          setSelectedChat(null);
+        }
+        setChats(prev => prev.filter(c => c.userEmail !== chatToDelete));
+        setChatToDelete(null);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete chat");
+      }
+    } catch (e) {
+      alert("Something went wrong");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      let finalImageUrl = formData.coverImage;
+
+      // If a file was selected, upload it via the Next.js API route to Google Drive
+      if (file) {
+        const uploadData = new FormData();
+        uploadData.append("file", file);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+
+        const uploadJson = await uploadRes.json();
+        if (!uploadRes.ok) {
+          throw new Error(uploadJson.error || "Failed to upload image");
+        }
+        finalImageUrl = uploadJson.url;
+      }
+
+      const url = editingMarket ? "/api/admin/markets" : "/api/admin/markets";
+      const method = editingMarket ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          ...formData, 
+          coverImage: finalImageUrl,
+          id: editingMarket ? editingMarket.id : undefined
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      // Refresh page to get new data from server
+      router.refresh();
+      setIsCreating(false);
+      setEditingMarket(null);
+      setFormData({ name: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
+      setFile(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateShop = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingShop) return;
+    setShopUpdating(true);
+    try {
+      const res = await fetch("/api/admin/shops", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editingShop.id, ...shopFormData })
+      });
+      if (res.ok) {
+        setShopsList(prev => prev.map(s => s.id === editingShop.id ? { ...s, ...shopFormData } : s));
+        setEditingShop(null);
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update shop");
+      }
+    } catch (err) {
+      alert("Something went wrong");
+    } finally {
+      setShopUpdating(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this market? This action cannot be undone.")) return;
+    
+    try {
+      const res = await fetch(`/api/admin/markets?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete market");
+      }
+    } catch (err) {
+      alert("Something went wrong");
+    }
+  };
+
+  const openEdit = (market: any) => {
+    setEditingMarket(market);
+    setFormData({
+      name: market.name,
+      description: market.description || "",
+      coverImage: market.coverImage || "",
+      ownerEmail: market.ownerEmail,
+      operatingStatus: market.operatingStatus || "always_open",
+      validDates: market.validDates || ""
+    });
+    setIsCreating(false);
+    setFile(null);
+  };
+
+  // Ads Functions
+  const handleAdSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdLoading(true);
+    try {
+      let finalImageUrl = adFormData.imageUrl;
+
+      if (adFile) {
+        const uploadData = new FormData();
+        uploadData.append("file", adFile);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadData });
+        const uploadJson = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadJson.error || "Failed to upload image");
+        finalImageUrl = uploadJson.url;
+      }
+
+      const method = editingAd ? "PUT" : "POST";
+      const payload = { ...adFormData, imageUrl: finalImageUrl, id: editingAd?.id };
+
+      const res = await fetch("/api/admin/ads", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error("Failed to save ad");
+      
+      router.refresh();
+      setIsCreatingAd(false);
+      setEditingAd(null);
+      setAdFile(null);
+      setAdFormData({ title: "", description: "", imageUrl: "", linkUrl: "", status: "ON", placement: "Main Page", validUntil: "" });
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setAdLoading(false);
+    }
+  };
+
+  const handleAdDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this ad?")) return;
+    try {
+      const res = await fetch(`/api/admin/ads?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setAdsList(prev => prev.filter(ad => ad.id !== id));
+        router.refresh();
+      }
+    } catch (e) {}
+  };
+
+  const handleSettingsUpdate = async (newSettings: any) => {
+    try {
+      await fetch("/api/admin/ads-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSettings)
+      });
+      setAdsSettings(newSettings);
+    } catch (e) {
+      alert("Failed to update settings");
+    }
+  };
+
+  const renderAdForm = () => (
+    <form onSubmit={handleAdSubmit} className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6 space-y-4 max-w-xl">
+      <h3 className="font-bold text-lg mb-4">{editingAd ? "Edit Ad" : "New Ad"}</h3>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Title</label>
+        <input required type="text" className="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-brand-500 focus:border-brand-500" value={adFormData.title} onChange={(e) => setAdFormData({ ...adFormData, title: e.target.value })} />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Description</label>
+        <textarea rows={2} required className="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-brand-500 focus:border-brand-500" value={adFormData.description} onChange={(e) => setAdFormData({ ...adFormData, description: e.target.value })} />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Link URL</label>
+        <input type="url" placeholder="https://" className="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-brand-500 focus:border-brand-500" value={adFormData.linkUrl} onChange={(e) => setAdFormData({ ...adFormData, linkUrl: e.target.value })} />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Ad Image (Upload)</label>
+        <input type="file" accept="image/*" onChange={(e) => setAdFile(e.target.files ? e.target.files[0] : null)} className="mt-1 block w-full text-sm text-gray-500" />
+        {editingAd && adFormData.imageUrl && <p className="text-xs text-gray-500 mt-1">Leave empty to keep existing image</p>}
+      </div>
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700">Status</label>
+          <select className="mt-1 block w-full rounded-md border-gray-300 border p-2" value={adFormData.status} onChange={(e) => setAdFormData({ ...adFormData, status: e.target.value })}>
+            <option value="ON">ON</option>
+            <option value="OFF">OFF</option>
+          </select>
+        </div>
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700">Valid Until</label>
+          <input type="date" required className="mt-1 block w-full rounded-md border-gray-300 border p-2" value={adFormData.validUntil} onChange={(e) => setAdFormData({ ...adFormData, validUntil: e.target.value })} />
+        </div>
+      </div>
+      <button type="submit" disabled={adLoading} className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 disabled:opacity-50">
+        {adLoading ? "Saving..." : "Save Ad"}
+      </button>
+    </form>
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Unread Chat Notification Banner */}
+      {chats.some(c => c.unreadByAdmin) && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded shadow-sm flex justify-between items-center">
+          <div className="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <p className="text-sm text-red-700 font-medium">
+              You have unread messages from shoppers waiting for a reply!
+            </p>
+          </div>
+          <button 
+            onClick={() => setActiveTab("chats")}
+            className="text-sm bg-red-100 hover:bg-red-200 text-red-800 font-bold py-1.5 px-4 rounded transition"
+          >
+            View Inbox
+          </button>
+        </div>
+      )}
+
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-gray-500 mt-1">Manage all markets and users.</p>
+        </div>
+        
+        <div className="flex space-x-4">
+          <div className="bg-gray-100 p-1 rounded-md flex space-x-1">
+            <button
+              onClick={() => setActiveTab("markets")}
+              className={`px-4 py-2 rounded text-sm font-medium transition ${activeTab === "markets" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
+            >
+              Markets & Reports
+            </button>
+            <button
+              onClick={() => setActiveTab("shops")}
+              className={`px-4 py-2 rounded text-sm font-medium transition ${activeTab === "shops" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
+            >
+              Manage Shops
+            </button>
+            <button
+              onClick={() => setActiveTab("chats")}
+              className={`px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2 ${activeTab === "chats" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
+            >
+              Support Inbox
+              {chats.some(c => c.unreadByAdmin) && (
+                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("ads")}
+              className={`px-4 py-2 rounded text-sm font-medium transition ${activeTab === "ads" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
+            >
+              Manage Ads
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {activeTab === "markets" && (
+        <>
+          <div className="flex justify-end">
+            <button 
+              onClick={() => {
+                setIsCreating(!isCreating);
+                setEditingMarket(null);
+                if (!isCreating) {
+                  setFormData({ name: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
+                }
+              }}
+              className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition"
+            >
+              {isCreating ? "Cancel" : "+ Create New Market"}
+            </button>
+          </div>
+
+          {(isCreating || editingMarket) && (
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">
+              {editingMarket ? `Edit Market: ${editingMarket.name}` : "Create a New Market"}
+            </h2>
+            {editingMarket && (
+              <button 
+                onClick={() => setEditingMarket(null)}
+                className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+              >
+                Cancel Edit
+              </button>
+            )}
+          </div>
+          {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
+          <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Market Name *</label>
+              <input
+                required
+                type="text"
+                placeholder="e.g. Sunday Village Market"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Location / Description</label>
+              <textarea
+                rows={3}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Cover Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+                onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Market Owner Email *</label>
+              <input
+                required
+                type="email"
+                placeholder="owner@example.com"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.ownerEmail}
+                onChange={(e) => setFormData({ ...formData, ownerEmail: e.target.value })}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                If the user doesn't exist, an account will be pre-created for them.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Operating Status</label>
+              <select
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.operatingStatus}
+                onChange={(e) => setFormData({ ...formData, operatingStatus: e.target.value })}
+              >
+                <option value="always_open">Open</option>
+                <option value="closed">Closed / Deactivated</option>
+                <option value="scheduled">Scheduled Dates</option>
+              </select>
+            </div>
+            {formData.operatingStatus === "scheduled" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Valid Until</label>
+                <input
+                  type="date"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={formData.validDates}
+                  onChange={(e) => setFormData({ ...formData, validDates: e.target.value })}
+                />
+              </div>
+            )}
+            <div className="pt-2">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
+              >
+                {loading ? "Saving..." : (editingMarket ? "Update Market" : "Save Market")}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h3 className="text-lg font-medium">Existing Markets</h3>
+          <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            Total: {initialMarkets.length}
+          </span>
+        </div>
+        
+        {initialMarkets.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            No markets have been created yet. Click the button above to get started.
+          </div>
+        ) : (
+          <ul className="divide-y divide-gray-200">
+            {initialMarkets.map((market) => (
+              <li key={market.id} className="p-6 hover:bg-gray-50 transition">
+                <div className="flex items-center space-x-4">
+                  {market.coverImage ? (
+                    <img src={market.coverImage} alt={market.name} className="h-16 w-16 object-cover rounded-md border border-gray-200" />
+                  ) : (
+                    <div className="h-16 w-16 bg-gray-100 rounded-md flex items-center justify-center border border-gray-200 text-gray-400">
+                      No Img
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg font-medium text-gray-900 truncate">
+                      {market.name}
+                    </p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {market.description || "No description provided"}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0 mr-4">
+                    <p className="text-sm font-medium text-gray-900">Owner</p>
+                    <p className="text-sm text-gray-500">{market.ownerEmail}</p>
+                    <p className={`text-xs mt-1 font-bold ${
+                      market.operatingStatus === 'closed' ? 'text-red-500' :
+                      market.operatingStatus === 'scheduled' ? 'text-blue-500' :
+                      'text-green-500'
+                    }`}>
+                      {market.operatingStatus === 'closed' ? 'Closed' :
+                       market.operatingStatus === 'scheduled' ? `Scheduled: ${market.validDates}` :
+                       'Open'}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2 flex-shrink-0 border-l border-gray-200 pl-4">
+                    <button 
+                      onClick={() => openEdit(market)}
+                      className="text-sm text-brand-600 hover:text-brand-800 font-medium text-left"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(market.id)}
+                      className="text-sm text-red-600 hover:text-red-800 font-medium text-left"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* PLATFORM OVERVIEW */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+        <h2 className="text-xl font-semibold mb-6">Platform Overview</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-brand-50 to-brand-100 p-6 rounded-xl border border-brand-200">
+            <p className="text-sm text-brand-700 font-medium uppercase tracking-wider mb-1">Total Revenue</p>
+            <p className="text-3xl font-bold text-brand-900">฿{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-xs text-brand-600 mt-2">From {completedOrders.length} completed orders</p>
+          </div>
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+            <p className="text-sm text-blue-700 font-medium uppercase tracking-wider mb-1">Active Markets</p>
+            <p className="text-3xl font-bold text-blue-900">{activeMarketsCount}</p>
+            <p className="text-xs text-blue-600 mt-2">Out of {markets.length} total markets</p>
+          </div>
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
+            <p className="text-sm text-green-700 font-medium uppercase tracking-wider mb-1">Approved Shops</p>
+            <p className="text-3xl font-bold text-green-900">{approvedShopsCount}</p>
+            <p className="text-xs text-green-600 mt-2">Across all markets</p>
+          </div>
+        </div>
+
+        <h3 className="text-lg font-medium mb-4 border-b border-gray-200 pb-2">Global Transaction List</h3>
+        {completedOrders.length === 0 ? (
+          <p className="text-gray-500 text-sm">No completed transactions have occurred on the platform yet.</p>
+        ) : (
+          <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+            <table className="min-w-full divide-y divide-gray-200 relative">
+              <thead className="bg-gray-50 sticky top-0 shadow-sm">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Market</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shop</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shopper</th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {completedOrders.map((order) => {
+                  const shop = initialShops.find(s => s.id === order.shopId);
+                  const market = markets.find(m => m.id === shop?.marketId);
+                  
+                  return (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(order.createdAt).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {market ? market.name : 'Unknown'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {shop ? shop.name : 'Unknown'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {order.shopperName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
+                      ฿{order.totalAmount.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button 
+                        onClick={() => setSelectedTransaction(order)}
+                        className="text-brand-600 hover:text-brand-900 bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded transition"
+                      >
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      </>
+      )}
+
+      {/* SHOPS TAB */}
+      {activeTab === "shops" && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">All Shops</h2>
+              <select
+                className="border-gray-300 shadow-sm border p-2 rounded-md text-sm focus:ring-brand-500 focus:border-brand-500"
+                value={selectedMarketFilter}
+                onChange={(e) => setSelectedMarketFilter(e.target.value)}
+              >
+                <option value="all">All Markets</option>
+                {markets.map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+            
+            {filteredShops.length === 0 ? (
+              <p className="text-gray-500 text-sm">No shops exist in this market yet.</p>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {filteredShops.map((shop) => {
+                  const marketName = markets.find(m => m.id === shop.marketId)?.name || "Unknown Market";
+                  return (
+                    <li key={shop.id} className="py-4 flex justify-between items-start gap-4">
+                      <div className="flex gap-4">
+                        <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                          {shop.coverImage ? (
+                            <img src={shop.coverImage} alt={shop.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-brand-900">{shop.name}</h3>
+                          <p className="text-sm font-medium text-brand-600 bg-brand-50 inline-block px-2 py-0.5 rounded mt-1">
+                            {marketName}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-2">{shop.description}</p>
+                          <p className="text-sm text-gray-500 mt-1">Owner: {shop.ownerEmail}</p>
+                        </div>
+                      </div>
+                      
+                    
+                    {editingShop?.id === shop.id ? (
+                      <form onSubmit={handleUpdateShop} className="bg-gray-50 p-4 rounded border border-gray-200 min-w-[300px]">
+                        <h4 className="font-semibold text-sm mb-2">Edit Status</h4>
+                        <div className="mb-3">
+                          <select
+                            className="block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
+                            value={shopFormData.operatingStatus}
+                            onChange={(e) => setShopFormData({ ...shopFormData, operatingStatus: e.target.value })}
+                          >
+                            <option value="always_open">Open</option>
+                            <option value="closed">Closed / Deactivated</option>
+                            <option value="scheduled">Scheduled Dates</option>
+                          </select>
+                        </div>
+                        {shopFormData.operatingStatus === "scheduled" && (
+                          <div className="mb-3">
+                            <label className="block text-xs text-gray-600 mb-1">Valid Until</label>
+                            <input
+                              type="date"
+                              className="block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
+                              value={shopFormData.validDates}
+                              onChange={(e) => setShopFormData({ ...shopFormData, validDates: e.target.value })}
+                            />
+                          </div>
+                        )}
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            type="button"
+                            onClick={() => setEditingShop(null)}
+                            className="text-xs text-gray-600 hover:text-gray-800 font-medium px-3 py-1"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={shopUpdating}
+                            className="bg-brand-600 text-white text-xs font-medium px-4 py-1.5 rounded hover:bg-brand-700 disabled:opacity-50"
+                          >
+                            {shopUpdating ? "Saving..." : "Save"}
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <div className="text-right flex flex-col items-end gap-2">
+                        <p className={`text-xs mt-1 font-bold ${
+                          shop.operatingStatus === 'closed' ? 'text-red-500' :
+                          shop.operatingStatus === 'scheduled' ? 'text-blue-500' :
+                          'text-green-500'
+                        }`}>
+                          {shop.operatingStatus === 'closed' ? 'Closed' :
+                           shop.operatingStatus === 'scheduled' ? `Scheduled: ${shop.validDates}` :
+                           'Open'}
+                        </p>
+                        <button 
+                          onClick={() => {
+                            setEditingShop(shop);
+                            setShopFormData({
+                              operatingStatus: shop.operatingStatus || "always_open",
+                              validDates: shop.validDates || ""
+                            });
+                          }}
+                          className="text-sm bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-50 transition"
+                        >
+                          Edit Status
+                        </button>
+                      </div>
+                    )}
+                  </li>
+                );
+                })}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CHATS TAB */}
+      {activeTab === "chats" && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-[600px] flex overflow-hidden">
+          {/* Chat List Sidebar */}
+          <div className="w-1/3 border-r border-gray-200 flex flex-col bg-gray-50">
+            <div className="p-4 border-b border-gray-200 bg-white">
+              <h2 className="font-semibold text-gray-900">Conversations</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {chats.length === 0 ? (
+                <p className="text-sm text-gray-500 p-4 text-center">No messages yet.</p>
+              ) : (
+                chats.map(chat => (
+                  <button
+                    key={chat.userEmail}
+                    onClick={() => {
+                      setSelectedChat(chat);
+                      if (chat.unreadByAdmin) {
+                        // Optimistically clear unread, actual clear will happen when we fetch single chat via GET /api/chat
+                        fetch(`/api/chat?email=${encodeURIComponent(chat.userEmail)}`);
+                        setChats(prev => prev.map(c => c.userEmail === chat.userEmail ? { ...c, unreadByAdmin: false } : c));
+                      }
+                    }}
+                    className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-100 transition flex items-center justify-between ${
+                      selectedChat?.userEmail === chat.userEmail ? 'bg-brand-50 border-brand-200' : ''
+                    }`}
+                  >
+                    <div className="truncate pr-2">
+                      <p className={`text-sm truncate ${chat.unreadByAdmin ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
+                        {chat.userEmail}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate mt-1">
+                        {chat.messages[chat.messages.length - 1]?.text}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {chat.unreadByAdmin && (
+                        <span className="w-2.5 h-2.5 bg-brand-500 rounded-full flex-shrink-0"></span>
+                      )}
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setChatToDelete(chat.userEmail);
+                        }}
+                        className="text-gray-400 hover:text-red-500 p-1 rounded transition"
+                        title="Delete Conversation"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                      </button>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+          
+          {/* Chat Area */}
+          <div className="flex-1 flex flex-col bg-white">
+            {selectedChat ? (
+              <>
+                <div className="p-4 border-b border-gray-200 bg-white flex justify-between items-center">
+                  <h3 className="font-bold text-gray-900">{selectedChat.userEmail}</h3>
+                  <button 
+                    onClick={() => setChatToDelete(selectedChat.userEmail)}
+                    className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-md transition flex items-center justify-center"
+                    title="Delete Conversation"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col space-y-4">
+                  {selectedChat.messages.map((msg: any, i: number) => (
+                    <div key={i} className={`max-w-[70%] rounded-xl p-3 text-sm shadow-sm ${
+                      msg.sender === "admin" 
+                        ? "bg-brand-600 text-white self-end rounded-br-none" 
+                        : "bg-white border border-gray-200 text-gray-800 self-start rounded-bl-none"
+                    }`}>
+                      <p className="whitespace-pre-wrap">{msg.text}</p>
+                      <p className={`text-[10px] mt-1 text-right ${msg.sender === "admin" ? "text-brand-200" : "text-gray-400"}`}>
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+                <form onSubmit={handleAdminReply} className="p-4 bg-white border-t border-gray-200 flex gap-2">
+                  <input
+                    type="text"
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                    placeholder="Type your reply..."
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    disabled={chatLoading}
+                  />
+                  <button
+                    type="submit"
+                    disabled={chatLoading || !chatInput.trim()}
+                    className="bg-brand-600 text-white rounded-lg px-6 py-2 font-medium hover:bg-brand-700 disabled:opacity-50 transition"
+                  >
+                    Send
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-gray-400 flex-col">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-16 h-16 mb-4 text-gray-300">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                <p>Select a conversation to view and reply</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ADS TAB */}
+      {activeTab === "ads" && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+              <h2 className="text-xl font-semibold">Ads Settings</h2>
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-medium text-gray-700">Max Ads (Homepage):</label>
+                  <input 
+                    type="number" 
+                    min="1" max="10"
+                    className="w-20 rounded-md border-gray-300 shadow-sm border p-1.5 focus:ring-brand-500 focus:border-brand-500"
+                    value={adsSettings.maxAds}
+                    onChange={(e) => handleSettingsUpdate({ ...adsSettings, maxAds: parseInt(e.target.value) || 3 })}
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-medium text-gray-700">Market Carousel Speed (sec):</label>
+                  <input 
+                    type="number" 
+                    min="1" max="30"
+                    className="w-20 rounded-md border-gray-300 shadow-sm border p-1.5 focus:ring-brand-500 focus:border-brand-500"
+                    value={adsSettings.carouselSpeed}
+                    onChange={(e) => handleSettingsUpdate({ ...adsSettings, carouselSpeed: parseInt(e.target.value) || 5 })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+                <h2 className="text-xl font-semibold text-brand-700">Main Page Ads</h2>
+                <button 
+                  onClick={() => {
+                    setIsCreatingAd(!isCreatingAd || adFormData.placement !== "Main Page");
+                    setEditingAd(null);
+                    setAdFormData({ title: "", description: "", imageUrl: "", linkUrl: "", status: "ON", placement: "Main Page", validUntil: "" });
+                  }}
+                  className="bg-brand-600 text-white px-3 py-1.5 text-sm rounded-md font-medium hover:bg-brand-700 transition"
+                >
+                  + Create Main Page Ad
+                </button>
+              </div>
+              
+              {(isCreatingAd || editingAd) && adFormData.placement === "Main Page" && renderAdForm()}
+
+              {initialAds.filter(ad => (ad.placement || "Main Page") === "Main Page").length === 0 ? (
+                <p className="text-gray-500 text-sm py-4">No Main Page ads created yet.</p>
+              ) : (
+                <ul className="divide-y divide-gray-200">
+                  {initialAds.filter(ad => (ad.placement || "Main Page") === "Main Page").map((ad: any) => {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const isExpired = ad.validUntil && ad.validUntil < todayStr;
+                    const displayStatus = isExpired ? 'OFF' : ad.status;
+                    
+                    return (
+                    <li key={ad.id} className="py-4 flex gap-4">
+                      <div className="w-32 h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                        {ad.imageUrl && <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover" />}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-900">{ad.title}</h4>
+                        <p className="text-sm text-gray-600 line-clamp-1">{ad.description}</p>
+                        <p className="text-xs text-brand-600 mt-1">{ad.linkUrl}</p>
+                        <div className="flex gap-3 mt-2 text-xs font-medium">
+                          <span className={displayStatus === 'ON' ? 'text-green-600' : 'text-red-500'}>Status: {displayStatus}</span>
+                          <span className="text-gray-500">Valid until: {ad.validUntil}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button onClick={() => {
+                          setEditingAd(ad);
+                          setAdFormData({ title: ad.title, description: ad.description, imageUrl: ad.imageUrl, linkUrl: ad.linkUrl || "", status: displayStatus, placement: ad.placement || "Main Page", validUntil: ad.validUntil });
+                          setIsCreatingAd(false);
+                        }} className="text-sm text-brand-600 hover:underline">Edit</button>
+                        <button onClick={() => handleAdDelete(ad.id)} className="text-sm text-red-600 hover:underline">Delete</button>
+                      </div>
+                    </li>
+                  );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+                <h2 className="text-xl font-semibold text-brand-700">Market Page Ads</h2>
+                <button 
+                  onClick={() => {
+                    setIsCreatingAd(!isCreatingAd || adFormData.placement !== "Market Page");
+                    setEditingAd(null);
+                    setAdFormData({ title: "", description: "", imageUrl: "", linkUrl: "", status: "ON", placement: "Market Page", validUntil: "" });
+                  }}
+                  className="bg-brand-600 text-white px-3 py-1.5 text-sm rounded-md font-medium hover:bg-brand-700 transition"
+                >
+                  + Create Market Page Ad
+                </button>
+              </div>
+
+              {(isCreatingAd || editingAd) && adFormData.placement === "Market Page" && renderAdForm()}
+
+              {initialAds.filter(ad => ad.placement === "Market Page").length === 0 ? (
+                <p className="text-gray-500 text-sm py-4">No Market Page ads created yet.</p>
+              ) : (
+                <ul className="divide-y divide-gray-200">
+                  {initialAds.filter(ad => ad.placement === "Market Page").map((ad: any) => {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const isExpired = ad.validUntil && ad.validUntil < todayStr;
+                    const displayStatus = isExpired ? 'OFF' : ad.status;
+                    
+                    return (
+                    <li key={ad.id} className="py-4 flex gap-4">
+                      <div className="w-32 h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                        {ad.imageUrl && <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover" />}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-900">{ad.title}</h4>
+                        <p className="text-sm text-gray-600 line-clamp-1">{ad.description}</p>
+                        <p className="text-xs text-brand-600 mt-1">{ad.linkUrl}</p>
+                        <div className="flex gap-3 mt-2 text-xs font-medium">
+                          <span className={displayStatus === 'ON' ? 'text-green-600' : 'text-red-500'}>Status: {displayStatus}</span>
+                          <span className="text-gray-500">Valid until: {ad.validUntil}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button onClick={() => {
+                          setEditingAd(ad);
+                          setAdFormData({ title: ad.title, description: ad.description, imageUrl: ad.imageUrl, linkUrl: ad.linkUrl || "", status: displayStatus, placement: ad.placement || "Market Page", validUntil: ad.validUntil });
+                          setIsCreatingAd(false);
+                        }} className="text-sm text-brand-600 hover:underline">Edit</button>
+                        <button onClick={() => handleAdDelete(ad.id)} className="text-sm text-red-600 hover:underline">Delete</button>
+                      </div>
+                    </li>
+                  );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CHAT DELETE MODAL */}
+      {chatToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Delete Conversation?</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to delete this conversation with <strong>{chatToDelete}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end pt-4">
+              <button 
+                onClick={handleDeleteChat}
+                className="bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 transition"
+              >
+                Delete Conversation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TRANSACTION DETAILS MODAL */}
+      {selectedTransaction && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+              <h3 className="text-lg font-bold text-gray-900">Transaction Details</h3>
+              <button 
+                onClick={() => setSelectedTransaction(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Order ID</p>
+                  <p className="text-gray-900 font-mono text-sm">{selectedTransaction.id}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Date</p>
+                  <p className="text-gray-900 text-sm">{new Date(selectedTransaction.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Shopper</p>
+                  <p className="text-gray-900 text-sm">{selectedTransaction.shopperName} ({selectedTransaction.shopperEmail})</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Delivery Address</p>
+                  <p className="text-gray-900 text-sm">{selectedTransaction.deliveryAddress}</p>
+                </div>
+              </div>
+
+              <h4 className="font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">Order Items</h4>
+              <div className="space-y-4">
+                {selectedTransaction.items?.map((item: any, idx: number) => (
+                  <div key={idx} className="flex justify-between items-start border border-gray-100 p-3 rounded-lg bg-gray-50">
+                    <div className="flex gap-3">
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.productName} className="w-12 h-12 object-cover rounded" />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-[10px] text-gray-400">No Img</div>
+                      )}
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">{item.productName}</p>
+                        <p className="text-gray-500 text-xs">Qty: {item.quantity}</p>
+                        {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {Object.entries(item.selectedOptions).map(([k, v]) => (
+                              <span key={k} className="text-[10px] bg-white border border-gray-200 px-1.5 py-0.5 rounded text-gray-600">
+                                {k}: {Array.isArray(v) ? v.join(', ') : (v as string)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {item.note && (
+                          <p className="text-[10px] text-gray-500 mt-1 italic">Note: {item.note}</p>
+                        )}
+                      </div>
+                    </div>
+                    <p className="font-medium text-gray-900 text-sm">฿{(item.price * item.quantity).toFixed(2)}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-gray-200 flex justify-between items-center">
+                <span className="font-bold text-gray-900 text-lg">Total Amount</span>
+                <span className="font-bold text-brand-600 text-xl">฿{selectedTransaction.totalAmount.toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end">
+              <button 
+                onClick={() => setSelectedTransaction(null)}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,582 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { storage } from "@/lib/firebase";
+
+const CATEGORIES = [
+  "Food & Beverage",
+  "Fresh Produce",
+  "Clothing & Apparel",
+  "Electronics & Accessories",
+  "Handicrafts & Art",
+  "Services",
+  "Other"
+];
+
+export default function MarketOwnerDashboardClient({ 
+  initialMarkets, 
+  initialShops,
+  initialMemberships
+}: { 
+  initialMarkets: any[],
+  initialShops: any[],
+  initialMemberships?: any[] // making it optional for backward compat just in case
+}) {
+  const router = useRouter();
+  const [isCreating, setIsCreating] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [selectedMarketFilter, setSelectedMarketFilter] = useState("all");
+
+  const [formData, setFormData] = useState({
+    marketId: initialMarkets.length > 0 ? initialMarkets[0].id : "",
+    name: "",
+    description: "",
+    category: CATEGORIES[0],
+    coverImage: "",
+    ownerEmail: "",
+  });
+
+  // Modal State for Feedback
+  const [feedbackModal, setFeedbackModal] = useState<{
+    isOpen: boolean;
+    targetId: string;
+    targetType: "shop" | "membership";
+    feedback: string;
+  }>({
+    isOpen: false,
+    targetId: "",
+    targetType: "shop",
+    feedback: "",
+  });
+
+  const pendingShops = initialShops.filter(s => 
+    (s.status === "pending" || s.status === "needs_revision") && 
+    (selectedMarketFilter === "all" || s.marketId === selectedMarketFilter)
+  );
+  const activeShops = initialShops.filter(s => 
+    s.status !== "pending" && 
+    (selectedMarketFilter === "all" || s.marketId === selectedMarketFilter)
+  );
+  const pendingMemberships = (initialMemberships || []).filter(m => 
+    m.status === "pending" && 
+    (selectedMarketFilter === "all" || m.marketId === selectedMarketFilter)
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      let finalImageUrl = formData.coverImage;
+
+      if (file) {
+        const uploadData = new FormData();
+        uploadData.append("file", file);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+
+        const uploadJson = await uploadRes.json();
+        if (!uploadRes.ok) {
+          throw new Error(uploadJson.error || "Failed to upload image");
+        }
+        finalImageUrl = uploadJson.url;
+      }
+
+      // Shop created directly by market owner is automatically approved (status defaults to undefined or approved on backend, but we'll let backend handle it, backend doesn't set status so it goes to activeShops)
+      const res = await fetch("/api/market-owner/shops", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, coverImage: finalImageUrl }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      router.refresh();
+      setIsCreating(false);
+      setFormData({ 
+        marketId: initialMarkets.length > 0 ? initialMarkets[0].id : "", 
+        name: "", 
+        description: "", 
+        category: CATEGORIES[0], 
+        coverImage: "", 
+        ownerEmail: "" 
+      });
+      setFile(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShopApprove = async (shopId: string) => {
+    try {
+      const res = await fetch("/api/market-owner/shops/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shopId, action: "approve" }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to approve shop");
+      }
+      
+      router.refresh();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleMembershipApprove = async (membershipId: string) => {
+    try {
+      const res = await fetch("/api/market-owner/memberships", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ membershipId, action: "approve", feedback: "" }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to update membership");
+      }
+      
+      router.refresh();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const submitFeedback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!feedbackModal.feedback.trim()) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (feedbackModal.targetType === "shop") {
+        const res = await fetch("/api/market-owner/shops/approve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            shopId: feedbackModal.targetId, 
+            action: "request_revision", 
+            feedback: feedbackModal.feedback 
+          }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+      } else {
+        const res = await fetch("/api/market-owner/memberships", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            membershipId: feedbackModal.targetId, 
+            action: "request_revision", 
+            feedback: feedbackModal.feedback 
+          }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+      }
+      
+      setFeedbackModal({ isOpen: false, targetId: "", targetType: "shop", feedback: "" });
+      router.refresh();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Market Owner Dashboard</h1>
+          <p className="text-gray-500 mt-1">Manage your markets and review new shops.</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <select
+            className="border-gray-300 shadow-sm border p-2 rounded-md text-sm focus:ring-brand-500 focus:border-brand-500"
+            value={selectedMarketFilter}
+            onChange={(e) => setSelectedMarketFilter(e.target.value)}
+          >
+            <option value="all">All Markets</option>
+            {initialMarkets.map(m => (
+              <option key={m.id} value={m.id}>{m.name}</option>
+            ))}
+          </select>
+          <button 
+            onClick={() => setIsCreating(!isCreating)}
+            disabled={initialMarkets.length === 0}
+            className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
+          >
+            {isCreating ? "Cancel" : "+ Create New Shop"}
+          </button>
+        </div>
+      </div>
+
+      {initialMarkets.length === 0 && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                You haven't been assigned to any markets yet. Contact an Admin to assign you a market before you can create shops.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCreating && initialMarkets.length > 0 && (
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h2 className="text-xl font-semibold mb-4">Create a New Shop</h2>
+          {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
+          <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Select Market *</label>
+              <select
+                required
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.marketId}
+                onChange={(e) => setFormData({ ...formData, marketId: e.target.value })}
+              >
+                {initialMarkets.map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Shop Name *</label>
+              <input
+                required
+                type="text"
+                placeholder="e.g. Somtum Auntie Noi"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Category *</label>
+              <select
+                required
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              >
+                {CATEGORIES.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                rows={3}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Shop Cover Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+                onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Shop Owner Email *</label>
+              <input
+                required
+                type="email"
+                placeholder="shopowner@example.com"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.ownerEmail}
+                onChange={(e) => setFormData({ ...formData, ownerEmail: e.target.value })}
+              />
+            </div>
+            <div className="pt-2">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
+              >
+                {loading ? "Creating..." : "Save Shop"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Pending Memberships Section */}
+      {pendingMemberships.length > 0 && (
+        <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-blue-200 flex justify-between items-center bg-blue-100">
+            <h3 className="text-lg font-medium text-blue-800">Pending Shopper Access Requests</h3>
+            <span className="bg-blue-200 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              {pendingMemberships.length} Requires Action
+            </span>
+          </div>
+          
+          <ul className="divide-y divide-blue-200">
+            {pendingMemberships.map((membership) => (
+              <li key={membership.id} className="p-6">
+                <div className="flex items-center space-x-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg font-medium text-gray-900 truncate">
+                      {membership.userEmail}
+                    </p>
+                    <p className="text-sm text-gray-600 truncate">
+                      <b>Application Note:</b> {membership.applicationNote || "No note provided"}
+                    </p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      Market: {initialMarkets.find(m => m.id === membership.marketId)?.name || membership.marketId}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0 space-x-2">
+                    <button
+                      onClick={() => setFeedbackModal({
+                        isOpen: true,
+                        targetId: membership.id,
+                        targetType: "membership",
+                        feedback: membership.feedback || ""
+                      })}
+                      className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium text-sm hover:bg-gray-50 transition"
+                    >
+                      Request Revision
+                    </button>
+                    <button
+                      onClick={() => handleMembershipApprove(membership.id)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-blue-700 transition"
+                    >
+                      Approve Access
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Pending Shops Section */}
+      {pendingShops.length > 0 && (
+        <div className="bg-yellow-50 rounded-lg shadow-sm border border-yellow-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-yellow-200 flex justify-between items-center bg-yellow-100">
+            <h3 className="text-lg font-medium text-yellow-800">Pending Shop Approvals</h3>
+            <span className="bg-yellow-200 text-yellow-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              {pendingShops.length} Requires Action
+            </span>
+          </div>
+          
+          <ul className="divide-y divide-yellow-200">
+            {pendingShops.map((shop) => (
+              <li key={shop.id} className="p-6">
+                <div className="flex items-center space-x-4">
+                  {shop.coverImage ? (
+                    <img src={shop.coverImage} alt={shop.name} className="h-16 w-16 object-cover rounded-md border border-yellow-200" />
+                  ) : (
+                    <div className="h-16 w-16 bg-yellow-200 rounded-md flex items-center justify-center border border-yellow-300 text-yellow-600">
+                      No Img
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg font-medium text-gray-900 truncate">
+                      {shop.name} <span className="text-xs ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">{shop.category}</span>
+                    </p>
+                    <p className="text-sm text-gray-600 truncate">
+                      {shop.description || "No description provided"}
+                    </p>
+                    <p className="text-xs text-yellow-700 mt-1">
+                      Market: {initialMarkets.find(m => m.id === shop.marketId)?.name || shop.marketId} • Requested by: {shop.ownerEmail}
+                    </p>
+                    {shop.status === "needs_revision" && (
+                      <p className="text-xs font-semibold text-red-600 mt-1">Status: Waiting for shopper to revise.</p>
+                    )}
+                  </div>
+                  <div className="text-right flex-shrink-0 space-x-2">
+                    <button
+                      onClick={() => setFeedbackModal({
+                        isOpen: true,
+                        targetId: shop.id,
+                        targetType: "shop",
+                        feedback: shop.feedback || ""
+                      })}
+                      className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium text-sm hover:bg-gray-50 transition"
+                    >
+                      Request Revision
+                    </button>
+                    <button
+                      onClick={() => handleShopApprove(shop.id)}
+                      className="bg-green-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-green-700 transition"
+                    >
+                      Approve Shop
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Active Markets and Shops Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 className="text-lg font-medium mb-4">Your Markets</h3>
+          {initialMarkets.length === 0 ? (
+            <p className="text-sm text-gray-500">No markets found.</p>
+          ) : (
+            <ul className="space-y-4">
+              {initialMarkets.map(m => (
+                <li key={m.id}>
+                  <button
+                    onClick={() => setSelectedMarketFilter(selectedMarketFilter === m.id ? "all" : m.id)}
+                    className={`w-full text-left flex items-center space-x-3 p-3 rounded-lg transition border ${
+                      selectedMarketFilter === m.id 
+                        ? "bg-brand-50 border-brand-200 shadow-sm ring-1 ring-brand-500" 
+                        : "bg-white border-transparent hover:bg-gray-50 hover:border-gray-200"
+                    }`}
+                  >
+                    <div className={`h-10 w-10 rounded flex-shrink-0 flex items-center justify-center font-bold ${
+                      selectedMarketFilter === m.id ? "bg-brand-600 text-white" : "bg-brand-100 text-brand-600"
+                    }`}>
+                      {m.name.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium truncate ${selectedMarketFilter === m.id ? "text-brand-900" : "text-gray-900"}`}>{m.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${
+                          m.operatingStatus === 'closed' ? 'bg-red-100 text-red-800' :
+                          m.operatingStatus === 'scheduled' ? 'bg-blue-100 text-blue-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {m.operatingStatus === 'closed' ? 'CLOSED' :
+                           m.operatingStatus === 'scheduled' ? `UNTIL ${m.validDates}` :
+                           'OPEN'}
+                        </span>
+                        <span className="text-xs text-gray-500 truncate">
+                          {initialShops.filter(s => s.marketId === m.id).length} Shops
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 className="text-lg font-medium">Active Shops</h3>
+            <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              Total: {activeShops.length}
+            </span>
+          </div>
+          
+          {activeShops.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              No active shops currently in your markets.
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-200">
+              {activeShops.map((shop) => (
+                <li key={shop.id} className="p-6 hover:bg-gray-50 transition">
+                  <div className="flex items-center space-x-4">
+                    {shop.coverImage ? (
+                      <img src={shop.coverImage} alt={shop.name} className="h-16 w-16 object-cover rounded-md border border-gray-200" />
+                    ) : (
+                      <div className="h-16 w-16 bg-gray-100 rounded-md flex items-center justify-center border border-gray-200 text-gray-400">
+                        No Img
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-lg font-medium text-gray-900 truncate">
+                        {shop.name} <span className="text-xs ml-2 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">{shop.category}</span>
+                      </p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {shop.description || "No description provided"}
+                      </p>
+                      <p className="text-xs text-brand-600 mt-1">
+                        Market: {initialMarkets.find(m => m.id === shop.marketId)?.name || shop.marketId}
+                      </p>
+                      <p className={`text-xs mt-1 font-bold ${
+                        shop.operatingStatus === 'closed' ? 'text-red-500' :
+                        shop.operatingStatus === 'scheduled' ? 'text-blue-500' :
+                        'text-green-500'
+                      }`}>
+                        {shop.operatingStatus === 'closed' ? 'Closed' :
+                         shop.operatingStatus === 'scheduled' ? `Scheduled Until: ${shop.validDates}` :
+                         'Open'}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-medium text-gray-900">Owner</p>
+                      <p className="text-sm text-gray-500">{shop.ownerEmail}</p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* FEEDBACK MODAL */}
+      {feedbackModal.isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Request Revision</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Provide feedback so the {feedbackModal.targetType === "shop" ? "shop owner" : "shopper"} knows what to fix before you can approve their request.
+            </p>
+            
+            <form onSubmit={submitFeedback}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Feedback *</label>
+              <textarea
+                required
+                rows={4}
+                placeholder="e.g. Please provide a clearer cover image..."
+                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500 mb-4"
+                value={feedbackModal.feedback}
+                onChange={(e) => setFeedbackModal(prev => ({ ...prev, feedback: e.target.value }))}
+              />
+              <div className="flex justify-end gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => setFeedbackModal({ isOpen: false, targetId: "", targetType: "shop", feedback: "" })}
+                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={loading || !feedbackModal.feedback.trim()}
+                  className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Sending..." : "Send Feedback"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}

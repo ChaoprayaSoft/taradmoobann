@@ -1,26 +1,54 @@
-export default function MarketOwnerDashboard() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Market Dashboard</h1>
-        <p className="text-gray-500 mt-1">Manage your market, approve shops, and view members.</p>
-      </div>
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
+import { redirect } from "next/navigation";
+import { adminDb } from "@/lib/firebaseAdmin";
+import MarketOwnerDashboardClient from "./MarketOwnerDashboardClient";
 
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4">Pending Shop Approvals</h2>
-        <div className="text-sm text-gray-500">
-          No pending shops to approve.
-        </div>
-      </div>
+export default async function MarketOwnerDashboard() {
+  const session = await getServerSession(authOptions);
+  
+  // Route Protection: Redirect if not logged in or not a market_owner/admin
+  const roles = (session?.user as any)?.roles || [];
+  if (!session || (!roles.includes("market_owner") && !roles.includes("admin"))) {
+    redirect("/");
+  }
 
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4">Active Shops</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="border rounded-md p-4 bg-gray-50">
-              <p className="text-gray-500 text-sm italic">Your approved shops will appear here.</p>
-            </div>
-        </div>
-      </div>
-    </div>
-  )
+  const userEmail = session.user?.email || "";
+
+  let markets: any[] = [];
+  let shops: any[] = [];
+  let memberships: any[] = [];
+  
+  try {
+    const marketSnapshot = await adminDb
+      .collection("markets")
+      .where("ownerEmail", "==", userEmail)
+      .get();
+      
+    markets = marketSnapshot.docs.map(doc => doc.data());
+
+    if (markets.length > 0) {
+      const marketIds = markets.map(m => m.id);
+      
+      const shopSnapshot = await adminDb
+        .collection("shops")
+        .where("marketId", "in", marketIds)
+        .get();
+        
+      shops = shopSnapshot.docs.map(doc => doc.data());
+      shops.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      const membershipSnapshot = await adminDb
+        .collection("market_memberships")
+        .where("marketId", "in", marketIds)
+        .get();
+      
+      memberships = membershipSnapshot.docs.map(doc => doc.data());
+      memberships.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+  } catch (error) {
+    console.error("Error fetching data for Market Owner Dashboard:", error);
+  }
+
+  return <MarketOwnerDashboardClient initialMarkets={markets} initialShops={shops} initialMemberships={memberships} />;
 }
