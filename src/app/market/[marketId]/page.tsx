@@ -17,9 +17,9 @@ export default async function MarketShoppingPage({ params, searchParams }: { par
   const { marketId } = params;
 
   let isMember = false;
-  let marketData = null;
-  let shops = [];
-  let products = [];
+  let marketData: any = null;
+  let shops: any[] = [];
+  let products: any[] = [];
   let userAccessibleMarkets: any[] = [];
   let activeAds: any[] = [];
   let carouselSpeed = 5;

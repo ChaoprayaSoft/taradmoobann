@@ -15,7 +15,7 @@ export async function PUT(req: Request) {
 
     const body = await req.json();
     const { shopId, name, description } = body;
-    const userEmail = session.user.email;
+    const userEmail = session?.user?.email;
 
     if (!shopId || !name) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });

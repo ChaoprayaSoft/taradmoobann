@@ -52,7 +52,7 @@ export default function MarketShoppingClient({
     // Listen to Shops
     const shopsQ = query(collection(db, "shops"), where("marketId", "==", market.id), where("status", "==", "approved"));
     const unsubShops = onSnapshot(shopsQ, (snap) => {
-      const freshShops = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const freshShops: any[] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       setLocalShops(prev => freshShops.map(fs => {
         const existing = prev.find(p => p.id === fs.id);
         return { ...fs, averageRating: existing?.averageRating };
@@ -77,7 +77,7 @@ export default function MarketShoppingClient({
     const unsubs = chunks.map(chunk => {
       const prodQ = query(collection(db, "products"), where("shopId", "in", chunk));
       return onSnapshot(prodQ, (snap) => {
-        const freshProds = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const freshProds: any[] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         setLocalProducts(prev => {
           const others = prev.filter((p: any) => !chunk.includes(p.shopId));
           // add shopName for UI
@@ -266,7 +266,7 @@ export default function MarketShoppingClient({
                   >
                     <div className="w-8 h-8 rounded bg-yellow-100 flex items-center justify-center text-yellow-500 flex-shrink-0">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                        <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" fillRule="evenodd" />
+                        <path fillRule="evenodd" clipRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
                       </svg>
                     </div>
                     <div className="truncate w-full">
@@ -309,7 +309,7 @@ export default function MarketShoppingClient({
                           <p className="text-xs opacity-80 truncate">{shop.category}</p>
                           <div className="flex items-center text-yellow-500 text-[10px] font-bold gap-0.5">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                              <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" fillRule="evenodd" />
+                              <path fillRule="evenodd" clipRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
                             </svg>
                             {shop.averageRating ? Number(shop.averageRating).toFixed(1) : "New"}
                           </div>
@@ -369,7 +369,7 @@ export default function MarketShoppingClient({
               <div className="bg-yellow-50 p-6 rounded-xl shadow-sm border border-yellow-200">
                 <h2 className="text-2xl font-bold text-yellow-900 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-yellow-500">
-                    <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" fillRule="evenodd" />
+                    <path fillRule="evenodd" clipRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
                   </svg>
                   Spotlight Products
                 </h2>

@@ -19,7 +19,7 @@ export async function GET(req: Request) {
         .where("shopperEmail", "==", session.user.email)
         .get();
 
-      let chats = chatsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let chats: any[] = chatsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       chats = chats.filter((c: any) => !c.deletedByShopper);
       
       chats.sort((a: any, b: any) => {
@@ -60,7 +60,7 @@ export async function GET(req: Request) {
         .where("shopId", "==", shopId)
         .get();
 
-      let chats = chatsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let chats: any[] = chatsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       chats = chats.filter((c: any) => !c.deletedByShopOwner);
       
       // Sort in memory to avoid needing a Firestore composite index
@@ -251,7 +251,7 @@ export async function DELETE(req: Request) {
       // Verify shop ownership
       const shopDoc = await adminDb.collection("shops").doc(shopId).get();
       if (shopDoc.exists && shopDoc.data()?.ownerEmail === session.user.email) {
-        if (chatData.deletedByShopper) {
+        if (chatData?.deletedByShopper) {
           shouldDelete = true;
         } else {
           updateData.deletedByShopOwner = true;

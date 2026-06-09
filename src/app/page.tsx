@@ -77,7 +77,7 @@ export default async function Home() {
       .get();
       
     spotlightProducts = spotlightSnapshot.docs
-      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .map(doc => ({ id: doc.id, ...doc.data() } as any))
       .filter(p => p.spotlightExpiry && new Date(p.spotlightExpiry) > new Date());
 
     // Sort spotlight products randomly

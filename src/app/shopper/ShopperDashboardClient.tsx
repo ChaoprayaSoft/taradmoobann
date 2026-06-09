@@ -242,7 +242,7 @@ export default function ShopperDashboardClient({
           text: textToSend 
         }),
       });
-      await fetchChats();
+
     } catch (error) {
       console.error("Failed to send message:", error);
     } finally {

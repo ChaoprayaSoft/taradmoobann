@@ -158,7 +158,7 @@ export default function ProductCard({ product, shopName, isClosed }: { product: 
                               checked={isChecked}
                               onChange={(e) => {
                                 setSelectedOptions(prev => {
-                                  const currentArr = Array.isArray(prev[opt.name]) ? [...prev[opt.name]] : [];
+                                  const currentArr = Array.isArray(prev[opt.name]) ? Array.from(prev[opt.name] as string[]) : [];
                                   if (e.target.checked) {
                                     return { ...prev, [opt.name]: [...currentArr, choice] };
                                   } else {

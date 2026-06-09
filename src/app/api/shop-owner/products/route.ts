@@ -21,15 +21,16 @@ async function verifyShopOwnership(shopId: string, userEmail: string, roles: str
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email;
     const roles = (session?.user as any)?.roles || [];
-    if (!session || (!roles.includes("shop_owner") && !roles.includes("admin"))) {
+    if (!userEmail || (!roles.includes("shop_owner") && !roles.includes("admin"))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { name, description, price, imageUrls, tags, shopId, options } = await req.json();
     if (!name || !price || !shopId) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
 
-    const verification = await verifyShopOwnership(shopId, session.user.email!, roles);
+    const verification = await verifyShopOwnership(shopId, userEmail, roles);
     if (verification.error) return NextResponse.json({ error: verification.error }, { status: verification.status });
 
     if (verification.shopData?.status === "pending") {
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
     const productCount = productsQuery.size;
     let cost = 0;
     let userDoc: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData> | null = null;
-    const userEmail = session.user.email!;
+
 
     const maxProductSlots = verification.shopData?.maxProductSlots || 3;
 
@@ -107,9 +108,11 @@ export async function POST(req: Request) {
       batch.set(productRef, productData);
 
       // Increment shop product slots
-      batch.update(verification.shopDoc.ref, {
-        maxProductSlots: maxProductSlots + 1
-      });
+      if (verification.shopDoc) {
+        batch.update(verification.shopDoc.ref, {
+          maxProductSlots: maxProductSlots + 1
+        });
+      }
       
       await batch.commit();
     } else {
@@ -126,8 +129,9 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email;
     const roles = (session?.user as any)?.roles || [];
-    if (!session || (!roles.includes("shop_owner") && !roles.includes("admin"))) {
+    if (!userEmail || (!roles.includes("shop_owner") && !roles.includes("admin"))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -136,7 +140,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const verification = await verifyShopOwnership(shopId, session.user.email!, roles);
+    const verification = await verifyShopOwnership(shopId, userEmail, roles);
     if (verification.error) return NextResponse.json({ error: verification.error }, { status: verification.status });
 
     const productRef = adminDb.collection("products").doc(productId);
@@ -176,8 +180,9 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email;
     const roles = (session?.user as any)?.roles || [];
-    if (!session || (!roles.includes("shop_owner") && !roles.includes("admin"))) {
+    if (!userEmail || (!roles.includes("shop_owner") && !roles.includes("admin"))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -189,7 +194,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const verification = await verifyShopOwnership(shopId, session.user.email!, roles);
+    const verification = await verifyShopOwnership(shopId, userEmail, roles);
     if (verification.error) return NextResponse.json({ error: verification.error }, { status: verification.status });
 
     const productRef = adminDb.collection("products").doc(productId);
