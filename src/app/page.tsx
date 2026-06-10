@@ -146,7 +146,6 @@ export default async function Home() {
         userEmail={userEmail} 
         spotlightProducts={spotlightProducts}
       />
-      </div>
 
       <AdsSection ads={activeAds} />
     </div>
