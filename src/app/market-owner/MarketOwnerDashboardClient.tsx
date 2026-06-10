@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { storage } from "@/lib/firebase";
+import { storage, db } from "@/lib/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 const CATEGORIES = [
   "Food & Beverage",
@@ -52,15 +53,47 @@ export default function MarketOwnerDashboardClient({
     feedback: "",
   });
 
-  const pendingShops = initialShops.filter(s => 
+  // Live Data State
+  const [liveShops, setLiveShops] = useState(initialShops);
+  const [liveMemberships, setLiveMemberships] = useState(initialMemberships || []);
+
+  useEffect(() => {
+    if (initialMarkets.length === 0) return;
+
+    const marketIds = initialMarkets.map(m => m.id);
+    
+    // Firestore 'in' query supports up to 10 items.
+    // If a market owner has > 10 markets, we would need to split queries.
+    // For now, assume < 10 markets.
+    const chunkedMarketIds = marketIds.slice(0, 10);
+
+    const shopsQ = query(collection(db, "shops"), where("marketId", "in", chunkedMarketIds));
+    const unsubShops = onSnapshot(shopsQ, (snap) => {
+      const freshShops = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setLiveShops(freshShops);
+    });
+
+    const membershipsQ = query(collection(db, "market_memberships"), where("marketId", "in", chunkedMarketIds));
+    const unsubMemberships = onSnapshot(membershipsQ, (snap) => {
+      const freshMems = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setLiveMemberships(freshMems);
+    });
+
+    return () => {
+      unsubShops();
+      unsubMemberships();
+    };
+  }, [initialMarkets]);
+
+  const pendingShops = liveShops.filter(s => 
     (s.status === "pending" || s.status === "needs_revision") && 
     (selectedMarketFilter === "all" || s.marketId === selectedMarketFilter)
   );
-  const activeShops = initialShops.filter(s => 
+  const activeShops = liveShops.filter(s => 
     s.status !== "pending" && 
     (selectedMarketFilter === "all" || s.marketId === selectedMarketFilter)
   );
-  const pendingMemberships = (initialMemberships || []).filter(m => 
+  const pendingMemberships = liveMemberships.filter(m => 
     m.status === "pending" && 
     (selectedMarketFilter === "all" || m.marketId === selectedMarketFilter)
   );
@@ -470,7 +503,7 @@ export default function MarketOwnerDashboardClient({
                            'OPEN'}
                         </span>
                         <span className="text-xs text-gray-500 truncate">
-                          {initialShops.filter(s => s.marketId === m.id).length} Shops
+                          {liveShops.filter(s => s.marketId === m.id).length} Shops
                         </span>
                       </div>
                     </div>
