@@ -53,7 +53,7 @@ export default function MarketShoppingClient({
     // Listen to Market
     const unsubMarket = onSnapshot(doc(db, "markets", market.id), (docSnapshot) => {
       if (docSnapshot.exists()) {
-        setLocalMarket(prev => ({ 
+        setLocalMarket((prev: any) => ({ 
           id: docSnapshot.id, 
           ...docSnapshot.data(),
           shopsCount: market.shopsCount,
