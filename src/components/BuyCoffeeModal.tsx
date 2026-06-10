@@ -1,22 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import generatePayload from "promptpay-qr";
+import { QRCodeSVG } from "qrcode.react";
 
 const DRINKS = [
-  { name: "Pure Matcha", price: 30 },
-  { name: "Matcha Latte", price: 35 },
-  { name: "Americano", price: 35 },
-  { name: "Soy Milk", price: 7 },
-  { name: "Starbuck", price: 100 },
+  { name: "Pure Matcha", price: 30, icon: "🍵" },
+  { name: "Matcha Latte", price: 40, icon: "🍵" },
+  { name: "Americano", price: 35, icon: "☕" },
+  { name: "Soy Milk", price: 7, icon: "🥛" },
+  { name: "Starbuck", price: 100, icon: "🥤" },
 ];
 
 export default function BuyCoffeeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const [selectedDrink, setSelectedDrink] = useState<{ name: string; price: number } | null>(null);
+  const [selectedDrink, setSelectedDrink] = useState<{ name: string; price: number; icon: string } | null>(null);
   const [showQR, setShowQR] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSelect = (drink: { name: string; price: number }) => {
+  const handleSelect = (drink: { name: string; price: number; icon: string }) => {
     setSelectedDrink(drink);
     setShowQR(true);
   };
@@ -55,23 +57,31 @@ export default function BuyCoffeeModal({ isOpen, onClose }: { isOpen: boolean; o
             {DRINKS.map((drink) => (
               <button
                 key={drink.name}
-                onClick={() => handleSelect(drink)}
-                className="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition text-left"
+                onClick={() => handleSelect(drink as any)}
+                className="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition text-left group"
               >
-                <span className="font-medium text-gray-800">{drink.name}</span>
+                <span className="font-medium text-gray-800 flex items-center gap-3">
+                  <span className="text-xl group-hover:scale-110 transition-transform">{drink.icon}</span>
+                  {drink.name}
+                </span>
                 <span className="font-bold text-orange-600">{drink.price} Baht</span>
               </button>
             ))}
           </div>
         ) : (
           <div className="text-center animate-fade-in">
-            <div className="bg-gray-100 p-4 rounded-lg mb-4 inline-block">
-              {/* Replace with a real QR code image if you have one, or just a placeholder */}
-              <div className="w-48 h-48 bg-white border-4 border-gray-800 flex items-center justify-center rounded">
-                <span className="text-gray-400 font-medium text-sm">QR Code<br/>(PromptPay)</span>
-              </div>
+            <div className="bg-white p-2 border-4 border-gray-800 inline-block rounded-xl shadow-sm mb-4">
+              {selectedDrink && (
+                <QRCodeSVG 
+                  value={generatePayload("0909739266", { amount: selectedDrink.price })} 
+                  size={192} 
+                />
+              )}
             </div>
-            <p className="font-medium text-gray-800 text-lg mb-1">{selectedDrink?.name}</p>
+            <p className="font-medium text-gray-800 text-lg mb-1 flex items-center justify-center gap-2">
+              <span className="text-2xl">{selectedDrink?.icon}</span>
+              {selectedDrink?.name}
+            </p>
             <p className="text-orange-600 font-bold text-xl mb-4">{selectedDrink?.price} Baht</p>
             <button 
               onClick={() => setShowQR(false)}
