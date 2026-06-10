@@ -34,7 +34,6 @@ export default function MarketShoppingClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("All Categories");
   const [shopFilterStatus, setShopFilterStatus] = useState("all");
-  const [isSwitchMarketOpen, setIsSwitchMarketOpen] = useState(false);
 
   const [localMarket, setLocalMarket] = useState(market);
   const [localShops, setLocalShops] = useState(shops);
@@ -164,56 +163,28 @@ export default function MarketShoppingClient({
 
   return (
     <div className="space-y-6">
-      {/* Market Navigation Dropdown */}
-      {userAccessibleMarkets.length > 0 && (
-        <div className="flex justify-end mb-4 relative z-50">
-          <button
-            onClick={() => setIsSwitchMarketOpen(!isSwitchMarketOpen)}
-            className="flex items-center gap-2 bg-white border border-gray-200 shadow-sm px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-brand-600 transition"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
-            </svg>
-            Switch Market
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 ml-1 text-gray-400">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-            </svg>
-          </button>
-
-          {isSwitchMarketOpen && (
-            <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 overflow-hidden z-[100]">
-              <div className="px-4 py-2 border-b border-gray-100">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Your Markets</span>
-              </div>
-              <div className="max-h-64 overflow-y-auto">
-                {userAccessibleMarkets.map(m => (
-                  <button
-                    key={m.id}
-                    onClick={() => {
-                      setIsSwitchMarketOpen(false);
-                      if (m.id !== market.id) {
-                        router.push(`/market/${m.id}`);
-                      }
-                    }}
-                    className={`w-full text-left px-4 py-3 text-sm transition flex items-center gap-2 ${
-                      m.id === market.id 
-                        ? "bg-brand-50 text-brand-700 font-semibold" 
-                        : "text-gray-700 hover:bg-gray-50 hover:text-brand-600"
-                    }`}
-                  >
-                    {m.id === market.id ? (
-                      <svg className="w-4 h-4 text-brand-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <span className="w-4 h-4 shrink-0"></span>
-                    )}
-                    <span className="truncate">{m.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Market Navigation Buttons */}
+      {userAccessibleMarkets.length > 1 && (
+        <div className="flex flex-wrap justify-end gap-2 mb-4 items-center">
+          <span className="text-sm font-medium text-gray-500 mr-2">Switch Market:</span>
+          {userAccessibleMarkets.map(m => (
+            <button
+              key={m.id}
+              onClick={() => {
+                if (m.id !== market.id) {
+                  router.push(`/market/${m.id}`);
+                }
+              }}
+              disabled={m.id === market.id}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition shadow-sm border ${
+                m.id === market.id 
+                  ? "bg-brand-600 text-white border-brand-600 cursor-default" 
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200"
+              }`}
+            >
+              {m.name}
+            </button>
+          ))}
         </div>
       )}
 
