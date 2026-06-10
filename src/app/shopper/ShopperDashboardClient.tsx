@@ -1292,12 +1292,25 @@ export default function ShopperDashboardClient({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {discoverableMarkets.map(market => (
-              <div key={market.id} className="border border-gray-200 rounded-lg overflow-hidden flex flex-col hover:shadow-md transition">
-                {market.coverImage ? (
-                  <img src={market.coverImage} alt={market.name} className="w-full h-32 object-cover" />
-                ) : (
-                  <div className="w-full h-32 bg-gray-100 flex items-center justify-center text-gray-400">No Image</div>
-                )}
+              <div key={market.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col h-full">
+                <button 
+                  onClick={() => {
+                    setRequestingMarketId(market.id);
+                    setApplicationNote("");
+                  }}
+                  className="w-full h-32 block overflow-hidden group text-left relative focus:outline-none"
+                >
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
+                    <span className="text-white font-medium bg-black/50 px-3 py-1 rounded-full">Click to Request Access</span>
+                  </div>
+                  {market.coverImage ? (
+                    <img src={market.coverImage} alt={market.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 transition-colors duration-300 group-hover:bg-gray-200">
+                      No Image
+                    </div>
+                  )}
+                </button>
                 <div className="p-4 flex flex-col flex-1">
                   <h3 className="font-bold text-gray-900">{market.name}</h3>
                   <p className="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{market.description}</p>

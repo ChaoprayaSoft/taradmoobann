@@ -47,7 +47,10 @@ export default function ProductCard({ product, shopName, isClosed, shopHouseNumb
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col h-full relative">
       {/* Image Carousel Area */}
-      <div className="relative w-full h-48 bg-gray-100 group">
+      <div 
+        className={`relative w-full h-48 bg-gray-100 group ${!isClosed ? 'cursor-pointer' : ''}`}
+        onClick={!isClosed ? handleOpenConfig : undefined}
+      >
         {images.length > 0 ? (
           <>
             <img 
