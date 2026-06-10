@@ -81,11 +81,30 @@ export default function ShopOwnerDashboardClient({
     }
   };
 
+  const CATEGORIES = [
+    "Food & Beverages",
+    "Fresh Produce",
+    "Groceries",
+    "Clothing & Apparel",
+    "Electronics & Accessories",
+    "Home & Living",
+    "Health & Beauty",
+    "Handicrafts",
+    "Services",
+    "Other"
+  ];
+
   // Shop Revision State
   const [shopReviseData, setShopReviseData] = useState({
     name: "",
     description: "",
+    category: CATEGORIES[0],
+    locationType: "house",
+    houseNumber: "",
+    location: "",
+    coverImage: ""
   });
+  const [shopReviseFile, setShopReviseFile] = useState<File | null>(null);
 
   // Reviews State
   const [shopReviews, setShopReviews] = useState<any[]>([]);
@@ -473,16 +492,28 @@ export default function ShopOwnerDashboardClient({
     setError("");
 
     try {
-      // In a real app, we'd have a specific PUT /api/shop-owner/shops route to update the shop.
-      // Since we don't have that yet, let's create a quick API call here.
-      // Actually, we don't have an endpoint to update shop details yet!
+      let finalImageUrl = shopReviseData.coverImage;
+
+      if (shopReviseFile) {
+        const uploadData = new FormData();
+        uploadData.append("file", shopReviseFile);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadData });
+        const uploadJson = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadJson.error || "Failed to upload image");
+        finalImageUrl = uploadJson.url;
+      }
+
       const res = await fetch("/api/shop-owner/shops/revise", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           shopId: selectedShopId,
           name: shopReviseData.name,
-          description: shopReviseData.description
+          description: shopReviseData.description,
+          category: shopReviseData.category,
+          houseNumber: shopReviseData.locationType === "house" ? shopReviseData.houseNumber : "",
+          location: shopReviseData.locationType === "area" ? shopReviseData.location : "",
+          coverImage: finalImageUrl
         }),
       });
 
@@ -583,8 +614,25 @@ export default function ShopOwnerDashboardClient({
             </div>
           )}
           <button 
+            onClick={() => {
+              setShopReviseData({ 
+                name: selectedShop.name, 
+                description: selectedShop.description || "",
+                category: selectedShop.category || CATEGORIES[0],
+                locationType: selectedShop.houseNumber ? "house" : "area",
+                houseNumber: selectedShop.houseNumber || "",
+                location: selectedShop.location || "",
+                coverImage: selectedShop.coverImage || ""
+              });
+              setIsRevisingShop(true);
+            }}
+            className="text-brand-600 hover:text-brand-800 text-sm font-semibold border border-brand-200 rounded-lg px-4 py-2 transition hover:bg-brand-50 bg-white shadow-sm"
+          >
+            Edit Shop
+          </button>
+          <button 
             onClick={() => setShopToDelete(selectedShopId)}
-            className="text-red-600 hover:text-red-800 text-sm font-semibold underline px-2"
+            className="text-red-600 hover:text-red-800 text-sm font-semibold border border-red-200 rounded-lg px-4 py-2 transition hover:bg-red-50 bg-white shadow-sm"
           >
             Delete Shop
           </button>
@@ -658,51 +706,6 @@ export default function ShopOwnerDashboardClient({
               </button>
             )}
           </div>
-
-          {isRevisingShop && (
-            <div className="bg-white p-6 rounded-md border border-red-200 mt-4">
-              <h3 className="font-bold text-lg mb-4 text-gray-900">Revise Shop Details</h3>
-              {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
-              
-              <form onSubmit={handleReviseShopSubmit} className="space-y-4 max-w-xl">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Shop Name</label>
-                  <input
-                    required
-                    type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
-                    value={shopReviseData.name}
-                    onChange={(e) => setShopReviseData({ ...shopReviseData, name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
-                  <textarea
-                    rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
-                    value={shopReviseData.description}
-                    onChange={(e) => setShopReviseData({ ...shopReviseData, description: e.target.value })}
-                  />
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsRevisingShop(false)}
-                    className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    disabled={loading}
-                    className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
-                  >
-                    {loading ? "Submitting..." : "Resubmit for Approval"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
         </div>
       )}
 
@@ -1563,6 +1566,130 @@ export default function ShopOwnerDashboardClient({
         </div>
       )}
 
+      {/* Edit Shop Modal */}
+      {isRevisingShop && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="font-bold text-lg mb-4 text-gray-900">Edit Shop Details</h3>
+            {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
+            
+            <form onSubmit={handleReviseShopSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Shop Name *</label>
+                <input
+                  required
+                  type="text"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={shopReviseData.name}
+                  onChange={(e) => setShopReviseData({ ...shopReviseData, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Category *</label>
+                <select
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={shopReviseData.category}
+                  onChange={(e) => setShopReviseData({ ...shopReviseData, category: e.target.value })}
+                >
+                  {CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <textarea
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={shopReviseData.description}
+                  onChange={(e) => setShopReviseData({ ...shopReviseData, description: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Location Type *</label>
+                <div className="flex gap-6 mb-3">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="reviseLocationType" 
+                      value="house" 
+                      checked={shopReviseData.locationType === "house"} 
+                      onChange={() => setShopReviseData({...shopReviseData, locationType: "house"})}
+                      className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
+                    />
+                    House Number
+                  </label>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="reviseLocationType" 
+                      value="area" 
+                      checked={shopReviseData.locationType === "area"} 
+                      onChange={() => setShopReviseData({...shopReviseData, locationType: "area"})}
+                      className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
+                    />
+                    Nearby Area
+                  </label>
+                </div>
+                
+                {shopReviseData.locationType === "house" ? (
+                  <div>
+                    <input
+                      required
+                      type="number"
+                      placeholder="e.g. 123"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={shopReviseData.houseNumber}
+                      onChange={(e) => setShopReviseData({ ...shopReviseData, houseNumber: e.target.value })}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      required
+                      type="text"
+                      maxLength={100}
+                      placeholder="e.g. Near the main gate"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={shopReviseData.location}
+                      onChange={(e) => setShopReviseData({ ...shopReviseData, location: e.target.value })}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Shop Cover Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+                  onChange={(e) => setShopReviseFile(e.target.files ? e.target.files[0] : null)}
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4 justify-end">
+                <button 
+                  type="button" 
+                  onClick={() => setIsRevisingShop(false)}
+                  className="px-4 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
+                >
+                  {loading ? "Submitting..." : "Save Changes & Request Approval"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

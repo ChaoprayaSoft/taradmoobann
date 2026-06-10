@@ -14,7 +14,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { shopId, name, description } = body;
+    const { shopId, name, description, category, houseNumber, location, coverImage } = body;
     const userEmail = session?.user?.email;
 
     if (!shopId || !name) {
@@ -33,12 +33,18 @@ export async function PUT(req: Request) {
     }
 
     // Update the shop and push it back to pending status
-    await shopRef.update({
+    const updateData: any = {
       name,
-      description,
+      description: description || "",
       status: "pending",
       updatedAt: new Date().toISOString(),
-    });
+    };
+    if (category) updateData.category = category;
+    if (houseNumber !== undefined) updateData.houseNumber = houseNumber;
+    if (location !== undefined) updateData.location = location;
+    if (coverImage !== undefined) updateData.coverImage = coverImage;
+
+    await shopRef.update(updateData);
 
     // Notify Market Owner
     const marketId = shopDoc.data()?.marketId;
