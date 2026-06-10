@@ -70,8 +70,6 @@ export async function PUT(req: Request) {
         }
       }
     }
-      }
-    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
