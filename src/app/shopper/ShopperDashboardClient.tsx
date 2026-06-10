@@ -446,6 +446,8 @@ export default function ShopperDashboardClient({
         description: "", 
         category: CATEGORIES[0], 
         coverImage: "", 
+        houseNumber: "",
+        location: ""
       });
       setFile(null);
       
