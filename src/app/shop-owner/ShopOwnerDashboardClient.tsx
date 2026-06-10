@@ -697,7 +697,15 @@ export default function ShopOwnerDashboardClient({
             {!isRevisingShop && (
               <button 
                 onClick={() => {
-                  setShopReviseData({ name: selectedShop.name, description: selectedShop.description || "" });
+                  setShopReviseData({ 
+                    name: selectedShop.name, 
+                    description: selectedShop.description || "",
+                    category: selectedShop.category || CATEGORIES[0],
+                    locationType: selectedShop.houseNumber ? "house" : "area",
+                    houseNumber: selectedShop.houseNumber || "",
+                    location: selectedShop.location || "",
+                    coverImage: selectedShop.coverImage || ""
+                  });
                   setIsRevisingShop(true);
                 }}
                 className="bg-red-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-red-700 transition"
