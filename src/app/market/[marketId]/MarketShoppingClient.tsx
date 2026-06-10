@@ -34,10 +34,18 @@ export default function MarketShoppingClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("All Categories");
   const [shopFilterStatus, setShopFilterStatus] = useState("all");
+  const [isSwitchMarketOpen, setIsSwitchMarketOpen] = useState(false);
 
   const [localMarket, setLocalMarket] = useState(market);
   const [localShops, setLocalShops] = useState(shops);
   const [localProducts, setLocalProducts] = useState(products);
+
+  // Sync props to state on navigation
+  useEffect(() => {
+    setLocalMarket(market);
+    setLocalShops(shops);
+    setLocalProducts(products);
+  }, [market, shops, products]);
 
   useEffect(() => {
     if (!market?.id) return;
@@ -158,20 +166,54 @@ export default function MarketShoppingClient({
     <div className="space-y-6">
       {/* Market Navigation Dropdown */}
       {userAccessibleMarkets.length > 0 && (
-        <div className="flex justify-end mb-4">
-          <select
-            className="border-gray-300 shadow-sm border p-2 rounded-md text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
-            value={localMarket.id}
-            onChange={(e) => {
-              if (e.target.value !== market.id) {
-                router.push(`/market/${e.target.value}`);
-              }
-            }}
+        <div className="flex justify-end mb-4 relative z-50">
+          <button
+            onClick={() => setIsSwitchMarketOpen(!isSwitchMarketOpen)}
+            className="flex items-center gap-2 bg-white border border-gray-200 shadow-sm px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-brand-600 transition"
           >
-            {userAccessibleMarkets.map(m => (
-              <option key={m.id} value={m.id}>Switch Market: {m.name}</option>
-            ))}
-          </select>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
+            </svg>
+            Switch Market
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 ml-1 text-gray-400">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+
+          {isSwitchMarketOpen && (
+            <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 overflow-hidden z-[100]">
+              <div className="px-4 py-2 border-b border-gray-100">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Your Markets</span>
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {userAccessibleMarkets.map(m => (
+                  <button
+                    key={m.id}
+                    onClick={() => {
+                      setIsSwitchMarketOpen(false);
+                      if (m.id !== market.id) {
+                        router.push(`/market/${m.id}`);
+                      }
+                    }}
+                    className={`w-full text-left px-4 py-3 text-sm transition flex items-center gap-2 ${
+                      m.id === market.id 
+                        ? "bg-brand-50 text-brand-700 font-semibold" 
+                        : "text-gray-700 hover:bg-gray-50 hover:text-brand-600"
+                    }`}
+                  >
+                    {m.id === market.id ? (
+                      <svg className="w-4 h-4 text-brand-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <span className="w-4 h-4 shrink-0"></span>
+                    )}
+                    <span className="truncate">{m.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -201,13 +243,13 @@ export default function MarketShoppingClient({
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
                 </svg>
-                <span>{localMarket.shopsCount || 0} Shops</span>
+                <span>{market.shopsCount || 0} Shops</span>
               </div>
               <div className="flex items-center gap-1.5" title="Approved Members">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                 </svg>
-                <span>{localMarket.membersCount || 0} Members</span>
+                <span>{market.membersCount || 0} Members</span>
               </div>
             </div>
           </div>
