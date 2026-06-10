@@ -8,11 +8,13 @@ import { signIn } from "next-auth/react";
 export default function HomePageMarketsClient({ 
   markets, 
   marketStatusMapObj, 
-  userEmail 
+  userEmail,
+  spotlightProducts 
 }: { 
   markets: any[], 
   marketStatusMapObj: Record<string, string>,
-  userEmail: string 
+  userEmail: string,
+  spotlightProducts: any[]
 }) {
   const router = useRouter();
   
@@ -71,6 +73,95 @@ export default function HomePageMarketsClient({
 
   return (
     <>
+      {spotlightProducts.length > 0 && (
+        <div className="w-full mt-12 mb-12 text-left">
+          <div className="flex items-center gap-2 mb-6 px-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-yellow-500">
+              <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+            </svg>
+            <h2 className="text-2xl font-bold text-gray-900">Spotlight Products</h2>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
+            {spotlightProducts.map(product => {
+              const status = product.marketId ? marketStatusMapObj[product.marketId] : null;
+
+              return (
+                <div key={product.id} className="bg-white rounded-xl shadow-sm border border-yellow-200 overflow-hidden hover:shadow-md transition relative flex flex-col group">
+                  <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                    </svg>
+                    Spotlight
+                  </div>
+
+                  {product.imageUrl || (product.imageUrls && product.imageUrls.length > 0) ? (
+                    <img
+                      src={product.imageUrl || product.imageUrls[0]}
+                      alt={product.name}
+                      className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                      onClick={(e) => {
+                        if (product.marketId) {
+                          if (status === "approved") {
+                            handleInteraction(e, product.marketId, "enter");
+                          } else if (!status) {
+                            handleInteraction(e, product.marketId, "request");
+                          }
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div 
+                      className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-200 transition-colors cursor-pointer"
+                      onClick={(e) => {
+                        if (product.marketId) {
+                          if (status === "approved") {
+                            handleInteraction(e, product.marketId, "enter");
+                          } else if (!status) {
+                            handleInteraction(e, product.marketId, "request");
+                          }
+                        }
+                      }}
+                    >
+                      No Image
+                    </div>
+                  )}
+                  <div className="p-4 flex flex-col flex-1">
+                    <h3 className="font-bold text-gray-900 line-clamp-1">{product.name}</h3>
+                    <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mt-0.5">In {product.marketName}</p>
+                    <p className="text-brand-600 font-bold mt-1">฿{product.price}</p>
+                    <p className="text-xs text-gray-500 line-clamp-2 mt-2 flex-1">{product.description}</p>
+                    
+                    {product.marketId && (
+                      <button 
+                        onClick={(e) => {
+                          if (status === "approved") {
+                            handleInteraction(e, product.marketId, "enter");
+                          } else if (!status) {
+                            handleInteraction(e, product.marketId, "request");
+                          } else {
+                            // Needs revision or pending
+                            router.push("/shopper");
+                          }
+                        }}
+                        className="mt-3 block text-center text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline"
+                      >
+                        {status === "approved" ? "View in Market \u2192" : 
+                         status === "pending" ? "Pending Approval" :
+                         status === "needs_revision" ? "Needs Revision" :
+                         "Request to Enter \u2192"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <h2 className="text-2xl font-bold text-gray-900 mb-6 px-4">Discover Local Markets</h2>
+
       {markets.length === 0 ? (
         <div className="text-center p-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
           <p className="text-gray-500">No markets have been created yet. Check back soon!</p>
