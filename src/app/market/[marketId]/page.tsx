@@ -30,7 +30,15 @@ export default async function MarketShoppingPage({ params, searchParams }: { par
     if (!marketDoc.exists) {
       redirect("/"); // Market not found
     }
-    marketData = { id: marketDoc.id, ...marketDoc.data() };
+    const shopsCountSnap = await adminDb.collection("shops").where("marketId", "==", marketId).where("status", "==", "approved").count().get();
+    const membersCountSnap = await adminDb.collection("market_memberships").where("marketId", "==", marketId).where("status", "==", "approved").count().get();
+
+    marketData = { 
+      id: marketDoc.id, 
+      ...marketDoc.data(),
+      shopsCount: shopsCountSnap.data().count,
+      membersCount: membersCountSnap.data().count
+    };
 
     // 2. Check Membership (or if they own a shop in it)
     const memSnapshot = await adminDb
