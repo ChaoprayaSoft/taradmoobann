@@ -522,6 +522,10 @@ export default function ShopOwnerDashboardClient({
 
       router.refresh();
       setIsRevisingShop(false);
+      
+      if (selectedShop.status === "approved") {
+        alert("Shop updated successfully!");
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -1691,7 +1695,7 @@ export default function ShopOwnerDashboardClient({
                   disabled={loading}
                   className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
                 >
-                  {loading ? "Submitting..." : "Save Changes & Request Approval"}
+                  {loading ? "Submitting..." : (selectedShop?.status === "approved" ? "Save Changes" : "Save Changes & Request Approval")}
                 </button>
               </div>
             </form>
