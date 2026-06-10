@@ -365,6 +365,7 @@ export default function ShopperDashboardClient({
     houseNumber: "",
     location: "",
   });
+  const [locationType, setLocationType] = useState<"house" | "area">("house");
 
   const submitMembership = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -427,7 +428,12 @@ export default function ShopperDashboardClient({
       const res = await fetch("/api/shopper/shops", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, coverImage: finalImageUrl }),
+        body: JSON.stringify({ 
+          ...formData, 
+          coverImage: finalImageUrl,
+          houseNumber: locationType === "house" ? formData.houseNumber : "",
+          location: locationType === "area" ? formData.location : ""
+        }),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -449,6 +455,7 @@ export default function ShopperDashboardClient({
         houseNumber: "",
         location: ""
       });
+      setLocationType("house");
       setFile(null);
       
       router.refresh();
@@ -892,30 +899,57 @@ export default function ShopperDashboardClient({
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">House Number *</label>
-                    <input
-                      required
-                      type="number"
-                      placeholder="e.g. 123"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
-                      value={formData.houseNumber}
-                      onChange={(e) => setFormData({ ...formData, houseNumber: e.target.value })}
-                    />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Location Type *</label>
+                  <div className="flex gap-6 mb-3">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="locationType" 
+                        value="house" 
+                        checked={locationType === "house"} 
+                        onChange={() => setLocationType("house")}
+                        className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
+                      />
+                      House Number
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="locationType" 
+                        value="area" 
+                        checked={locationType === "area"} 
+                        onChange={() => setLocationType("area")}
+                        className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
+                      />
+                      Nearby Area
+                    </label>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Location *</label>
-                    <input
-                      required
-                      type="text"
-                      maxLength={100}
-                      placeholder="e.g. Near the main gate"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    />
-                  </div>
+                  
+                  {locationType === "house" ? (
+                    <div>
+                      <input
+                        required
+                        type="number"
+                        placeholder="e.g. 123"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                        value={formData.houseNumber}
+                        onChange={(e) => setFormData({ ...formData, houseNumber: e.target.value })}
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        required
+                        type="text"
+                        maxLength={100}
+                        placeholder="e.g. Near the main gate"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Shop Cover Image</label>
