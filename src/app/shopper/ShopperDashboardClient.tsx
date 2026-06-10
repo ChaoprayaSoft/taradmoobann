@@ -6,7 +6,8 @@ import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Coins } from "lucide-react";
+import { Coins, Coffee } from "lucide-react";
+import BuyCoffeeModal from "@/components/BuyCoffeeModal";
 
 const CATEGORIES = [
   "Food & Beverage",
@@ -62,6 +63,7 @@ export default function ShopperDashboardClient({
   // Address State
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [showCoffeeModal, setShowCoffeeModal] = useState(false);
 
   const [ownedShopsCount, setOwnedShopsCount] = useState(
     initialShops.filter(s => s.ownerEmail === session?.user?.email).length
@@ -561,6 +563,14 @@ export default function ShopperDashboardClient({
           <p className="text-gray-500 mt-1">Discover markets, track memberships, and open your own shop.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <button 
+            onClick={() => setShowCoffeeModal(true)}
+            className="flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-200 px-4 py-2 rounded-md hover:bg-orange-100 transition shadow-sm"
+          >
+            <Coffee className="w-5 h-5 text-orange-500" />
+            <span className="font-bold text-sm">Buy developer a coffee</span>
+          </button>
+          
           <Link href="/shopper/wallet" className="flex items-center gap-2 bg-yellow-50 text-yellow-700 border border-yellow-200 px-4 py-2 rounded-md hover:bg-yellow-100 transition shadow-sm">
             <Coins className="w-5 h-5 text-yellow-500" />
             <div className="flex flex-col items-start leading-none">
@@ -1670,6 +1680,7 @@ export default function ShopperDashboardClient({
         </div>
       )}
 
+      <BuyCoffeeModal isOpen={showCoffeeModal} onClose={() => setShowCoffeeModal(false)} />
     </div>
   );
 }

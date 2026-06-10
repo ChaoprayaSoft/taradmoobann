@@ -403,7 +403,14 @@ export default function MarketShoppingClient({
                   {displayedProducts.map((product: any) => {
                     const shop = localShops.find((s: any) => s.id === product.shopId);
                     return (
-                      <ProductCard key={product.id} product={product} shopName={shop?.name} isClosed={shop?.operatingStatus === 'closed'} />
+                      <ProductCard 
+                        key={product.id} 
+                        product={product} 
+                        shopName={shop?.name} 
+                        isClosed={shop?.operatingStatus === 'closed'} 
+                        shopHouseNumber={shop?.houseNumber}
+                        shopLocation={shop?.location}
+                      />
                     );
                   })}
                 </div>
@@ -430,7 +437,14 @@ export default function MarketShoppingClient({
                   {displayedProducts.map((product: any) => {
                     const shop = localShops.find((s: any) => s.id === product.shopId);
                     return (
-                      <ProductCard key={product.id} product={product} shopName={shop?.name} isClosed={shop?.operatingStatus === 'closed'} />
+                      <ProductCard 
+                        key={product.id} 
+                        product={product} 
+                        shopName={shop?.name} 
+                        isClosed={shop?.operatingStatus === 'closed'} 
+                        shopHouseNumber={shop?.houseNumber}
+                        shopLocation={shop?.location}
+                      />
                     );
                   })}
                 </div>
@@ -499,7 +513,13 @@ export default function MarketShoppingClient({
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {displayedProducts.map(product => (
-                    <ProductCard key={product.id} product={product} isClosed={selectedShop.operatingStatus === 'closed'} />
+                    <ProductCard 
+                      key={product.id} 
+                      product={product} 
+                      isClosed={selectedShop.operatingStatus === 'closed'} 
+                      shopHouseNumber={selectedShop?.houseNumber}
+                      shopLocation={selectedShop?.location}
+                    />
                   ))}
                 </div>
               )}

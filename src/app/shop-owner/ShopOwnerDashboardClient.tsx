@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { Coins, Coffee } from "lucide-react";
+import BuyCoffeeModal from "@/components/BuyCoffeeModal";
 
 export default function ShopOwnerDashboardClient({ 
   userEmail,
@@ -105,6 +107,8 @@ export default function ShopOwnerDashboardClient({
     coverImage: ""
   });
   const [shopReviseFile, setShopReviseFile] = useState<File | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showCoffeeModal, setShowCoffeeModal] = useState(false);
 
   // Reviews State
   const [shopReviews, setShopReviews] = useState<any[]>([]);
@@ -524,7 +528,7 @@ export default function ShopOwnerDashboardClient({
       setIsRevisingShop(false);
       
       if (selectedShop.status === "approved") {
-        alert("Shop updated successfully!");
+        setShowSuccessModal(true);
       }
     } catch (err: any) {
       setError(err.message);
@@ -584,6 +588,14 @@ export default function ShopOwnerDashboardClient({
                   <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.464-1.112 2.428 0 .964.4 1.862 1.112 2.428.42.333.864.55 1.346.68V15.54a2.54 2.54 0 01-1.346-.68.75.75 0 00-1.06 1.06c.712.566 1.57.864 2.446.963V18a.75.75 0 001.5 0v-.816a3.836 3.836 0 001.72-.756c.712-.566 1.112-1.464 1.112-2.428 0-.964-.4-1.862-1.112-2.428a3.836 3.836 0 00-1.346-.68V7.46c.482.13.926.347 1.346.68a.75.75 0 001.06-1.06c-.712-.566-1.57-.864-2.446-.963V6z" clipRule="evenodd" />
                 </svg>
                 {coins} Coins
+              </button>
+              
+              <button 
+                onClick={() => setShowCoffeeModal(true)}
+                className="ml-3 flex items-center gap-1 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full border border-orange-200 hover:bg-orange-200 hover:border-orange-300 transition shadow-sm cursor-pointer"
+              >
+                <Coffee className="w-4 h-4 text-orange-500" />
+                Buy developer a coffee
               </button>
               
               {/* Beautiful Custom Tooltip */}
@@ -1702,6 +1714,33 @@ export default function ShopOwnerDashboardClient({
           </div>
         </div>
       )}
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+              <svg className="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Success!</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Shop details have been updated successfully.
+            </p>
+            <div className="flex justify-center">
+              <button 
+                onClick={() => setShowSuccessModal(false)}
+                className="px-6 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 transition"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <BuyCoffeeModal isOpen={showCoffeeModal} onClose={() => setShowCoffeeModal(false)} />
     </div>
   );
 }
