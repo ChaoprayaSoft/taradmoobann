@@ -362,6 +362,8 @@ export default function ShopperDashboardClient({
     description: "",
     category: CATEGORIES[0],
     coverImage: "",
+    houseNumber: "",
+    location: "",
   });
 
   const submitMembership = async (e: React.FormEvent) => {
@@ -887,6 +889,31 @@ export default function ShopperDashboardClient({
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">House Number *</label>
+                    <input
+                      required
+                      type="number"
+                      placeholder="e.g. 123"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={formData.houseNumber}
+                      onChange={(e) => setFormData({ ...formData, houseNumber: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Location *</label>
+                    <input
+                      required
+                      type="text"
+                      maxLength={100}
+                      placeholder="e.g. Near the main gate"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Shop Cover Image</label>

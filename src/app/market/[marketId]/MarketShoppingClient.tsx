@@ -346,6 +346,19 @@ export default function MarketShoppingClient({
                             {shop.averageRating ? Number(shop.averageRating).toFixed(1) : "New"}
                           </div>
                         </div>
+                        {(shop.houseNumber || shop.location) && (
+                          <p className="text-[10px] text-gray-500 mt-1 truncate text-left flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 shrink-0">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                            </svg>
+                            <span className="truncate">
+                              {shop.houseNumber && <span>No. {shop.houseNumber}</span>}
+                              {shop.houseNumber && shop.location && <span>, </span>}
+                              {shop.location && <span>{shop.location}</span>}
+                            </span>
+                          </p>
+                        )}
                       </div>
                     </button>
                   </li>
