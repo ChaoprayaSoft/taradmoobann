@@ -26,7 +26,9 @@ export default function ShopperDashboardClient({
   initialAddresses = [], 
   initialOrders = [],
   userCoins = 0,
-  userMaxShopSlots = 1
+  userMaxShopSlots = 1,
+  initialEmailNotificationsEnabled = true,
+  initialPushNotificationsEnabled = true
 }: { 
   allMarkets: any[], 
   initialShops?: any[],
@@ -34,7 +36,9 @@ export default function ShopperDashboardClient({
   initialAddresses: string[], 
   initialOrders: any[],
   userCoins?: number,
-  userMaxShopSlots?: number
+  userMaxShopSlots?: number,
+  initialEmailNotificationsEnabled?: boolean,
+  initialPushNotificationsEnabled?: boolean
 }) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -64,6 +68,57 @@ export default function ShopperDashboardClient({
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showCoffeeModal, setShowCoffeeModal] = useState(false);
+
+  // Notification Settings State
+  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(initialEmailNotificationsEnabled);
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+
+  const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(initialPushNotificationsEnabled);
+  const [isSavingPushNotifications, setIsSavingPushNotifications] = useState(false);
+
+  const handleToggleNotifications = async () => {
+    setIsSavingNotifications(true);
+    const newValue = !emailNotificationsEnabled;
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emailNotificationsEnabled: newValue })
+      });
+      if (res.ok) {
+        setEmailNotificationsEnabled(newValue);
+      } else {
+        alert("Failed to save settings");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Something went wrong");
+    } finally {
+      setIsSavingNotifications(false);
+    }
+  };
+
+  const handleTogglePushNotifications = async () => {
+    setIsSavingPushNotifications(true);
+    const newValue = !pushNotificationsEnabled;
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pushNotificationsEnabled: newValue })
+      });
+      if (res.ok) {
+        setPushNotificationsEnabled(newValue);
+      } else {
+        alert("Failed to save settings");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Something went wrong");
+    } finally {
+      setIsSavingPushNotifications(false);
+    }
+  };
 
   const [ownedShopsCount, setOwnedShopsCount] = useState(
     initialShops.filter(s => s.ownerEmail === session?.user?.email).length
@@ -633,6 +688,9 @@ export default function ShopperDashboardClient({
         <a href="#discover-markets" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
           Discover Markets
         </a>
+        <a href="#notification-settings" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
+          Notifications
+        </a>
         {(shopRequests.length > 0 || membershipRequests.length > 0) && (
           <a href="#my-requests" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
             My Requests
@@ -641,6 +699,47 @@ export default function ShopperDashboardClient({
             </span>
           </a>
         )}
+      </div>
+
+      {/* NOTIFICATION SETTINGS */}
+      <div id="notification-settings" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Notification Settings</h2>
+        
+        <div className="space-y-4 max-w-2xl">
+          <div className="flex items-center justify-between border border-gray-200 rounded-md p-4 bg-gray-50">
+            <div>
+              <h3 className="font-bold text-gray-800">Email Notifications</h3>
+              <p className="text-sm text-gray-500">Receive important updates via email (e.g. market membership approvals, shop request feedback).</p>
+            </div>
+            <button
+              onClick={handleToggleNotifications}
+              disabled={isSavingNotifications}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2 ${emailNotificationsEnabled ? 'bg-brand-600' : 'bg-gray-200'}`}
+            >
+              <span className="sr-only">Toggle email notifications</span>
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${emailNotificationsEnabled ? 'translate-x-5' : 'translate-x-0'}`}
+              />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between border border-gray-200 rounded-md p-4 bg-gray-50">
+            <div>
+              <h3 className="font-bold text-gray-800">Push Notifications</h3>
+              <p className="text-sm text-gray-500">Receive real-time push notifications on your device.</p>
+            </div>
+            <button
+              onClick={handleTogglePushNotifications}
+              disabled={isSavingPushNotifications}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2 ${pushNotificationsEnabled ? 'bg-brand-600' : 'bg-gray-200'}`}
+            >
+              <span className="sr-only">Toggle push notifications</span>
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${pushNotificationsEnabled ? 'translate-x-5' : 'translate-x-0'}`}
+              />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* MY REQUESTS */}
@@ -815,12 +914,9 @@ export default function ShopperDashboardClient({
           {addresses.length < 3 && editingIndex !== addresses.length && (
             <button 
               onClick={handleAddNewAddress}
-              className="w-full py-3 border-2 border-dashed border-gray-300 rounded-md text-gray-500 hover:text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition text-sm font-medium flex justify-center items-center gap-2"
+              className="w-full border-2 border-dashed border-gray-300 rounded-md p-4 text-sm font-medium text-gray-500 hover:text-brand-600 hover:border-brand-400 transition bg-white"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              Add New Address
+              + Add New Address
             </button>
           )}
         </div>

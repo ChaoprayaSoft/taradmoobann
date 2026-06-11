@@ -20,6 +20,8 @@ export default async function ShopperDashboard() {
   let orders: any[] = [];
   let userCoins: number = 0;
   let userMaxShopSlots: number = 1;
+  let emailNotificationsEnabled: boolean = true;
+  let pushNotificationsEnabled: boolean = true;
 
   try {
     const marketSnapshot = await adminDb.collection("markets").get();
@@ -79,6 +81,8 @@ export default async function ShopperDashboard() {
       userMaxShopSlots = data?.maxShopSlots !== undefined && data.maxShopSlots < 2 
         ? data.maxShopSlots + 1 
         : (data?.maxShopSlots || 1);
+      emailNotificationsEnabled = data?.emailNotificationsEnabled !== false;
+      pushNotificationsEnabled = data?.pushNotificationsEnabled !== false;
     }
 
     // Fetch user's orders
@@ -103,6 +107,8 @@ export default async function ShopperDashboard() {
       initialOrders={orders} 
       userCoins={userCoins}
       userMaxShopSlots={userMaxShopSlots}
+      initialEmailNotificationsEnabled={emailNotificationsEnabled}
+      initialPushNotificationsEnabled={pushNotificationsEnabled}
     />
   );
 }
