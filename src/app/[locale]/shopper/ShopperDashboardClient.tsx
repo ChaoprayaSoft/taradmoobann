@@ -186,20 +186,20 @@ export default function ShopperDashboardClient({
     if (editingIndex === null) return;
 
     const newAddresses = [...addresses];
-    const isEmpty = !editAddress.villageName.trim() && !editAddress.houseNo.trim() && !editAddress.address.trim() && !editAddress.telephone.trim();
-
-    if (isEmpty) {
-      // Remove address if empty
-      newAddresses.splice(editingIndex, 1);
+    const jsonStr = JSON.stringify(editAddress);
+    if (editingIndex >= newAddresses.length) {
+      newAddresses.push(jsonStr);
     } else {
-      const jsonStr = JSON.stringify(editAddress);
-      if (editingIndex >= newAddresses.length) {
-        newAddresses.push(jsonStr);
-      } else {
-        newAddresses[editingIndex] = jsonStr;
-      }
+      newAddresses[editingIndex] = jsonStr;
     }
 
+    saveAddresses(newAddresses);
+  };
+
+  const handleDeleteAddress = (index: number) => {
+    const newAddresses = [...addresses];
+    newAddresses.splice(index, 1);
+    setEditingIndex(null);
     saveAddresses(newAddresses);
   };
 
@@ -885,7 +885,7 @@ export default function ShopperDashboardClient({
                       value={editAddress.villageName}
                       onChange={(e) => setEditAddress({ ...editAddress, villageName: e.target.value })}
                     >
-                      <option value="" disabled>{t("villageName")}</option>
+                      <option value="" disabled>{t("villageName")} *</option>
                       {uniqueVillageNames.map(v => (
                         <option key={v} value={v}>{v}</option>
                       ))}
@@ -893,7 +893,7 @@ export default function ShopperDashboardClient({
                     <input
                       required
                       type="text"
-                      placeholder={t("houseNo")}
+                      placeholder={t("houseNo") + " *"}
                       className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
                       value={editAddress.houseNo}
                       onChange={(e) => setEditAddress({ ...editAddress, houseNo: e.target.value })}
@@ -901,7 +901,7 @@ export default function ShopperDashboardClient({
                     <input
                       required
                       type="text"
-                      placeholder={t("telephone")}
+                      placeholder={t("telephone") + " *"}
                       className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
                       value={editAddress.telephone}
                       onChange={(e) => setEditAddress({ ...editAddress, telephone: e.target.value })}
@@ -909,7 +909,7 @@ export default function ShopperDashboardClient({
                     <input
                       required
                       type="text"
-                      placeholder={t("addressLine")}
+                      placeholder={t("addressLine") + " *"}
                       className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
                       value={editAddress.address}
                       onChange={(e) => setEditAddress({ ...editAddress, address: e.target.value })}
@@ -929,6 +929,13 @@ export default function ShopperDashboardClient({
                       className="text-gray-600 hover:text-gray-800 text-sm font-medium"
                     >
                       {t("cancel")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteAddress(idx)}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium mt-2"
+                    >
+                      Delete
                     </button>
                   </div>
                 </form>
@@ -959,7 +966,7 @@ export default function ShopperDashboardClient({
                     value={editAddress.villageName}
                     onChange={(e) => setEditAddress({ ...editAddress, villageName: e.target.value })}
                   >
-                    <option value="" disabled>{t("villageName")}</option>
+                    <option value="" disabled>{t("villageName")} *</option>
                     {uniqueVillageNames.map(v => (
                       <option key={v} value={v}>{v}</option>
                     ))}
@@ -967,7 +974,7 @@ export default function ShopperDashboardClient({
                   <input
                     required
                     type="text"
-                    placeholder={t("houseNo")}
+                    placeholder={t("houseNo") + " *"}
                     className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
                     value={editAddress.houseNo}
                     onChange={(e) => setEditAddress({ ...editAddress, houseNo: e.target.value })}
@@ -975,7 +982,7 @@ export default function ShopperDashboardClient({
                   <input
                     required
                     type="text"
-                    placeholder={t("telephone")}
+                    placeholder={t("telephone") + " *"}
                     className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
                     value={editAddress.telephone}
                     onChange={(e) => setEditAddress({ ...editAddress, telephone: e.target.value })}
@@ -983,7 +990,7 @@ export default function ShopperDashboardClient({
                   <input
                     required
                     type="text"
-                    placeholder={t("addressLine")}
+                    placeholder={t("addressLine") + " *"}
                     className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
                     value={editAddress.address}
                     onChange={(e) => setEditAddress({ ...editAddress, address: e.target.value })}
