@@ -1,0 +1,11 @@
+{
+  "HomePage": {
+    "welcome": "Welcome to",
+    "description": "Your local neighborhood online market. Discover local shops, and get notified when your favorite vendors open."
+  },
+  "Navigation": {
+    "home": "Home",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  }
+}

@@ -6,10 +6,12 @@ import Link from "next/link";
 import { useCart } from "./CartProvider";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useTranslations } from "next-intl";
 
 export default function LoginButton() {
   const { data: session, status, update } = useSession();
   const { cartItems, setIsCartOpen } = useCart();
+  const t = useTranslations("Navigation");
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState("");
@@ -155,7 +157,7 @@ export default function LoginButton() {
             onClick={() => signOut()}
             className="text-sm text-red-600 hover:text-red-700 font-medium hidden sm:block"
           >
-            Sign Out
+            {t('signOut')}
           </button>
           
           {/* Mobile Menu Toggle */}
@@ -201,7 +203,7 @@ export default function LoginButton() {
                 onClick={() => { signOut(); setIsMobileMenuOpen(false); }}
                 className="text-left text-sm text-red-600 hover:text-red-700 font-medium py-2 mt-2 border-t border-gray-100 sm:hidden"
               >
-                Sign Out
+                {t('signOut')}
               </button>
             </div>
           </div>
@@ -248,7 +250,7 @@ export default function LoginButton() {
       onClick={() => signIn("google")}
       className="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition"
     >
-      Sign In
+      {t('signIn')}
     </button>
   );
 }

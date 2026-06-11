@@ -6,9 +6,12 @@ import AdsSection from "@/components/AdsSection";
 import Logo from "@/components/Logo";
 import HomePageMarketsClient from "./HomePageMarketsClient";
 
+import { getTranslations } from "next-intl/server";
+
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  const t = await getTranslations("HomePage");
   const session = await getServerSession(authOptions);
   const userEmail = session?.user?.email || "";
 
@@ -129,7 +132,7 @@ export default async function Home() {
     <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8">
       <div className="flex flex-col items-center mt-12 mb-2">
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-gray-900 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-          <span>Welcome to</span>
+          <span>{t('welcome')}</span>
           <div className="bg-brand-50 p-2 sm:p-3 rounded-2xl shadow-sm">
             <Logo className="w-10 h-10 sm:w-14 sm:h-14 text-brand-600" />
           </div>
@@ -137,7 +140,7 @@ export default async function Home() {
         </h1>
       </div>
       <p className="text-lg sm:text-xl text-gray-600 max-w-2xl">
-        Your local neighborhood online market. Discover local shops, and get notified when your favorite vendors open.
+        {t('description')}
       </p>
 
       <HomePageMarketsClient 
