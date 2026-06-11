@@ -374,65 +374,66 @@ export default function AdminDashboardClient({
   );
 
   return (
-    <div className="space-y-6">
-      {/* Unread Chat Notification Banner */}
-      {chats.some(c => c.unreadByAdmin) && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded shadow-sm flex justify-between items-center">
-          <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            <p className="text-sm text-red-700 font-medium">
-              You have unread messages from shoppers waiting for a reply!
-            </p>
-          </div>
-          <button 
-            onClick={() => setActiveTab("chats")}
-            className="text-sm bg-red-100 hover:bg-red-200 text-red-800 font-bold py-1.5 px-4 rounded transition"
-          >
-            View Inbox
-          </button>
-        </div>
-      )}
-
-      <div className="flex justify-between items-center">
+    <div className="flex flex-col md:flex-row gap-8">
+      {/* Sidebar Navigation */}
+      <div className="w-full md:w-64 flex-shrink-0 md:sticky md:top-24 self-start space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-500 mt-1">Manage all markets and users.</p>
+          <p className="text-gray-500 mt-1 text-sm">Manage all markets, shops, and users.</p>
         </div>
-        
-        <div className="flex space-x-4">
-          <div className="bg-gray-100 p-1 rounded-md flex space-x-1">
-            <button
-              onClick={() => setActiveTab("markets")}
-              className={`px-4 py-2 rounded text-sm font-medium transition ${activeTab === "markets" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
-            >
-              Markets & Reports
-            </button>
-            <button
-              onClick={() => setActiveTab("shops")}
-              className={`px-4 py-2 rounded text-sm font-medium transition ${activeTab === "shops" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
-            >
-              Manage Shops
-            </button>
-            <button
+
+        {/* Unread Chat Notification Banner */}
+        {chats.some(c => c.unreadByAdmin) && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded shadow-sm">
+            <div className="flex items-start gap-2 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <p className="text-xs text-red-700 font-medium">Unread messages waiting for reply!</p>
+            </div>
+            <button 
               onClick={() => setActiveTab("chats")}
-              className={`px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2 ${activeTab === "chats" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
+              className="text-xs w-full bg-red-100 hover:bg-red-200 text-red-800 font-bold py-1.5 px-3 rounded transition"
             >
-              Support Inbox
-              {chats.some(c => c.unreadByAdmin) && (
-                <span className="w-2 h-2 rounded-full bg-red-500"></span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("ads")}
-              className={`px-4 py-2 rounded text-sm font-medium transition ${activeTab === "ads" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
-            >
-              Manage Ads
+              View Inbox
             </button>
           </div>
-        </div>
+        )}
+
+        {/* Navigation Menu */}
+        <nav className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scrollbar-hide">
+          <button
+            onClick={() => setActiveTab("markets")}
+            className={`px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition text-left whitespace-nowrap md:whitespace-normal ${activeTab === "markets" ? "bg-brand-50 text-brand-700 border-l-4 border-brand-600" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent"}`}
+          >
+            Markets & Reports
+          </button>
+          <button
+            onClick={() => setActiveTab("shops")}
+            className={`px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition text-left whitespace-nowrap md:whitespace-normal ${activeTab === "shops" ? "bg-brand-50 text-brand-700 border-l-4 border-brand-600" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent"}`}
+          >
+            Manage Shops
+          </button>
+          <button
+            onClick={() => setActiveTab("chats")}
+            className={`px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition text-left whitespace-nowrap md:whitespace-normal flex justify-between items-center gap-2 ${activeTab === "chats" ? "bg-brand-50 text-brand-700 border-l-4 border-brand-600" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent"}`}
+          >
+            <span>Support Inbox</span>
+            {chats.some(c => c.unreadByAdmin) && (
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("ads")}
+            className={`px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition text-left whitespace-nowrap md:whitespace-normal ${activeTab === "ads" ? "bg-brand-50 text-brand-700 border-l-4 border-brand-600" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent"}`}
+          >
+            Manage Ads
+          </button>
+        </nav>
       </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0 space-y-6">
 
       {activeTab === "markets" && (
         <>
@@ -1187,6 +1188,7 @@ export default function AdminDashboardClient({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
