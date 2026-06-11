@@ -463,26 +463,27 @@ export default function AdminDashboardClient({
           </div>
 
           {(isCreating || editingMarket) && (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">
-              {editingMarket ? t("editMarket", { name: editingMarket.name }) : t("createMarketTitle")}
-            </h2>
-            {editingMarket && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-xl rounded-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {editingMarket ? t("editMarket", { name: editingMarket.name }) : t("createMarketTitle")}
+              </h2>
               <button 
                 onClick={() => {
                   setEditingMarket(null);
+                  setIsCreating(false);
                   setFormData({ name: "", villageName: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
                   setFile(null);
                 }}
-                className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                className="text-gray-400 hover:text-gray-600 transition"
               >
-                {t("cancelEdit")}
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
-            )}
-          </div>
-          {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
-          <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
+            </div>
+            <div className="p-6 overflow-y-auto">
+              {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
+              <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">{t("marketName")}</label>
               <input
@@ -560,7 +561,19 @@ export default function AdminDashboardClient({
                 />
               </div>
             )}
-            <div className="pt-2">
+            <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 mt-6">
+              <button 
+                type="button" 
+                onClick={() => {
+                  setEditingMarket(null);
+                  setIsCreating(false);
+                  setFormData({ name: "", villageName: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
+                  setFile(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
+              >
+                {t("cancel")}
+              </button>
               <button 
                 type="submit" 
                 disabled={loading}
@@ -570,6 +583,8 @@ export default function AdminDashboardClient({
               </button>
             </div>
           </form>
+            </div>
+          </div>
         </div>
       )}
 
