@@ -19,21 +19,21 @@ const CATEGORIES = [
   "Other"
 ];
 
-export default function ShopperDashboardClient({ 
-  allMarkets, 
+export default function ShopperDashboardClient({
+  allMarkets,
   initialShops = [],
-  memberships, 
-  initialAddresses = [], 
+  memberships,
+  initialAddresses = [],
   initialOrders = [],
   userCoins = 0,
   userMaxShopSlots = 1,
   initialEmailNotificationsEnabled = true,
   initialPushNotificationsEnabled = true
-}: { 
-  allMarkets: any[], 
+}: {
+  allMarkets: any[],
   initialShops?: any[],
-  memberships: any[], 
-  initialAddresses: string[], 
+  memberships: any[],
+  initialAddresses: string[],
   initialOrders: any[],
   userCoins?: number,
   userMaxShopSlots?: number,
@@ -42,7 +42,7 @@ export default function ShopperDashboardClient({
 }) {
   const router = useRouter();
   const { data: session } = useSession();
-  
+
   // Membership Request State
   const [requestingMarketId, setRequestingMarketId] = useState<string | null>(null);
   const [applicationNote, setApplicationNote] = useState("");
@@ -130,7 +130,7 @@ export default function ShopperDashboardClient({
   const saveAddresses = async (newAddresses: string[]) => {
     setIsSavingAddress(true);
     setAddressSaved(false);
-    
+
     try {
       const res = await fetch("/api/shopper/address", {
         method: "POST",
@@ -165,7 +165,7 @@ export default function ShopperDashboardClient({
         newAddresses[editingIndex] = editValue;
       }
     }
-    
+
     saveAddresses(newAddresses);
   };
 
@@ -189,7 +189,7 @@ export default function ShopperDashboardClient({
   const [selectedChat, setSelectedChat] = useState<any | null>(null);
   const [chatInputText, setChatInputText] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
-  const [chatToDelete, setChatToDelete] = useState<{chatId: string, shopId: string} | null>(null);
+  const [chatToDelete, setChatToDelete] = useState<{ chatId: string, shopId: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [shopRequests, setShopRequests] = useState<any[]>(
@@ -226,13 +226,13 @@ export default function ShopperDashboardClient({
       let freshChats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       freshChats = freshChats.filter((c: any) => !c.deletedByShopper);
       freshChats.sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
-      
+
       // Need to fetch shop names since they aren't stored in shop_chats doc
       // In a real app we might fetch these once and cache, or let backend do it
       // Since it's realtime, we will just use the shopId for now if it's missing
-      
+
       setMyChats(freshChats);
-      
+
       // Update selected chat if it exists
       if (selectedChat) {
         const updated = freshChats.find((c: any) => c.id === selectedChat.id);
@@ -294,9 +294,9 @@ export default function ShopperDashboardClient({
       await fetch("/api/shop-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          shopId: selectedChat.shopId, 
-          text: textToSend 
+        body: JSON.stringify({
+          shopId: selectedChat.shopId,
+          text: textToSend
         }),
       });
 
@@ -368,7 +368,7 @@ export default function ShopperDashboardClient({
     setExistingReview(null);
     setReviewRating(5);
     setReviewComment("");
-    
+
     try {
       const res = await fetch(`/api/public/reviews?orderId=${order.id}`);
       if (res.ok) {
@@ -385,7 +385,7 @@ export default function ShopperDashboardClient({
   const submitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedOrderDetails) return;
-    
+
     setReviewLoading(true);
     try {
       const res = await fetch("/api/shopper/reviews", {
@@ -400,7 +400,7 @@ export default function ShopperDashboardClient({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      
+
       setExistingReview({
         ...data,
         rating: reviewRating,
@@ -485,8 +485,8 @@ export default function ShopperDashboardClient({
       const res = await fetch("/api/shopper/shops", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          ...formData, 
+        body: JSON.stringify({
+          ...formData,
           coverImage: finalImageUrl,
           houseNumber: locationType === "house" ? formData.houseNumber : "",
           location: locationType === "area" ? formData.location : ""
@@ -496,27 +496,27 @@ export default function ShopperDashboardClient({
       clearTimeout(timeoutId);
 
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.error || "Something went wrong");
       }
 
       setSuccess(true);
       setIsOpeningShop(false);
-      setFormData({ 
-        marketId: approvedMarkets.length > 0 ? approvedMarkets[0].id : "", 
-        name: "", 
-        description: "", 
-        category: CATEGORIES[0], 
-        coverImage: "", 
+      setFormData({
+        marketId: approvedMarkets.length > 0 ? approvedMarkets[0].id : "",
+        name: "",
+        description: "",
+        category: CATEGORIES[0],
+        coverImage: "",
         houseNumber: "",
         location: ""
       });
       setLocationType("house");
       setFile(null);
-      
+
       router.refresh();
-      
+
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -525,12 +525,12 @@ export default function ShopperDashboardClient({
   };
 
   const [withdrawLoading, setWithdrawLoading] = useState<string | null>(null);
-  const [withdrawConfirmModal, setWithdrawConfirmModal] = useState<{type: 'shop' | 'membership', id: string, name: string} | null>(null);
+  const [withdrawConfirmModal, setWithdrawConfirmModal] = useState<{ type: 'shop' | 'membership', id: string, name: string } | null>(null);
 
   const executeWithdraw = async () => {
     if (!withdrawConfirmModal) return;
     const { type, id } = withdrawConfirmModal;
-    
+
     setWithdrawLoading(`${type === 'shop' ? 'shop' : 'mem'}-${id}`);
     try {
       const res = await fetch(`/api/shopper/${type === 'shop' ? 'shops' : 'memberships'}`, {
@@ -551,10 +551,10 @@ export default function ShopperDashboardClient({
     }
   };
 
-  const [resubmitMemModal, setResubmitMemModal] = useState<{id: string, marketId: string, name: string, note: string} | null>(null);
+  const [resubmitMemModal, setResubmitMemModal] = useState<{ id: string, marketId: string, name: string, note: string } | null>(null);
   const [resubmitMemLoading, setResubmitMemLoading] = useState(false);
 
-  const [resubmitShopModal, setResubmitShopModal] = useState<{id: string, name: string, description: string} | null>(null);
+  const [resubmitShopModal, setResubmitShopModal] = useState<{ id: string, name: string, description: string } | null>(null);
   const [resubmitShopLoading, setResubmitShopLoading] = useState(false);
 
   const handleResubmitMembership = async (e: React.FormEvent) => {
@@ -589,8 +589,8 @@ export default function ShopperDashboardClient({
       const res = await fetch("/api/shop-owner/shops/revise", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          shopId: resubmitShopModal.id, 
+        body: JSON.stringify({
+          shopId: resubmitShopModal.id,
           name: resubmitShopModal.name,
           description: resubmitShopModal.description
         })
@@ -618,14 +618,14 @@ export default function ShopperDashboardClient({
           <p className="text-gray-500 mt-1">Discover markets, track memberships, and open your own shop.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <button 
+          <button
             onClick={() => setShowCoffeeModal(true)}
             className="flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-200 px-4 py-2 rounded-md hover:bg-orange-100 transition shadow-sm"
           >
             <Coffee className="w-5 h-5 text-orange-500" />
             <span className="font-bold text-sm">Buy developer a coffee</span>
           </button>
-          
+
           <Link href="/shopper/wallet" className="flex items-center gap-2 bg-yellow-50 text-yellow-700 border border-yellow-200 px-4 py-2 rounded-md hover:bg-yellow-100 transition shadow-sm">
             <Coins className="w-5 h-5 text-yellow-500" />
             <div className="flex flex-col items-start leading-none">
@@ -635,7 +635,7 @@ export default function ShopperDashboardClient({
           </Link>
           <div className="relative group h-full flex items-center">
             <div className="flex flex-col items-center">
-              <button 
+              <button
                 onClick={() => setIsOpeningShop(true)}
                 disabled={approvedMarkets.length === 0}
                 className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50 h-full flex items-center gap-2 shadow-sm disabled:cursor-not-allowed"
@@ -652,8 +652,8 @@ export default function ShopperDashboardClient({
                 )}
               </button>
               <span className="text-[10px] text-gray-500 font-medium mt-1">
-                {ownedShopsCount >= userMaxShopSlots 
-                  ? `You have reached ${userMaxShopSlots} shop slot limit.` 
+                {ownedShopsCount >= userMaxShopSlots
+                  ? `You have reached ${userMaxShopSlots} shop slot limit.`
                   : `Used ${ownedShopsCount} out of ${userMaxShopSlots} shop slots.`}
               </span>
             </div>
@@ -704,12 +704,12 @@ export default function ShopperDashboardClient({
       {/* NOTIFICATION SETTINGS */}
       <div id="notification-settings" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Notification Settings</h2>
-        
+
         <div className="space-y-4 max-w-2xl">
           <div className="flex items-center justify-between border border-gray-200 rounded-md p-4 bg-gray-50">
             <div>
               <h3 className="font-bold text-gray-800">Email Notifications</h3>
-              <p className="text-sm text-gray-500">Receive important updates via email (e.g. market membership approvals, shop request feedback).</p>
+              <p className="text-sm text-gray-500">Receive important updates via email (e.g. New Order Received, Order Update, Chats).</p>
             </div>
             <button
               onClick={handleToggleNotifications}
@@ -765,14 +765,14 @@ export default function ShopperDashboardClient({
                 </div>
                 <div className="flex flex-col gap-2 shrink-0">
                   {req.status === 'needs_revision' && (
-                    <button 
+                    <button
                       onClick={() => setResubmitShopModal({ id: req.id, name: req.name, description: req.description || "" })}
                       className="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm"
                     >
                       Revise Shop
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={() => setWithdrawConfirmModal({ type: 'shop', id: req.id, name: req.name })}
                     disabled={withdrawLoading === `shop-${req.id}`}
                     className="text-red-600 hover:text-red-800 text-xs font-bold disabled:opacity-50 border border-red-200 hover:bg-red-50 py-1.5 px-3 rounded"
@@ -802,14 +802,14 @@ export default function ShopperDashboardClient({
                   </div>
                   <div className="flex flex-col gap-2 shrink-0">
                     {req.status === 'needs_revision' && (
-                      <button 
+                      <button
                         onClick={() => setResubmitMemModal({ id: req.id, marketId: req.marketId, name: marketName, note: req.applicationNote || '' })}
                         className="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm"
                       >
                         Resubmit
                       </button>
                     )}
-                    <button 
+                    <button
                       onClick={() => setWithdrawConfirmModal({ type: 'membership', id: req.id, name: marketName })}
                       disabled={withdrawLoading === `mem-${req.id}`}
                       className="text-red-600 hover:text-red-800 text-xs font-bold disabled:opacity-50 border border-red-200 hover:bg-red-50 py-1.5 px-3 rounded"
@@ -833,7 +833,7 @@ export default function ShopperDashboardClient({
           </div>
           {addressSaved && <span className="text-green-600 text-sm font-medium bg-green-50 px-3 py-1 rounded-full">Saved!</span>}
         </div>
-        
+
         <div className="space-y-4 max-w-2xl">
           {addresses.map((addr, idx) => (
             <div key={idx} className="border border-gray-200 rounded-md p-4 bg-gray-50">
@@ -847,15 +847,15 @@ export default function ShopperDashboardClient({
                     onChange={(e) => setEditValue(e.target.value)}
                   />
                   <div className="flex flex-col gap-2">
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       disabled={isSavingAddress}
                       className="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition disabled:opacity-50"
                     >
                       {isSavingAddress ? "Saving..." : "Save"}
                     </button>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setEditingIndex(null)}
                       className="text-gray-600 hover:text-gray-800 text-sm font-medium"
                     >
@@ -866,7 +866,7 @@ export default function ShopperDashboardClient({
               ) : (
                 <div className="flex justify-between items-start gap-4">
                   <p className="text-sm text-gray-800 whitespace-pre-wrap flex-1">{addr}</p>
-                  <button 
+                  <button
                     onClick={() => {
                       setEditValue(addr);
                       setEditingIndex(idx);
@@ -892,15 +892,15 @@ export default function ShopperDashboardClient({
                   onChange={(e) => setEditValue(e.target.value)}
                 />
                 <div className="flex flex-col gap-2">
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={isSavingAddress}
                     className="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition disabled:opacity-50"
                   >
                     {isSavingAddress ? "Saving..." : "Save"}
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setEditingIndex(null)}
                     className="text-gray-600 hover:text-gray-800 text-sm font-medium"
                   >
@@ -912,7 +912,7 @@ export default function ShopperDashboardClient({
           )}
 
           {addresses.length < 3 && editingIndex !== addresses.length && (
-            <button 
+            <button
               onClick={handleAddNewAddress}
               className="w-full border-2 border-dashed border-gray-300 rounded-md p-4 text-sm font-medium text-gray-500 hover:text-brand-600 hover:border-brand-400 transition bg-white"
             >
@@ -946,18 +946,18 @@ export default function ShopperDashboardClient({
                 <h2 className="text-xl font-semibold text-gray-900">Open a Shop</h2>
                 <p className="text-gray-500 text-sm mt-1">Select an approved market and submit your shop details.</p>
               </div>
-              <button 
-                onClick={() => setIsOpeningShop(false)} 
+              <button
+                onClick={() => setIsOpeningShop(false)}
                 className="text-gray-400 hover:text-gray-600 transition"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            
+
             {/* Body */}
             <div className="p-6 overflow-y-auto">
               {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
-              
+
               <form onSubmit={handleShopSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Select Market *</label>
@@ -1009,29 +1009,29 @@ export default function ShopperDashboardClient({
                   <label className="block text-sm font-medium text-gray-700 mb-2">Location Type *</label>
                   <div className="flex gap-6 mb-3">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="locationType" 
-                        value="house" 
-                        checked={locationType === "house"} 
+                      <input
+                        type="radio"
+                        name="locationType"
+                        value="house"
+                        checked={locationType === "house"}
                         onChange={() => setLocationType("house")}
                         className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
                       />
                       House Number
                     </label>
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="locationType" 
-                        value="area" 
-                        checked={locationType === "area"} 
+                      <input
+                        type="radio"
+                        name="locationType"
+                        value="area"
+                        checked={locationType === "area"}
                         onChange={() => setLocationType("area")}
                         className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
                       />
                       Nearby Area
                     </label>
                   </div>
-                  
+
                   {locationType === "house" ? (
                     <div>
                       <input
@@ -1067,15 +1067,15 @@ export default function ShopperDashboardClient({
                   />
                 </div>
                 <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 mt-6">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setIsOpeningShop(false)}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={loading}
                     className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
                   >
@@ -1098,7 +1098,7 @@ export default function ShopperDashboardClient({
             {memberships.map(m => {
               const market = allMarkets.find(x => x.id === m.marketId);
               const marketShops = initialShops?.filter((s: any) => s.marketId === m.marketId) || [];
-              
+
               return (
                 <div key={m.id} className="border border-gray-100 rounded-lg p-4 bg-gray-50 flex flex-col gap-4">
                   <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
@@ -1129,7 +1129,7 @@ export default function ShopperDashboardClient({
                         <div className="text-right">
                           <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium mb-2 inline-block">Needs Revision</span>
                           <p className="text-sm text-red-600"><b>Feedback:</b> {m.feedback}</p>
-                          <button 
+                          <button
                             onClick={() => {
                               setRequestingMarketId(m.marketId);
                               setApplicationNote(m.applicationNote);
@@ -1142,36 +1142,35 @@ export default function ShopperDashboardClient({
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Shop List */}
                   {m.status === "approved" && marketShops.length > 0 && (
-                     <div className="mt-2 pt-4 border-t border-gray-200">
-                       <h4 className="text-sm font-semibold text-gray-700 mb-3">Shops in this Market</h4>
-                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                         {marketShops.map((shop: any) => (
-                           <Link key={shop.id} href={`/market/${m.marketId}?shopId=${shop.id}`} className="flex items-center p-3 bg-white border border-gray-200 rounded-md hover:border-brand-300 hover:shadow-sm transition group">
-                             {shop.coverImage ? (
-                               <img src={shop.coverImage} alt={shop.name} className="w-10 h-10 rounded-md object-cover mr-3" />
-                             ) : (
-                               <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400 text-xs mr-3">No Img</div>
-                             )}
-                             <div className="flex-1 min-w-0">
-                               <p className="text-sm font-medium text-gray-900 truncate group-hover:text-brand-600">{shop.name}</p>
-                               <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                                 <span className={`w-2 h-2 rounded-full ${
-                                    shop.operatingStatus === 'closed' ? 'bg-red-500' :
+                    <div className="mt-2 pt-4 border-t border-gray-200">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Shops in this Market</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {marketShops.map((shop: any) => (
+                          <Link key={shop.id} href={`/market/${m.marketId}?shopId=${shop.id}`} className="flex items-center p-3 bg-white border border-gray-200 rounded-md hover:border-brand-300 hover:shadow-sm transition group">
+                            {shop.coverImage ? (
+                              <img src={shop.coverImage} alt={shop.name} className="w-10 h-10 rounded-md object-cover mr-3" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400 text-xs mr-3">No Img</div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-brand-600">{shop.name}</p>
+                              <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                                <span className={`w-2 h-2 rounded-full ${shop.operatingStatus === 'closed' ? 'bg-red-500' :
                                     shop.operatingStatus === 'scheduled' ? 'bg-blue-500' :
-                                    'bg-green-500'
-                                 }`}></span>
-                                 {shop.operatingStatus === 'closed' ? 'Closed' :
+                                      'bg-green-500'
+                                  }`}></span>
+                                {shop.operatingStatus === 'closed' ? 'Closed' :
                                   shop.operatingStatus === 'scheduled' ? `Until ${shop.validDates}` :
-                                  'Open'}
-                               </p>
-                             </div>
-                           </Link>
-                         ))}
-                       </div>
-                     </div>
+                                    'Open'}
+                              </p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               );
@@ -1188,7 +1187,7 @@ export default function ShopperDashboardClient({
             <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">NEW</span>
           )}
         </h2>
-        
+
         <div className="flex flex-col md:flex-row gap-6 border border-gray-200 rounded-lg overflow-hidden h-[500px]">
           {/* Chat List */}
           <div className="w-full md:w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col overflow-y-auto">
@@ -1211,7 +1210,7 @@ export default function ShopperDashboardClient({
                       {chat.messages.length > 0 ? chat.messages[chat.messages.length - 1].text : "New Chat"}
                     </p>
                   </button>
-                  <button 
+                  <button
                     onClick={(e) => triggerDeleteChat(e, chat.id, chat.shopId)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
                     title="Delete conversation"
@@ -1232,17 +1231,16 @@ export default function ShopperDashboardClient({
                 <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
                   <h3 className="font-bold text-gray-900">{selectedChat.shopName}</h3>
                 </div>
-                
+
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col space-y-3">
                   {selectedChat.messages.map((msg: any, i: number) => (
-                    <div key={i} className={`max-w-[80%] rounded-lg p-3 text-sm ${
-                      msg.sender === "shopper" 
-                        ? "bg-brand-600 text-white self-end rounded-br-none" 
+                    <div key={i} className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.sender === "shopper"
+                        ? "bg-brand-600 text-white self-end rounded-br-none"
                         : "bg-gray-200 text-gray-800 self-start rounded-bl-none"
-                    }`}>
+                      }`}>
                       <p className="whitespace-pre-wrap">{msg.text}</p>
                       <span className={`text-[10px] mt-1 block ${msg.sender === "shopper" ? "text-brand-200" : "text-gray-500"}`}>
-                        {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                   ))}
@@ -1289,17 +1287,16 @@ export default function ShopperDashboardClient({
           <div className="space-y-4 mb-8">
             {activeOrders.map(order => {
               const shop = initialShops.find(s => s.id === order.shopId);
-              
+
               return (
                 <div key={order.id} className="border border-brand-200 rounded-lg p-4 bg-brand-50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${
-                        order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
-                        order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
-                        order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-200 text-gray-800'
-                      }`}>
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
+                            order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-200 text-gray-800'
+                        }`}>
                         {order.status}
                       </span>
                       <span className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleString()}</span>
@@ -1309,10 +1306,10 @@ export default function ShopperDashboardClient({
                       {order.items.map((item: any) => `${item.quantity}x ${item.productName}`).join(", ")}
                     </p>
                   </div>
-                  
+
                   <div className="flex flex-col gap-2 min-w-[140px]">
                     {order.status === "Pending Completion" && (
-                      <button 
+                      <button
                         disabled={completingOrderId === order.id}
                         onClick={() => handleAcceptDelivery(order.id)}
                         className="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition disabled:opacity-50"
@@ -1321,7 +1318,7 @@ export default function ShopperDashboardClient({
                       </button>
                     )}
                     {order.status === "Out for Delivery" && (
-                      <button 
+                      <button
                         disabled={completingOrderId === order.id}
                         onClick={() => {
                           const scannedId = prompt("Scan Shop Owner's QR Code (or paste Order ID):");
@@ -1367,7 +1364,7 @@ export default function ShopperDashboardClient({
                   <p className="text-xs text-gray-500">
                     {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
                   </p>
-                  <button 
+                  <button
                     onClick={() => handleViewOrderDetails(order)}
                     className="mt-4 w-full bg-gray-100 text-gray-700 font-medium py-2 rounded hover:bg-gray-200 transition"
                   >
@@ -1389,7 +1386,7 @@ export default function ShopperDashboardClient({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {discoverableMarkets.map(market => (
               <div key={market.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col h-full">
-                <button 
+                <button
                   onClick={() => {
                     setRequestingMarketId(market.id);
                     setApplicationNote("");
@@ -1410,7 +1407,7 @@ export default function ShopperDashboardClient({
                 <div className="p-4 flex flex-col flex-1">
                   <h3 className="font-bold text-gray-900">{market.name}</h3>
                   <p className="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{market.description}</p>
-                  <button 
+                  <button
                     onClick={() => {
                       setRequestingMarketId(market.id);
                       setApplicationNote("");
@@ -1432,9 +1429,9 @@ export default function ShopperDashboardClient({
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-2">Request Market Access</h2>
             <p className="text-sm text-gray-500 mb-4">Please provide a brief note to the Market Owner (e.g., your house number or name) to verify your residency.</p>
-            
+
             {membershipError && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{membershipError}</div>}
-            
+
             <form onSubmit={submitMembership}>
               <label className="block text-sm font-medium text-gray-700 mb-1">Application Note *</label>
               <textarea
@@ -1446,15 +1443,15 @@ export default function ShopperDashboardClient({
                 onChange={(e) => setApplicationNote(e.target.value)}
               />
               <div className="flex justify-end gap-2">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setRequestingMarketId(null)}
                   className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition"
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={membershipLoading || !applicationNote.trim()}
                   className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -1472,7 +1469,7 @@ export default function ShopperDashboardClient({
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
               <h3 className="font-bold text-lg text-gray-900">Order Details</h3>
-              <button 
+              <button
                 onClick={() => setSelectedOrderDetails(null)}
                 className="text-gray-400 hover:text-gray-600 transition"
               >
@@ -1495,7 +1492,7 @@ export default function ShopperDashboardClient({
                 <p className="text-sm text-gray-500 mb-1">Date</p>
                 <p className="font-medium text-gray-900">{new Date(selectedOrderDetails.createdAt).toLocaleString()}</p>
               </div>
-              
+
               <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
                 <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
                   <p className="font-semibold text-sm text-gray-700">Items ({selectedOrderDetails.items.length})</p>
@@ -1505,7 +1502,7 @@ export default function ShopperDashboardClient({
                     <li key={i} className="p-4 flex justify-between items-start">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{item.productName}</p>
-                        
+
                         {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1">
                             {Object.entries(item.selectedOptions).map(([key, value]) => (
@@ -1518,7 +1515,7 @@ export default function ShopperDashboardClient({
                         {item.note && (
                           <p className="text-[11px] text-gray-500 mt-1 italic line-clamp-2">Note: {item.note}</p>
                         )}
-                        
+
                         <p className="text-xs text-gray-500 mt-1">฿{item.price.toFixed(2)} x {item.quantity}</p>
                       </div>
                       <p className="text-sm font-semibold text-gray-900 ml-4">฿{(item.price * item.quantity).toFixed(2)}</p>
@@ -1594,7 +1591,7 @@ export default function ShopperDashboardClient({
               </div>
             </div>
             <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-end">
-              <button 
+              <button
                 onClick={() => setSelectedOrderDetails(null)}
                 className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-medium hover:bg-gray-300 transition"
               >
@@ -1650,7 +1647,7 @@ export default function ShopperDashboardClient({
               <p className="text-gray-500 text-center mb-6">
                 Are you sure you want to withdraw your <strong>{withdrawConfirmModal.type === 'shop' ? 'Shop' : 'Membership'}</strong> request for <span className="font-semibold text-gray-700">"{withdrawConfirmModal.name}"</span>? This action cannot be undone.
               </p>
-              
+
               <div className="flex gap-3 w-full">
                 <button
                   onClick={() => setWithdrawConfirmModal(null)}
