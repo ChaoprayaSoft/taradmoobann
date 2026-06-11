@@ -216,7 +216,9 @@
     "orderItems": "Order Items",
     "note": "Note: {note}",
     "qty": "Qty: {qty}",
-    "close": "Close"
+    "close": "Close",
+    "villageName": "Village Name",
+    "villageNamePlaceholder": "e.g. Happy Village"
   },
   "ShopOwnerDashboard": {
     "shopDashboard": "Shop Dashboard",

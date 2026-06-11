@@ -37,6 +37,7 @@ export default function AdminDashboardClient({
 
   const [formData, setFormData] = useState({
     name: "",
+    villageName: "",
     description: "",
     coverImage: "",
     ownerEmail: "",
@@ -210,7 +211,7 @@ export default function AdminDashboardClient({
       router.refresh();
       setIsCreating(false);
       setEditingMarket(null);
-      setFormData({ name: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
+      setFormData({ name: "", villageName: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
       setFile(null);
     } catch (err: any) {
       setError(err.message);
@@ -264,6 +265,7 @@ export default function AdminDashboardClient({
     setEditingMarket(market);
     setFormData({
       name: market.name,
+      villageName: market.villageName || "",
       description: market.description || "",
       coverImage: market.coverImage || "",
       ownerEmail: market.ownerEmail,
@@ -449,7 +451,7 @@ export default function AdminDashboardClient({
                 } else {
                   setIsCreating(true);
                   setEditingMarket(null);
-                  setFormData({ name: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
+                  setFormData({ name: "", villageName: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
                   setFile(null);
                   // Optional: clear file input element if needed by resetting a key or directly
                 }
@@ -470,7 +472,7 @@ export default function AdminDashboardClient({
               <button 
                 onClick={() => {
                   setEditingMarket(null);
-                  setFormData({ name: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
+                  setFormData({ name: "", villageName: "", description: "", coverImage: "", ownerEmail: "", operatingStatus: "always_open", validDates: "" });
                   setFile(null);
                 }}
                 className="text-gray-500 hover:text-gray-700 text-sm font-medium"
@@ -490,6 +492,17 @@ export default function AdminDashboardClient({
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">{t("villageName")}</label>
+              <input
+                required
+                type="text"
+                placeholder={t("villageNamePlaceholder")}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                value={formData.villageName}
+                onChange={(e) => setFormData({ ...formData, villageName: e.target.value })}
               />
             </div>
             <div>

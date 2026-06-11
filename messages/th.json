@@ -216,7 +216,9 @@
     "orderItems": "รายการสินค้า",
     "note": "หมายเหตุ: {note}",
     "qty": "จำนวน: {qty}",
-    "close": "ปิด"
+    "close": "ปิด",
+    "villageName": "ชื่อหมู่บ้าน",
+    "villageNamePlaceholder": "เช่น หมู่บ้านสุขสันต์"
   },
   "ShopOwnerDashboard": {
     "shopDashboard": "แดชบอร์ดร้านค้า",

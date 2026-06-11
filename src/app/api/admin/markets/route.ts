@@ -12,10 +12,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, description, coverImage, ownerEmail, operatingStatus, validDates } = await req.json();
+    const { name, villageName, description, coverImage, ownerEmail, operatingStatus, validDates } = await req.json();
 
-    if (!name || !ownerEmail) {
-      return NextResponse.json({ error: "Name and owner email are required" }, { status: 400 });
+    if (!name || !villageName || !ownerEmail) {
+      return NextResponse.json({ error: "Name, village name, and owner email are required" }, { status: 400 });
     }
 
     // Assign market_owner role to the user
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
     await newMarketRef.set({
       id: newMarketRef.id,
       name,
+      villageName,
       description: description || "",
       coverImage: coverImage || "",
       ownerEmail,
@@ -65,14 +66,15 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, name, description, coverImage, ownerEmail, operatingStatus, validDates } = await req.json();
+    const { id, name, villageName, description, coverImage, ownerEmail, operatingStatus, validDates } = await req.json();
 
-    if (!id || !name || !ownerEmail) {
+    if (!id || !name || !villageName || !ownerEmail) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const updateData = {
       name,
+      villageName,
       description: description || "",
       coverImage: coverImage || "",
       ownerEmail,
