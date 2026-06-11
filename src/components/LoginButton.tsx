@@ -18,12 +18,13 @@ export default function LoginButton() {
   const [firstMarketId, setFirstMarketId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (session?.user?.email) {
+    const userEmail = session?.user?.email;
+    if (userEmail) {
       const fetchMembership = async () => {
         try {
           const q = query(
             collection(db, "market_memberships"),
-            where("userEmail", "==", session.user.email),
+            where("userEmail", "==", userEmail),
             where("status", "==", "approved")
           );
           const snap = await getDocs(q);
