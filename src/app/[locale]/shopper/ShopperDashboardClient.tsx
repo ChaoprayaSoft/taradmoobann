@@ -8,6 +8,7 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Coins, Coffee } from "lucide-react";
 import BuyCoffeeModal from "@/components/BuyCoffeeModal";
+import { useTranslations } from "next-intl";
 
 const CATEGORIES = [
   "Food & Beverage",
@@ -42,6 +43,7 @@ export default function ShopperDashboardClient({
 }) {
   const router = useRouter();
   const { data: session } = useSession();
+  const t = useTranslations("ShopperDashboard");
 
   // Membership Request State
   const [requestingMarketId, setRequestingMarketId] = useState<string | null>(null);
@@ -614,8 +616,8 @@ export default function ShopperDashboardClient({
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Shopper Dashboard</h1>
-          <p className="text-gray-500 mt-1">Discover markets, track memberships, and open your own shop.</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
+          <p className="text-gray-500 mt-1">{t("description")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -623,14 +625,14 @@ export default function ShopperDashboardClient({
             className="flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-200 px-4 py-2 rounded-md hover:bg-orange-100 transition shadow-sm"
           >
             <Coffee className="w-5 h-5 text-orange-500" />
-            <span className="font-bold text-sm">Buy developer a coffee</span>
+            <span className="font-bold text-sm">{t("buyCoffee")}</span>
           </button>
 
           <Link href="/shopper/wallet" className="flex items-center gap-2 bg-yellow-50 text-yellow-700 border border-yellow-200 px-4 py-2 rounded-md hover:bg-yellow-100 transition shadow-sm">
             <Coins className="w-5 h-5 text-yellow-500" />
             <div className="flex flex-col items-start leading-none">
-              <span className="text-xs uppercase tracking-wider font-semibold opacity-70">Wallet</span>
-              <span className="font-bold text-sm">{userCoins} Coins</span>
+              <span className="text-xs uppercase tracking-wider font-semibold opacity-70">{t("wallet")}</span>
+              <span className="font-bold text-sm">{t("coins", { coins: userCoins })}</span>
             </div>
           </Link>
           <div className="relative group h-full flex items-center">
@@ -640,7 +642,7 @@ export default function ShopperDashboardClient({
                 disabled={approvedMarkets.length === 0}
                 className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50 h-full flex items-center gap-2 shadow-sm disabled:cursor-not-allowed"
               >
-                Open a Shop
+                {t("openShop")}
                 {ownedShopsCount >= userMaxShopSlots && (
                   <span className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
@@ -653,8 +655,8 @@ export default function ShopperDashboardClient({
               </button>
               <span className="text-[10px] text-gray-500 font-medium mt-1">
                 {ownedShopsCount >= userMaxShopSlots
-                  ? `You have reached ${userMaxShopSlots} shop slot limit.`
-                  : `Used ${ownedShopsCount} out of ${userMaxShopSlots} shop slots.`}
+                  ? t("shopSlotLimit", { max: userMaxShopSlots })
+                  : t("shopSlotUsed", { used: ownedShopsCount, max: userMaxShopSlots })}
               </span>
             </div>
             {approvedMarkets.length === 0 && (
@@ -677,23 +679,23 @@ export default function ShopperDashboardClient({
       {/* QUICK ACCESS BUTTONS */}
       <div className="flex flex-wrap items-center gap-3 mt-4 border-b border-gray-200 pb-4">
         <a href="#market-memberships" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
-          Market Membership
+          {t("marketMembership")}
         </a>
         <a href="#my-messages" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
-          My Message
+          {t("myMessage")}
         </a>
         <a href="#active-orders" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
-          Active Orders
+          {t("activeOrders")}
         </a>
         <a href="#discover-markets" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
-          Discover Markets
+          {t("discoverMarkets")}
         </a>
         <a href="#notification-settings" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
-          Notifications
+          {t("notifications")}
         </a>
         {(shopRequests.length > 0 || membershipRequests.length > 0) && (
           <a href="#my-requests" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
-            My Requests
+            {t("myRequests")}
             <span className="bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full ml-1 font-bold">
               {shopRequests.length + membershipRequests.length}
             </span>
@@ -703,13 +705,13 @@ export default function ShopperDashboardClient({
 
       {/* NOTIFICATION SETTINGS */}
       <div id="notification-settings" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Notification Settings</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">{t("notificationSettings")}</h2>
 
         <div className="space-y-4 max-w-2xl">
           <div className="flex items-center justify-between border border-gray-200 rounded-md p-4 bg-gray-50">
             <div>
-              <h3 className="font-bold text-gray-800">Email Notifications</h3>
-              <p className="text-sm text-gray-500">Receive important updates via email (e.g. New Order Received, Order Update, Chats).</p>
+              <h3 className="font-bold text-gray-800">{t("emailNotifications")}</h3>
+              <p className="text-sm text-gray-500">{t("emailNotificationsDesc")}</p>
             </div>
             <button
               onClick={handleToggleNotifications}
@@ -725,8 +727,8 @@ export default function ShopperDashboardClient({
 
           <div className="flex items-center justify-between border border-gray-200 rounded-md p-4 bg-gray-50">
             <div>
-              <h3 className="font-bold text-gray-800">Push Notifications</h3>
-              <p className="text-sm text-gray-500">Receive real-time push notifications on your device.</p>
+              <h3 className="font-bold text-gray-800">{t("pushNotifications")}</h3>
+              <p className="text-sm text-gray-500">{t("pushNotificationsDesc")}</p>
             </div>
             <button
               onClick={handleTogglePushNotifications}
@@ -745,21 +747,21 @@ export default function ShopperDashboardClient({
       {/* MY REQUESTS */}
       {(shopRequests.length > 0 || membershipRequests.length > 0) && (
         <div id="my-requests" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">My Requests</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">{t("myRequests")}</h2>
           <div className="space-y-4">
             {shopRequests.map(req => (
               <div key={req.id} className="border border-gray-200 rounded-md p-4 flex justify-between items-center bg-gray-50">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-gray-800">Shop Request: {req.name}</span>
+                    <span className="font-bold text-gray-800">{t("shopRequest", { name: req.name })}</span>
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${req.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
-                      {req.status === 'pending' ? 'Pending' : 'Needs Revision'}
+                      {req.status === 'pending' ? t("pending") : t("needsRevision")}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">Requested on {new Date(req.createdAt).toLocaleDateString()}</p>
+                  <p className="text-sm text-gray-500 mt-1">{t("requestedOn", { date: new Date(req.createdAt).toLocaleDateString() })}</p>
                   {req.status === 'needs_revision' && req.feedback && (
                     <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded text-sm text-red-800">
-                      <strong>Feedback:</strong> {req.feedback}
+                      <strong>{t("feedback")}</strong> {req.feedback}
                     </div>
                   )}
                 </div>
@@ -769,7 +771,7 @@ export default function ShopperDashboardClient({
                       onClick={() => setResubmitShopModal({ id: req.id, name: req.name, description: req.description || "" })}
                       className="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm"
                     >
-                      Revise Shop
+                      {t("reviseShop")}
                     </button>
                   )}
                   <button
@@ -777,7 +779,7 @@ export default function ShopperDashboardClient({
                     disabled={withdrawLoading === `shop-${req.id}`}
                     className="text-red-600 hover:text-red-800 text-xs font-bold disabled:opacity-50 border border-red-200 hover:bg-red-50 py-1.5 px-3 rounded"
                   >
-                    {withdrawLoading === `shop-${req.id}` ? "Withdrawing..." : "Withdraw"}
+                    {withdrawLoading === `shop-${req.id}` ? t("withdrawing") : t("withdraw")}
                   </button>
                 </div>
               </div>
@@ -788,9 +790,9 @@ export default function ShopperDashboardClient({
                 <div key={req.id} className="border border-gray-200 rounded-md p-4 flex justify-between items-center bg-gray-50">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-gray-800">Membership Request: {marketName}</span>
+                      <span className="font-bold text-gray-800">{t("membershipRequest", { name: marketName })}</span>
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${req.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
-                        {req.status === 'pending' ? 'Pending' : 'Needs Revision'}
+                        {req.status === 'pending' ? t("pending") : t("needsRevision")}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">Requested on {new Date(req.createdAt).toLocaleDateString()}</p>
@@ -828,10 +830,10 @@ export default function ShopperDashboardClient({
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Delivery Addresses</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t("myAddresses")}</h2>
             <p className="text-gray-500 text-sm mt-1">Set up to 3 delivery addresses for faster checkout within your markets.</p>
           </div>
-          {addressSaved && <span className="text-green-600 text-sm font-medium bg-green-50 px-3 py-1 rounded-full">Saved!</span>}
+          {addressSaved && <span className="text-green-600 text-sm font-medium bg-green-50 px-3 py-1 rounded-full">{t("addressSaved")}</span>}
         </div>
 
         <div className="space-y-4 max-w-2xl">
@@ -852,14 +854,14 @@ export default function ShopperDashboardClient({
                       disabled={isSavingAddress}
                       className="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition disabled:opacity-50"
                     >
-                      {isSavingAddress ? "Saving..." : "Save"}
+                      {isSavingAddress ? "Saving..." : t("save")}
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditingIndex(null)}
                       className="text-gray-600 hover:text-gray-800 text-sm font-medium"
                     >
-                      Cancel
+                      {t("cancel")}
                     </button>
                   </div>
                 </form>
@@ -897,14 +899,14 @@ export default function ShopperDashboardClient({
                     disabled={isSavingAddress}
                     className="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition disabled:opacity-50"
                   >
-                    {isSavingAddress ? "Saving..." : "Save"}
+                    {isSavingAddress ? "Saving..." : t("save")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingIndex(null)}
                     className="text-gray-600 hover:text-gray-800 text-sm font-medium"
                   >
-                    Cancel
+                    {t("cancel")}
                   </button>
                 </div>
               </form>
@@ -916,7 +918,7 @@ export default function ShopperDashboardClient({
               onClick={handleAddNewAddress}
               className="w-full border-2 border-dashed border-gray-300 rounded-md p-4 text-sm font-medium text-gray-500 hover:text-brand-600 hover:border-brand-400 transition bg-white"
             >
-              + Add New Address
+              + {t("addNewAddress")}
             </button>
           )}
         </div>
@@ -931,9 +933,9 @@ export default function ShopperDashboardClient({
       {/* SHOP CREATION MESSAGES & FORM */}
       {success && (
         <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-md">
-          <p className="font-semibold text-lg">Shop Request Submitted Successfully!</p>
-          <p className="text-sm mt-1">Your shop has been submitted to the Market Owner for approval. You have been granted the <b>Shop Owner</b> role.</p>
-          <p className="text-sm mt-1 underline cursor-pointer font-medium" onClick={() => signIn('google')}>Please click here to quickly re-login so your new dashboard links appear!</p>
+          <p className="font-semibold text-lg">{t("shopSubmitted")}</p>
+          <p className="text-sm mt-1">{t("shopSubmittedDesc")}</p>
+          <p className="text-sm mt-1 underline cursor-pointer font-medium" onClick={() => signIn('google')}>{t("reLogin")}</p>
         </div>
       )}
 
@@ -1090,9 +1092,9 @@ export default function ShopperDashboardClient({
 
       {/* MY MEMBERSHIPS */}
       <div id="market-memberships" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900">My Market Memberships</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">{t("myMemberships")}</h2>
         {memberships.length === 0 ? (
-          <p className="text-gray-500 text-sm">You haven't joined any markets yet. Request access below!</p>
+          <p className="text-gray-500 text-sm">{t("noMemberships")}</p>
         ) : (
           <div className="space-y-4">
             {memberships.map(m => {
@@ -1116,19 +1118,19 @@ export default function ShopperDashboardClient({
                       </div>
                     </div>
                     <div className="flex flex-col items-end text-right">
-                      {m.status === "pending" && <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">Pending Approval</span>}
+                      {m.status === "pending" && <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">{t("pending")}</span>}
                       {m.status === "approved" && (
                         <div className="flex flex-col items-end gap-2">
-                          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Approved</span>
+                          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">{t("approved")}</span>
                           <Link href={`/market/${m.marketId}`} className="text-sm bg-brand-600 text-white px-4 py-2 rounded-md hover:bg-brand-700 transition font-medium">
-                            Enter Market
+                            {t("enterMarket")}
                           </Link>
                         </div>
                       )}
                       {m.status === "needs_revision" && (
                         <div className="text-right">
-                          <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium mb-2 inline-block">Needs Revision</span>
-                          <p className="text-sm text-red-600"><b>Feedback:</b> {m.feedback}</p>
+                          <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium mb-2 inline-block">{t("needsRevision")}</span>
+                          <p className="text-sm text-red-600"><b>{t("feedback")}</b> {m.feedback}</p>
                           <button
                             onClick={() => {
                               setRequestingMarketId(m.marketId);
@@ -1136,7 +1138,7 @@ export default function ShopperDashboardClient({
                             }}
                             className="mt-2 text-sm text-brand-600 hover:underline font-medium"
                           >
-                            Revise & Resubmit
+                            {t("reviseAndResubmit")}
                           </button>
                         </div>
                       )}
@@ -1146,7 +1148,7 @@ export default function ShopperDashboardClient({
                   {/* Shop List */}
                   {m.status === "approved" && marketShops.length > 0 && (
                     <div className="mt-2 pt-4 border-t border-gray-200">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Shops in this Market</h4>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("shopsInMarket")}</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         {marketShops.map((shop: any) => (
                           <Link key={shop.id} href={`/market/${m.marketId}?shopId=${shop.id}`} className="flex items-center p-3 bg-white border border-gray-200 rounded-md hover:border-brand-300 hover:shadow-sm transition group">
@@ -1162,9 +1164,9 @@ export default function ShopperDashboardClient({
                                     shop.operatingStatus === 'scheduled' ? 'bg-blue-500' :
                                       'bg-green-500'
                                   }`}></span>
-                                {shop.operatingStatus === 'closed' ? 'Closed' :
-                                  shop.operatingStatus === 'scheduled' ? `Until ${shop.validDates}` :
-                                    'Open'}
+                                {shop.operatingStatus === 'closed' ? t("closed") :
+                                  shop.operatingStatus === 'scheduled' ? t("until", { dates: shop.validDates }) :
+                                    t("open")}
                               </p>
                             </div>
                           </Link>
@@ -1182,7 +1184,7 @@ export default function ShopperDashboardClient({
       {/* MY MESSAGES */}
       <div id="my-messages" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
         <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-gray-900">
-          My Messages
+          {t("myMessage")}
           {myChats.some(c => c.unreadByShopper) && (
             <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">NEW</span>
           )}
@@ -1192,7 +1194,7 @@ export default function ShopperDashboardClient({
           {/* Chat List */}
           <div className="w-full md:w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col overflow-y-auto">
             {myChats.length === 0 ? (
-              <p className="p-4 text-sm text-gray-500 text-center mt-10">No messages yet.</p>
+              <p className="p-4 text-sm text-gray-500 text-center mt-10">{t("noMessages")}</p>
             ) : (
               myChats.map(chat => (
                 <div key={chat.id} className="relative group">
@@ -1207,7 +1209,7 @@ export default function ShopperDashboardClient({
                       )}
                     </div>
                     <p className="text-xs text-gray-500 truncate">
-                      {chat.messages.length > 0 ? chat.messages[chat.messages.length - 1].text : "New Chat"}
+                      {chat.messages.length > 0 ? chat.messages[chat.messages.length - 1].text : t("newChat")}
                     </p>
                   </button>
                   <button
@@ -1253,7 +1255,7 @@ export default function ShopperDashboardClient({
                       type="text"
                       value={chatInputText}
                       onChange={(e) => setChatInputText(e.target.value)}
-                      placeholder="Type a message..."
+                      placeholder={t("typeMessage")}
                       className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-brand-500 text-gray-900"
                       disabled={chatLoading}
                     />
@@ -1271,7 +1273,7 @@ export default function ShopperDashboardClient({
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-400 text-sm p-4">
-                Select a conversation to start chatting
+                {t("selectConversation")}
               </div>
             )}
           </div>
@@ -1280,9 +1282,9 @@ export default function ShopperDashboardClient({
 
       {/* MY ORDERS */}
       <div id="active-orders" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900">Active Orders</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">{t("activeOrders")}</h2>
         {activeOrders.length === 0 ? (
-          <p className="text-gray-500 text-sm mb-6">You have no active orders.</p>
+          <p className="text-gray-500 text-sm mb-6">{t("noActiveOrders")}</p>
         ) : (
           <div className="space-y-4 mb-8">
             {activeOrders.map(order => {
@@ -1344,9 +1346,9 @@ export default function ShopperDashboardClient({
           </div>
         )}
 
-        <h2 className="text-xl font-semibold mb-4 text-gray-900 border-t border-gray-200 pt-6">Order History</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 border-t border-gray-200 pt-6">{t("orderHistory")}</h2>
         {pastOrders.length === 0 ? (
-          <p className="text-gray-500 text-sm">You haven't completed any orders yet.</p>
+          <p className="text-gray-500 text-sm">{t("noPastOrders")}</p>
         ) : (
           <div className="space-y-3">
             {pastOrders.map(order => (
@@ -1358,17 +1360,17 @@ export default function ShopperDashboardClient({
                     </span>
                     <span className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-900 mt-1">Total: ฿{order.totalAmount.toFixed(2)}</p>
+                  <p className="text-sm font-medium text-gray-900 mt-1">{t("total", { amount: order.totalAmount.toFixed(2) })}</p>
                 </div>
                 <div className="text-right flex flex-col items-end gap-2">
                   <p className="text-xs text-gray-500">
-                    {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
+                    {order.items.length} {order.items.length === 1 ? t("item") : t("items")}
                   </p>
                   <button
                     onClick={() => handleViewOrderDetails(order)}
                     className="mt-4 w-full bg-gray-100 text-gray-700 font-medium py-2 rounded hover:bg-gray-200 transition"
                   >
-                    View Details
+                    {t("viewDetails")}
                   </button>
                 </div>
               </div>
@@ -1379,9 +1381,9 @@ export default function ShopperDashboardClient({
 
       {/* DISCOVER MARKETS */}
       <div id="discover-markets" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900">Discover Markets</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">{t("discoverMarketsTitle")}</h2>
         {discoverableMarkets.length === 0 ? (
-          <p className="text-gray-500 text-sm">There are no new markets to join at this time.</p>
+          <p className="text-gray-500 text-sm">{t("noNewMarkets")}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {discoverableMarkets.map(market => (
@@ -1394,13 +1396,13 @@ export default function ShopperDashboardClient({
                   className="w-full h-32 block overflow-hidden group text-left relative focus:outline-none"
                 >
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
-                    <span className="text-white font-medium bg-black/50 px-3 py-1 rounded-full">Click to Request Access</span>
+                    <span className="text-white font-medium bg-black/50 px-3 py-1 rounded-full">{t("clickToRequest")}</span>
                   </div>
                   {market.coverImage ? (
                     <img src={market.coverImage} alt={market.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   ) : (
                     <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 transition-colors duration-300 group-hover:bg-gray-200">
-                      No Image
+                      {t("noImage")}
                     </div>
                   )}
                 </button>
@@ -1414,7 +1416,7 @@ export default function ShopperDashboardClient({
                     }}
                     className="mt-4 w-full bg-brand-50 text-brand-700 py-2 rounded text-sm font-semibold hover:bg-brand-100 transition"
                   >
-                    Request to Enter
+                    {t("requestToEnter")}
                   </button>
                 </div>
               </div>
@@ -1427,13 +1429,13 @@ export default function ShopperDashboardClient({
       {requestingMarketId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Request Market Access</h2>
-            <p className="text-sm text-gray-500 mb-4">Please provide a brief note to the Market Owner (e.g., your house number or name) to verify your residency.</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t("requestAccess")}</h2>
+            <p className="text-sm text-gray-500 mb-4">{t("requestAccessDesc")}</p>
 
             {membershipError && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{membershipError}</div>}
 
             <form onSubmit={submitMembership}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Application Note *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("applicationNote")}</label>
               <textarea
                 required
                 rows={3}
@@ -1448,14 +1450,14 @@ export default function ShopperDashboardClient({
                   onClick={() => setRequestingMarketId(null)}
                   className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={membershipLoading || !applicationNote.trim()}
                   className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {membershipLoading ? "Submitting..." : "Submit Application"}
+                  {membershipLoading ? t("submitting") : t("submitApplication")}
                 </button>
               </div>
             </form>

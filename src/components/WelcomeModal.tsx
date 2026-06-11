@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Confetti from "react-confetti";
 import { Coins, X, PartyPopper } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function WelcomeModal() {
   const { data: session, update } = useSession();
   const [isVisible, setIsVisible] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  const t = useTranslations("WelcomeModal");
 
   useEffect(() => {
     // Only show if session exists and showWelcomeModal is true
@@ -66,10 +68,10 @@ export default function WelcomeModal() {
           </div>
 
           <h2 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
-            Welcome to TaradMooBann!
+            {t("welcomeTitle")}
           </h2>
           <p className="text-gray-600 mb-8 leading-relaxed">
-            We're thrilled to have you here. To get you started on your journey, we've deposited a welcome gift into your account!
+            {t("welcomeDesc")}
           </p>
 
           <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-8 transform hover:scale-105 transition duration-300">
@@ -78,15 +80,15 @@ export default function WelcomeModal() {
                 <Coins className="w-7 h-7 text-yellow-600" />
               </div>
             </div>
-            <h3 className="text-2xl font-black text-yellow-700 mb-1">50 Free Coins!</h3>
-            <p className="text-sm text-yellow-600 font-medium">Added to your wallet</p>
+            <h3 className="text-2xl font-black text-yellow-700 mb-1">{t("coinsAmount")}</h3>
+            <p className="text-sm text-yellow-600 font-medium">{t("addedToWallet")}</p>
           </div>
 
           <button
             onClick={handleDismiss}
             className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-lg shadow-brand-200"
           >
-            Start Exploring
+            {t("startExploring")}
           </button>
         </div>
       </div>

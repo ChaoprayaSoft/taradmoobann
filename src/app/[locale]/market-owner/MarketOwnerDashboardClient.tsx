@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { storage, db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { useTranslations } from "next-intl";
 
 const CATEGORIES = [
   "Food & Beverage",
@@ -25,6 +26,7 @@ export default function MarketOwnerDashboardClient({
   initialMemberships?: any[] // making it optional for backward compat just in case
 }) {
   const router = useRouter();
+  const t = useTranslations("MarketOwnerDashboard");
   const [isCreating, setIsCreating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -235,8 +237,8 @@ export default function MarketOwnerDashboardClient({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Market Owner Dashboard</h1>
-          <p className="text-gray-500 mt-1">Manage your markets and review new shops.</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t("marketDashboard")}</h1>
+          <p className="text-gray-500 mt-1">{t("manageMarkets")}</p>
         </div>
         <div className="flex items-center gap-4">
           <select
@@ -244,7 +246,7 @@ export default function MarketOwnerDashboardClient({
             value={selectedMarketFilter}
             onChange={(e) => setSelectedMarketFilter(e.target.value)}
           >
-            <option value="all">All Markets</option>
+            <option value="all">{t("allMarkets")}</option>
             {initialMarkets.map(m => (
               <option key={m.id} value={m.id}>{m.name}</option>
             ))}
@@ -254,7 +256,7 @@ export default function MarketOwnerDashboardClient({
             disabled={initialMarkets.length === 0}
             className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
           >
-            {isCreating ? "Cancel" : "+ Create New Shop"}
+            {isCreating ? t("cancel") : t("createNewShop")}
           </button>
         </div>
       </div>
@@ -264,7 +266,7 @@ export default function MarketOwnerDashboardClient({
           <div className="flex">
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                You haven't been assigned to any markets yet. Contact an Admin to assign you a market before you can create shops.
+                {t("noMarketsAssigned")}
               </p>
             </div>
           </div>
@@ -273,11 +275,11 @@ export default function MarketOwnerDashboardClient({
 
       {isCreating && initialMarkets.length > 0 && (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold mb-4">Create a New Shop</h2>
+          <h2 className="text-xl font-semibold mb-4">{t("createShopTitle")}</h2>
           {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
           <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Select Market *</label>
+              <label className="block text-sm font-medium text-gray-700">{t("selectMarket")}</label>
               <select
                 required
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
@@ -290,7 +292,7 @@ export default function MarketOwnerDashboardClient({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Shop Name *</label>
+              <label className="block text-sm font-medium text-gray-700">{t("shopName")}</label>
               <input
                 required
                 type="text"
@@ -301,7 +303,7 @@ export default function MarketOwnerDashboardClient({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Category *</label>
+              <label className="block text-sm font-medium text-gray-700">{t("category")}</label>
               <select
                 required
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
@@ -314,7 +316,7 @@ export default function MarketOwnerDashboardClient({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <label className="block text-sm font-medium text-gray-700">{t("description")}</label>
               <textarea
                 rows={3}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
@@ -323,7 +325,7 @@ export default function MarketOwnerDashboardClient({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Shop Cover Image</label>
+              <label className="block text-sm font-medium text-gray-700">{t("shopCoverImage")}</label>
               <input
                 type="file"
                 accept="image/*"
@@ -332,7 +334,7 @@ export default function MarketOwnerDashboardClient({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Shop Owner Email *</label>
+              <label className="block text-sm font-medium text-gray-700">{t("shopOwnerEmail")}</label>
               <input
                 required
                 type="email"
@@ -348,7 +350,7 @@ export default function MarketOwnerDashboardClient({
                 disabled={loading}
                 className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
               >
-                {loading ? "Creating..." : "Save Shop"}
+                {loading ? t("creating") : t("saveShop")}
               </button>
             </div>
           </form>
@@ -359,9 +361,9 @@ export default function MarketOwnerDashboardClient({
       {pendingMemberships.length > 0 && (
         <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-blue-200 flex justify-between items-center bg-blue-100">
-            <h3 className="text-lg font-medium text-blue-800">Pending Shopper Access Requests</h3>
+            <h3 className="text-lg font-medium text-blue-800">{t("pendingShopperRequests")}</h3>
             <span className="bg-blue-200 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-              {pendingMemberships.length} Requires Action
+              {t("requiresAction", { count: pendingMemberships.length })}
             </span>
           </div>
           
@@ -374,10 +376,10 @@ export default function MarketOwnerDashboardClient({
                       {membership.userEmail}
                     </p>
                     <p className="text-sm text-gray-600 truncate">
-                      <b>Application Note:</b> {membership.applicationNote || "No note provided"}
+                      <b>{t("applicationNote")}</b> {membership.applicationNote || t("noNoteProvided")}
                     </p>
                     <p className="text-xs text-blue-700 mt-1">
-                      Market: {initialMarkets.find(m => m.id === membership.marketId)?.name || membership.marketId}
+                      {t("market")} {initialMarkets.find(m => m.id === membership.marketId)?.name || membership.marketId}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0 space-x-2">
@@ -390,13 +392,13 @@ export default function MarketOwnerDashboardClient({
                       })}
                       className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium text-sm hover:bg-gray-50 transition"
                     >
-                      Request Revision
+                      {t("requestRevision")}
                     </button>
                     <button
                       onClick={() => handleMembershipApprove(membership.id)}
                       className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-blue-700 transition"
                     >
-                      Approve Access
+                      {t("approveAccess")}
                     </button>
                   </div>
                 </div>
@@ -410,9 +412,9 @@ export default function MarketOwnerDashboardClient({
       {pendingShops.length > 0 && (
         <div className="bg-yellow-50 rounded-lg shadow-sm border border-yellow-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-yellow-200 flex justify-between items-center bg-yellow-100">
-            <h3 className="text-lg font-medium text-yellow-800">Pending Shop Approvals</h3>
+            <h3 className="text-lg font-medium text-yellow-800">{t("pendingShopApprovals")}</h3>
             <span className="bg-yellow-200 text-yellow-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-              {pendingShops.length} Requires Action
+              {t("requiresAction", { count: pendingShops.length })}
             </span>
           </div>
           
@@ -424,7 +426,7 @@ export default function MarketOwnerDashboardClient({
                     <img src={shop.coverImage} alt={shop.name} className="h-16 w-16 object-cover rounded-md border border-yellow-200" />
                   ) : (
                     <div className="h-16 w-16 bg-yellow-200 rounded-md flex items-center justify-center border border-yellow-300 text-yellow-600">
-                      No Img
+                      {t("noImg")}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
@@ -432,13 +434,13 @@ export default function MarketOwnerDashboardClient({
                       {shop.name} <span className="text-xs ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">{shop.category}</span>
                     </p>
                     <p className="text-sm text-gray-600 truncate">
-                      {shop.description || "No description provided"}
+                      {shop.description || t("noDescriptionProvided")}
                     </p>
                     <p className="text-xs text-yellow-700 mt-1">
-                      Market: {initialMarkets.find(m => m.id === shop.marketId)?.name || shop.marketId} • Requested by: {shop.ownerEmail}
+                      {t("market")} {initialMarkets.find(m => m.id === shop.marketId)?.name || shop.marketId} • {t("requestedBy")} {shop.ownerEmail}
                     </p>
                     {shop.status === "needs_revision" && (
-                      <p className="text-xs font-semibold text-red-600 mt-1">Status: Waiting for shopper to revise.</p>
+                      <p className="text-xs font-semibold text-red-600 mt-1">{t("statusWaitingForShopper")}</p>
                     )}
                   </div>
                   <div className="text-right flex-shrink-0 space-x-2">
@@ -451,13 +453,13 @@ export default function MarketOwnerDashboardClient({
                       })}
                       className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium text-sm hover:bg-gray-50 transition"
                     >
-                      Request Revision
+                      {t("requestRevision")}
                     </button>
                     <button
                       onClick={() => handleShopApprove(shop.id)}
                       className="bg-green-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-green-700 transition"
                     >
-                      Approve Shop
+                      {t("approveShop")}
                     </button>
                   </div>
                 </div>
@@ -470,9 +472,9 @@ export default function MarketOwnerDashboardClient({
       {/* Active Markets and Shops Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-medium mb-4">Your Markets</h3>
+          <h3 className="text-lg font-medium mb-4">{t("yourMarkets")}</h3>
           {initialMarkets.length === 0 ? (
-            <p className="text-sm text-gray-500">No markets found.</p>
+            <p className="text-sm text-gray-500">{t("noMarketsFound")}</p>
           ) : (
             <ul className="space-y-4">
               {initialMarkets.map(m => (
@@ -498,12 +500,12 @@ export default function MarketOwnerDashboardClient({
                           m.operatingStatus === 'scheduled' ? 'bg-blue-100 text-blue-800' :
                           'bg-green-100 text-green-800'
                         }`}>
-                          {m.operatingStatus === 'closed' ? 'CLOSED' :
-                           m.operatingStatus === 'scheduled' ? `UNTIL ${m.validDates}` :
-                           'OPEN'}
+                          {m.operatingStatus === 'closed' ? t("closed") :
+                           m.operatingStatus === 'scheduled' ? t("untilDates", { dates: m.validDates }) :
+                           t("open")}
                         </span>
                         <span className="text-xs text-gray-500 truncate">
-                          {liveShops.filter(s => s.marketId === m.id).length} Shops
+                          {t("shopsCount", { count: liveShops.filter(s => s.marketId === m.id).length })}
                         </span>
                       </div>
                     </div>
@@ -516,15 +518,15 @@ export default function MarketOwnerDashboardClient({
 
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-lg font-medium">Active Shops</h3>
+            <h3 className="text-lg font-medium">{t("activeShops")}</h3>
             <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-              Total: {activeShops.length}
+              {t("totalCount", { count: activeShops.length })}
             </span>
           </div>
           
           {activeShops.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
-              No active shops currently in your markets.
+              {t("noActiveShops")}
             </div>
           ) : (
             <ul className="divide-y divide-gray-200">
@@ -535,7 +537,7 @@ export default function MarketOwnerDashboardClient({
                       <img src={shop.coverImage} alt={shop.name} className="h-16 w-16 object-cover rounded-md border border-gray-200" />
                     ) : (
                       <div className="h-16 w-16 bg-gray-100 rounded-md flex items-center justify-center border border-gray-200 text-gray-400">
-                        No Img
+                        {t("noImg")}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
@@ -543,23 +545,23 @@ export default function MarketOwnerDashboardClient({
                         {shop.name} <span className="text-xs ml-2 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">{shop.category}</span>
                       </p>
                       <p className="text-sm text-gray-500 truncate">
-                        {shop.description || "No description provided"}
+                        {shop.description || t("noDescriptionProvided")}
                       </p>
                       <p className="text-xs text-brand-600 mt-1">
-                        Market: {initialMarkets.find(m => m.id === shop.marketId)?.name || shop.marketId}
+                        {t("market")} {initialMarkets.find(m => m.id === shop.marketId)?.name || shop.marketId}
                       </p>
                       <p className={`text-xs mt-1 font-bold ${
                         shop.operatingStatus === 'closed' ? 'text-red-500' :
                         shop.operatingStatus === 'scheduled' ? 'text-blue-500' :
                         'text-green-500'
                       }`}>
-                        {shop.operatingStatus === 'closed' ? 'Closed' :
-                         shop.operatingStatus === 'scheduled' ? `Scheduled Until: ${shop.validDates}` :
-                         'Open'}
+                        {shop.operatingStatus === 'closed' ? t("closedCamel") :
+                         shop.operatingStatus === 'scheduled' ? t("scheduledUntil", { dates: shop.validDates }) :
+                         t("openCamel")}
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-medium text-gray-900">Owner</p>
+                      <p className="text-sm font-medium text-gray-900">{t("owner")}</p>
                       <p className="text-sm text-gray-500">{shop.ownerEmail}</p>
                     </div>
                   </div>
@@ -574,17 +576,17 @@ export default function MarketOwnerDashboardClient({
       {feedbackModal.isOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Request Revision</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t("requestRevisionTitle")}</h2>
             <p className="text-sm text-gray-500 mb-4">
-              Provide feedback so the {feedbackModal.targetType === "shop" ? "shop owner" : "shopper"} knows what to fix before you can approve their request.
+              {t("provideFeedback", { target: feedbackModal.targetType === "shop" ? t("shopOwner") : t("shopper") })}
             </p>
             
             <form onSubmit={submitFeedback}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Feedback *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("feedback")}</label>
               <textarea
                 required
                 rows={4}
-                placeholder="e.g. Please provide a clearer cover image..."
+                placeholder={t("feedbackPlaceholder")}
                 className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500 mb-4"
                 value={feedbackModal.feedback}
                 onChange={(e) => setFeedbackModal(prev => ({ ...prev, feedback: e.target.value }))}
@@ -595,14 +597,14 @@ export default function MarketOwnerDashboardClient({
                   onClick={() => setFeedbackModal({ isOpen: false, targetId: "", targetType: "shop", feedback: "" })}
                   className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button 
                   type="submit" 
                   disabled={loading || !feedbackModal.feedback.trim()}
                   className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Sending..." : "Send Feedback"}
+                  {loading ? t("sending") : t("sendFeedback")}
                 </button>
               </div>
             </form>

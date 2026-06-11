@@ -5,12 +5,14 @@ import { useSession } from "next-auth/react";
 import { requestForToken } from "@/lib/firebase";
 import { getMessaging, onMessage, isSupported } from "firebase/messaging";
 import { getApp } from "firebase/app";
+import { useTranslations } from "next-intl";
 
 export default function NotificationPrompt() {
   const { data: session } = useSession();
   const [showPrompt, setShowPrompt] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const [toastMessage, setToastMessage] = useState<{title: string, body: string} | null>(null);
+  const t = useTranslations("NotificationPrompt");
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -58,13 +60,13 @@ export default function NotificationPrompt() {
                 }
 
                 setToastMessage({
-                  title: payload.notification.title || "New Notification",
+                  title: payload.notification.title || t("newNotification"),
                   body: payload.notification.body || ""
                 });
                 
                 // Always trigger a system notification so they never miss it even if tab is unfocused
                 if (Notification.permission === "granted") {
-                  const notif = new Notification(payload.notification.title || "New Notification", { 
+                  const notif = new Notification(payload.notification.title || t("newNotification"), { 
                     body: payload.notification.body,
                     icon: '/favicon.ico',
                     data: payload.data
@@ -137,22 +139,22 @@ export default function NotificationPrompt() {
               </svg>
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 mb-1">Enable Notifications?</h3>
+              <h3 className="font-bold text-gray-900 mb-1">{t("enableTitle")}</h3>
               <p className="text-sm text-gray-500 mb-3">
-                Get instant alerts when your order status changes or when you receive a new message.
+                {t("enableDesc")}
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleEnableNotifications(false)}
                   className="bg-brand-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-brand-700 transition"
                 >
-                  Allow
+                  {t("allow")}
                 </button>
                 <button
                   onClick={() => setShowPrompt(false)}
                   className="bg-gray-100 text-gray-700 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-200 transition"
                 >
-                  Maybe Later
+                  {t("maybeLater")}
                 </button>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 export default function HomePageMarketsClient({ 
   markets, 
@@ -24,6 +25,7 @@ export default function HomePageMarketsClient({
   const [membershipLoading, setMembershipLoading] = useState(false);
   const [membershipError, setMembershipError] = useState("");
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const t = useTranslations("HomePage");
 
   const handleInteraction = (e: React.MouseEvent, marketId: string, action: "enter" | "request") => {
     e.preventDefault();
@@ -79,7 +81,7 @@ export default function HomePageMarketsClient({
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-yellow-500">
               <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
             </svg>
-            <h2 className="text-2xl font-bold text-gray-900">Spotlight Products</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{t("spotlightProducts")}</h2>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
@@ -92,7 +94,7 @@ export default function HomePageMarketsClient({
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                       <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
                     </svg>
-                    Spotlight
+                    {t("spotlight")}
                   </div>
 
                   {product.imageUrl || (product.imageUrls && product.imageUrls.length > 0) ? (
@@ -123,12 +125,12 @@ export default function HomePageMarketsClient({
                         }
                       }}
                     >
-                      No Image
+                      {t("noImage")}
                     </div>
                   )}
                   <div className="p-4 flex flex-col flex-1">
                     <h3 className="font-bold text-gray-900 line-clamp-1">{product.name}</h3>
-                    <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mt-0.5">In {product.marketName}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mt-0.5">{t("inMarket", { marketName: product.marketName })}</p>
                     <p className="text-brand-600 font-bold mt-1">฿{product.price}</p>
                     <p className="text-xs text-gray-500 line-clamp-2 mt-2 flex-1">{product.description}</p>
                     
@@ -146,10 +148,10 @@ export default function HomePageMarketsClient({
                         }}
                         className="mt-3 block text-center text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline"
                       >
-                        {status === "approved" ? "View in Market \u2192" : 
-                         status === "pending" ? "Pending Approval" :
-                         status === "needs_revision" ? "Needs Revision" :
-                         "Request to Enter \u2192"}
+                        {status === "approved" ? t("viewInMarket") : 
+                         status === "pending" ? t("pendingApproval") :
+                         status === "needs_revision" ? t("needsRevision") :
+                         t("requestToEnterArrow")}
                       </button>
                     )}
                   </div>
@@ -160,11 +162,11 @@ export default function HomePageMarketsClient({
         </div>
       )}
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 px-4">Discover Local Markets</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6 px-4">{t("discoverLocalMarkets")}</h2>
 
       {markets.length === 0 ? (
         <div className="text-center p-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-          <p className="text-gray-500">No markets have been created yet. Check back soon!</p>
+          <p className="text-gray-500">{t("noMarketsYet")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -182,7 +184,7 @@ export default function HomePageMarketsClient({
                       <img src={market.coverImage} alt={market.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                     ) : (
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 transition-colors duration-300 group-hover:bg-gray-200">
-                        No Image
+                        {t("noImage")}
                       </div>
                     )}
                   </button>
@@ -193,14 +195,14 @@ export default function HomePageMarketsClient({
                   >
                     {!status && (
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
-                        <span className="text-white font-medium bg-black/50 px-3 py-1 rounded-full">Click to Request Access</span>
+                        <span className="text-white font-medium bg-black/50 px-3 py-1 rounded-full">{t("clickToRequest")}</span>
                       </div>
                     )}
                     {market.coverImage ? (
                       <img src={market.coverImage} alt={market.name} className={`w-full h-full object-cover ${!status ? 'transition-transform duration-300 group-hover:scale-105' : ''}`} />
                     ) : (
                       <div className={`w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 ${!status ? 'transition-colors duration-300 group-hover:bg-gray-200' : ''}`}>
-                        No Image
+                        {t("noImage")}
                       </div>
                     )}
                   </button>
@@ -230,19 +232,19 @@ export default function HomePageMarketsClient({
                       onClick={(e) => handleInteraction(e, market.id, "enter")}
                       className="mt-4 block w-full text-center bg-green-600 text-white font-medium py-2 rounded-md hover:bg-green-700 transition"
                     >
-                      Enter Market
+                      {t("enterMarket")}
                     </button>
                   )}
 
                   {status === "pending" && (
                     <Link href="/shopper" className="mt-4 block w-full text-center bg-yellow-100 text-yellow-800 font-medium py-2 rounded-md hover:bg-yellow-200 transition">
-                      Pending Approval
+                      {t("pendingApproval")}
                     </Link>
                   )}
 
                   {status === "needs_revision" && (
                     <Link href="/shopper" className="mt-4 block w-full text-center bg-red-100 text-red-800 font-medium py-2 rounded-md hover:bg-red-200 transition">
-                      Needs Revision
+                      {t("needsRevision")}
                     </Link>
                   )}
 
@@ -251,7 +253,7 @@ export default function HomePageMarketsClient({
                       onClick={(e) => handleInteraction(e, market.id, "request")}
                       className="mt-4 block w-full text-center bg-brand-50 text-brand-700 font-medium py-2 rounded-md hover:bg-brand-100 transition"
                     >
-                      Request to Enter
+                      {t("requestToEnter")}
                     </button>
                   )}
                 </div>
@@ -265,17 +267,17 @@ export default function HomePageMarketsClient({
       {requestingMarketId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Request Market Access</h2>
-            <p className="text-sm text-gray-500 mb-4">Please provide a brief note to the Market Owner (e.g., your house number or name) to verify your residency.</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t("requestMarketAccess")}</h2>
+            <p className="text-sm text-gray-500 mb-4">{t("applicationNoteDesc")}</p>
             
             {membershipError && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{membershipError}</div>}
             
             <form onSubmit={submitMembership}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Application Note *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("applicationNoteLabel")}</label>
               <textarea
                 required
                 rows={3}
-                placeholder="Hi, I live at House #42..."
+                placeholder={t("applicationNotePlaceholder")}
                 className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500 mb-4"
                 value={applicationNote}
                 onChange={(e) => setApplicationNote(e.target.value)}
@@ -289,14 +291,14 @@ export default function HomePageMarketsClient({
                   }}
                   className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button 
                   type="submit" 
                   disabled={membershipLoading}
                   className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 transition disabled:opacity-50"
                 >
-                  {membershipLoading ? "Submitting..." : "Submit Request"}
+                  {membershipLoading ? t("submitting") : t("submitRequest")}
                 </button>
               </div>
             </form>
@@ -321,15 +323,15 @@ export default function HomePageMarketsClient({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Sign In Required</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t("signInRequired")}</h3>
             <p className="text-sm text-gray-600 mb-6">
-              You need to sign in or create an account before you can join a market and start shopping.
+              {t("signInRequiredDesc")}
             </p>
             <button 
               onClick={() => signIn("google")}
               className="w-full bg-brand-600 text-white font-medium py-2 rounded-md hover:bg-brand-700 transition"
             >
-              Sign in with Google
+              {t("signInWithGoogle")}
             </button>
           </div>
         </div>

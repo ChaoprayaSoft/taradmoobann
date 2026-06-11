@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 export default function ChatWidget() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations("ChatWidget");
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -110,13 +112,13 @@ export default function ChatWidget() {
       {isOpen && (
         <div className="fixed bottom-24 right-6 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 flex flex-col overflow-hidden" style={{ height: "400px" }}>
           <div className="bg-brand-600 p-4 text-white">
-            <h3 className="font-bold">Contact Admin</h3>
-            <p className="text-xs text-brand-100">We usually reply within a few hours.</p>
+            <h3 className="font-bold">{t("contactAdmin")}</h3>
+            <p className="text-xs text-brand-100">{t("replySoon")}</p>
           </div>
           
           <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col space-y-3">
             {messages.length === 0 ? (
-              <p className="text-center text-sm text-gray-400 mt-auto mb-auto">Send a message to start a conversation.</p>
+              <p className="text-center text-sm text-gray-400 mt-auto mb-auto">{t("sendToStart")}</p>
             ) : (
               messages.map((msg, i) => (
                 <div key={i} className={`max-w-[80%] rounded-lg p-3 text-sm ${
@@ -138,7 +140,7 @@ export default function ChatWidget() {
             <input
               type="text"
               className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-              placeholder="Type your message..."
+              placeholder={t("typeMessage")}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               disabled={loading}

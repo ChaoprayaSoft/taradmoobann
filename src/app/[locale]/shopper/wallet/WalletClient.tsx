@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Coins, QrCode, RefreshCcw, CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function WalletClient({ currentCoins }: { currentCoins: number }) {
+  const t = useTranslations("ShopperWallet");
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,10 +59,10 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
           <Coins className="w-8 h-8 text-yellow-500" />
-          My Wallet
+          {t("myWallet")}
         </h1>
         <Link href="/shopper" className="text-brand-600 hover:text-brand-700 font-medium">
-          Back to Dashboard
+          {t("backToDashboard")}
         </Link>
       </div>
 
@@ -72,7 +74,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <Coins className="w-32 h-32" />
             </div>
-            <p className="text-brand-100 font-medium mb-2 uppercase tracking-wider text-sm">Available Balance</p>
+            <p className="text-brand-100 font-medium mb-2 uppercase tracking-wider text-sm">{t("availableBalance")}</p>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-extrabold">{currentCoins}</span>
               <span className="text-xl text-brand-200">Coins</span>
@@ -82,14 +84,14 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
               className="mt-6 flex items-center gap-2 text-sm bg-white/20 hover:bg-white/30 transition px-4 py-2 rounded-full"
             >
               <RefreshCcw className="w-4 h-4" />
-              Refresh Balance
+              {t("refreshBalance")}
             </button>
           </div>
 
           {/* Top-up Packages */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Top-up Coins</h2>
-            <p className="text-gray-500 mb-6 text-sm">Select a package below to add coins to your wallet. You can pay securely using PromptPay QR.</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t("topUpCoins")}</h2>
+            <p className="text-gray-500 mb-6 text-sm">{t("topUpDesc")}</p>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {packages.map((pkg) => (
@@ -126,21 +128,21 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
         {/* Right Column: Checkout / QR Display */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-8">
-            <h3 className="font-bold text-gray-900 text-lg mb-4">Payment Details</h3>
+            <h3 className="font-bold text-gray-900 text-lg mb-4">{t("paymentDetails")}</h3>
             
             {!selectedPackage ? (
               <div className="text-center py-8 text-gray-400">
                 <Coins className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                <p className="text-sm">Select a package to continue</p>
+                <p className="text-sm">{t("selectPackage")}</p>
               </div>
             ) : !qrCodeUrl ? (
               <div className="space-y-6">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Selected Package</span>
+                  <span className="text-gray-600">{t("selectedPackage")}</span>
                   <span className="font-medium text-gray-900">{selectedPackage} Coins</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Payment Method</span>
+                  <span className="text-gray-600">{t("paymentMethod")}</span>
                   <span className="font-medium text-gray-900">PromptPay QR</span>
                 </div>
                 <div className="border-t border-gray-100 pt-4 flex justify-between items-end">
@@ -153,14 +155,14 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                   disabled={isLoading}
                   className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition disabled:opacity-50 flex justify-center items-center gap-2"
                 >
-                  {isLoading ? "Generating QR..." : "Generate QR Code"}
+                  {isLoading ? t("generatingQr") : t("generateQr")}
                 </button>
               </div>
             ) : (
               <div className="text-center space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 mb-4">
                   <CheckCircle2 className="w-5 h-5" />
-                  QR Code Generated
+                  {t("qrGenerated")}
                 </div>
                 
                 <div className="bg-white p-4 border-2 border-gray-100 rounded-xl inline-block mx-auto shadow-sm">
@@ -168,19 +170,19 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                 </div>
                 
                 <div className="space-y-1">
-                  <p className="font-medium text-gray-900">Scan to pay ฿{selectedPackage}</p>
-                  <p className="text-sm text-gray-500">Use any Thai banking app</p>
+                  <p className="font-medium text-gray-900">{t("scanToPay", { amount: selectedPackage })}</p>
+                  <p className="text-sm text-gray-500">{t("useApp")}</p>
                 </div>
 
                 <div className="pt-4 border-t border-gray-100 mt-4">
                   <p className="text-xs text-gray-400 mb-3">
-                    After completing the payment, click the button below to update your balance.
+                    {t("afterPayment")}
                   </p>
                   <button 
                     onClick={handleRefresh}
                     className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition"
                   >
-                    I have paid
+                    {t("iHavePaid")}
                   </button>
                 </div>
               </div>

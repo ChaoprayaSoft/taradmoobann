@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 interface ShopperShopChatModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export default function ShopperShopChatModal({ isOpen, onClose, shopId, shopName
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("ShopperShopChatModal");
 
   const fetchChat = async () => {
     if (!session?.user?.email || !shopId) return;
@@ -76,8 +78,8 @@ export default function ShopperShopChatModal({ isOpen, onClose, shopId, shopName
       <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col h-[500px] max-h-[90vh]">
         <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
           <div>
-            <h3 className="font-bold text-lg text-gray-900">Chat with {shopName}</h3>
-            <p className="text-xs text-gray-500">Shop Owner</p>
+            <h3 className="font-bold text-lg text-gray-900">{t("chatWith", { shopName })}</h3>
+            <p className="text-xs text-gray-500">{t("shopOwner")}</p>
           </div>
           <button 
             onClick={onClose}
@@ -91,7 +93,7 @@ export default function ShopperShopChatModal({ isOpen, onClose, shopId, shopName
         
         <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col space-y-3">
           {messages.length === 0 ? (
-            <p className="text-center text-sm text-gray-400 mt-auto mb-auto">Send a message to start a conversation with the shop owner.</p>
+            <p className="text-center text-sm text-gray-400 mt-auto mb-auto">{t("sendToStartShop")}</p>
           ) : (
             messages.map((msg, i) => (
               <div key={i} className={`max-w-[80%] rounded-lg p-3 text-sm ${
@@ -115,7 +117,7 @@ export default function ShopperShopChatModal({ isOpen, onClose, shopId, shopName
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Type a message..."
+              placeholder={t("typeMessageShop")}
               className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-brand-500"
               disabled={loading}
             />

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { storage } from "@/lib/firebase";
+import { useTranslations } from "next-intl";
 
 export default function AdminDashboardClient({ 
   initialMarkets,
@@ -19,6 +20,7 @@ export default function AdminDashboardClient({
   initialAdsSettings?: any,
   totalUsers?: number
 }) {
+  const t = useTranslations("AdminDashboard");
   const router = useRouter();
   const [markets, setMarkets] = useState(initialMarkets);
   const [isCreating, setIsCreating] = useState(false);
@@ -336,104 +338,106 @@ export default function AdminDashboardClient({
 
   const renderAdForm = () => (
     <form onSubmit={handleAdSubmit} className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6 space-y-4 max-w-xl">
-      <h3 className="font-bold text-lg mb-4">{editingAd ? "Edit Ad" : "New Ad"}</h3>
+      <h3 className="font-bold text-lg mb-4">{editingAd ? t("editAd") : t("newAd")}</h3>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Title</label>
+        <label className="block text-sm font-medium text-gray-700">{t("title")}</label>
         <input required type="text" className="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-brand-500 focus:border-brand-500" value={adFormData.title} onChange={(e) => setAdFormData({ ...adFormData, title: e.target.value })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Description</label>
+        <label className="block text-sm font-medium text-gray-700">{t("description")}</label>
         <textarea rows={2} required className="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-brand-500 focus:border-brand-500" value={adFormData.description} onChange={(e) => setAdFormData({ ...adFormData, description: e.target.value })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Link URL</label>
+        <label className="block text-sm font-medium text-gray-700">{t("linkUrl")}</label>
         <input type="url" placeholder="https://" className="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-brand-500 focus:border-brand-500" value={adFormData.linkUrl} onChange={(e) => setAdFormData({ ...adFormData, linkUrl: e.target.value })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Ad Image (Upload)</label>
+        <label className="block text-sm font-medium text-gray-700">{t("adImageUpload")}</label>
         <input type="file" accept="image/*" onChange={(e) => setAdFile(e.target.files ? e.target.files[0] : null)} className="mt-1 block w-full text-sm text-gray-500" />
-        {editingAd && adFormData.imageUrl && <p className="text-xs text-gray-500 mt-1">Leave empty to keep existing image</p>}
+        {editingAd && adFormData.imageUrl && <p className="text-xs text-gray-500 mt-1">{t("leaveEmptyKeep")}</p>}
       </div>
       <div className="flex gap-4">
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700">Status</label>
+          <label className="block text-sm font-medium text-gray-700">{t("status")}</label>
           <select className="mt-1 block w-full rounded-md border-gray-300 border p-2" value={adFormData.status} onChange={(e) => setAdFormData({ ...adFormData, status: e.target.value })}>
             <option value="ON">ON</option>
             <option value="OFF">OFF</option>
           </select>
         </div>
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700">Valid Until</label>
+          <label className="block text-sm font-medium text-gray-700">{t("validUntil")}</label>
           <input type="date" required className="mt-1 block w-full rounded-md border-gray-300 border p-2" value={adFormData.validUntil} onChange={(e) => setAdFormData({ ...adFormData, validUntil: e.target.value })} />
         </div>
       </div>
       <button type="submit" disabled={adLoading} className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 disabled:opacity-50">
-        {adLoading ? "Saving..." : "Save Ad"}
+        {adLoading ? t("saving") : t("saveAd")}
       </button>
     </form>
   );
 
   return (
-    <div className="flex flex-col md:flex-row gap-8">
-      {/* Sidebar Navigation */}
-      <div className="w-full md:w-64 flex-shrink-0 md:sticky md:top-24 self-start space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-500 mt-1 text-sm">Manage all markets, shops, and users.</p>
+    <div className="flex flex-col gap-6">
+      {/* Top Header & Navigation */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col gap-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{t("adminDashboard")}</h1>
+            <p className="text-gray-500 mt-1 text-sm">{t("manageAll")}</p>
+          </div>
+          
+          {/* Unread Chat Notification Banner */}
+          {chats.some(c => c.unreadByAdmin) && (
+            <div className="bg-red-50 border border-red-200 p-3 rounded shadow-sm flex items-center justify-between gap-4 min-w-[250px]">
+              <div className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <p className="text-sm text-red-700 font-bold">{t("unreadMessages")}</p>
+              </div>
+              <button 
+                onClick={() => setActiveTab("chats")}
+                className="text-xs bg-red-100 hover:bg-red-200 text-red-800 font-bold py-1.5 px-4 rounded transition shrink-0 whitespace-nowrap"
+              >
+                {t("viewInbox")}
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Unread Chat Notification Banner */}
-        {chats.some(c => c.unreadByAdmin) && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded shadow-sm">
-            <div className="flex items-start gap-2 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              <p className="text-xs text-red-700 font-medium">Unread messages waiting for reply!</p>
-            </div>
-            <button 
-              onClick={() => setActiveTab("chats")}
-              className="text-xs w-full bg-red-100 hover:bg-red-200 text-red-800 font-bold py-1.5 px-3 rounded transition"
-            >
-              View Inbox
-            </button>
-          </div>
-        )}
-
-        {/* Navigation Menu */}
-        <nav className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scrollbar-hide">
+        {/* Navigation Menu (Horizontal) */}
+        <nav className="flex flex-row overflow-x-auto scrollbar-hide pb-2 border-b border-gray-100 gap-2 md:gap-4 w-full">
           <button
             onClick={() => setActiveTab("markets")}
-            className={`px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition text-left whitespace-nowrap md:whitespace-normal ${activeTab === "markets" ? "bg-brand-50 text-brand-700 border-l-4 border-brand-600" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent"}`}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "markets" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
           >
-            Markets & Reports
+            {t("marketsAndReports")}
           </button>
           <button
             onClick={() => setActiveTab("shops")}
-            className={`px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition text-left whitespace-nowrap md:whitespace-normal ${activeTab === "shops" ? "bg-brand-50 text-brand-700 border-l-4 border-brand-600" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent"}`}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "shops" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
           >
-            Manage Shops
+            {t("manageShops")}
           </button>
           <button
             onClick={() => setActiveTab("chats")}
-            className={`px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition text-left whitespace-nowrap md:whitespace-normal flex justify-between items-center gap-2 ${activeTab === "chats" ? "bg-brand-50 text-brand-700 border-l-4 border-brand-600" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent"}`}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap flex items-center gap-2 ${activeTab === "chats" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
           >
-            <span>Support Inbox</span>
+            <span>{t("supportInbox")}</span>
             {chats.some(c => c.unreadByAdmin) && (
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 shadow-sm"></span>
             )}
           </button>
           <button
             onClick={() => setActiveTab("ads")}
-            className={`px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition text-left whitespace-nowrap md:whitespace-normal ${activeTab === "ads" ? "bg-brand-50 text-brand-700 border-l-4 border-brand-600" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent"}`}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "ads" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
           >
-            Manage Ads
+            {t("manageAds")}
           </button>
         </nav>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0 space-y-6">
+      <div className="flex-1 w-full pb-20 min-w-0 space-y-6">
 
       {activeTab === "markets" && (
         <>
@@ -448,7 +452,7 @@ export default function AdminDashboardClient({
               }}
               className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition"
             >
-              {isCreating ? "Cancel" : "+ Create New Market"}
+              {isCreating ? t("cancel") : t("createNewMarket")}
             </button>
           </div>
 
@@ -456,32 +460,32 @@ export default function AdminDashboardClient({
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">
-              {editingMarket ? `Edit Market: ${editingMarket.name}` : "Create a New Market"}
+              {editingMarket ? t("editMarket", { name: editingMarket.name }) : t("createMarketTitle")}
             </h2>
             {editingMarket && (
               <button 
                 onClick={() => setEditingMarket(null)}
                 className="text-gray-500 hover:text-gray-700 text-sm font-medium"
               >
-                Cancel Edit
+                {t("cancelEdit")}
               </button>
             )}
           </div>
           {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
           <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Market Name *</label>
+              <label className="block text-sm font-medium text-gray-700">{t("marketName")}</label>
               <input
                 required
                 type="text"
-                placeholder="e.g. Sunday Village Market"
+                placeholder={t("marketNamePlaceholder")}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Location / Description</label>
+              <label className="block text-sm font-medium text-gray-700">{t("locationDescription")}</label>
               <textarea
                 rows={3}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
@@ -490,7 +494,7 @@ export default function AdminDashboardClient({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Cover Image</label>
+              <label className="block text-sm font-medium text-gray-700">{t("coverImage")}</label>
               <input
                 type="file"
                 accept="image/*"
@@ -499,7 +503,7 @@ export default function AdminDashboardClient({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Market Owner Email *</label>
+              <label className="block text-sm font-medium text-gray-700">{t("marketOwnerEmail")}</label>
               <input
                 required
                 type="email"
@@ -509,24 +513,24 @@ export default function AdminDashboardClient({
                 onChange={(e) => setFormData({ ...formData, ownerEmail: e.target.value })}
               />
               <p className="text-xs text-gray-500 mt-1">
-                If the user doesn't exist, an account will be pre-created for them.
+                {t("ownerEmailNote")}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Operating Status</label>
+              <label className="block text-sm font-medium text-gray-700">{t("operatingStatus")}</label>
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
                 value={formData.operatingStatus}
                 onChange={(e) => setFormData({ ...formData, operatingStatus: e.target.value })}
               >
-                <option value="always_open">Open</option>
-                <option value="closed">Closed / Deactivated</option>
-                <option value="scheduled">Scheduled Dates</option>
+                <option value="always_open">{t("open")}</option>
+                <option value="closed">{t("closedDeactivated")}</option>
+                <option value="scheduled">{t("scheduledDates")}</option>
               </select>
             </div>
             {formData.operatingStatus === "scheduled" && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Valid Until</label>
+                <label className="block text-sm font-medium text-gray-700">{t("validUntil")}</label>
                 <input
                   type="date"
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
@@ -541,7 +545,7 @@ export default function AdminDashboardClient({
                 disabled={loading}
                 className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
               >
-                {loading ? "Saving..." : (editingMarket ? "Update Market" : "Save Market")}
+                {loading ? t("saving") : (editingMarket ? t("updateMarket") : t("saveMarket"))}
               </button>
             </div>
           </form>
@@ -550,15 +554,15 @@ export default function AdminDashboardClient({
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-lg font-medium">Existing Markets</h3>
+          <h3 className="text-lg font-medium">{t("existingMarkets")}</h3>
           <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-            Total: {initialMarkets.length}
+            {t("totalCount", { count: initialMarkets.length })}
           </span>
         </div>
         
         {initialMarkets.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            No markets have been created yet. Click the button above to get started.
+            {t("noMarketsCreated")}
           </div>
         ) : (
           <ul className="divide-y divide-gray-200">
@@ -577,20 +581,20 @@ export default function AdminDashboardClient({
                       {market.name}
                     </p>
                     <p className="text-sm text-gray-500 truncate">
-                      {market.description || "No description provided"}
+                      {market.description || t("noDescription")}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0 mr-4">
-                    <p className="text-sm font-medium text-gray-900">Owner</p>
+                    <p className="text-sm font-medium text-gray-900">{t("owner")}</p>
                     <p className="text-sm text-gray-500">{market.ownerEmail}</p>
                     <p className={`text-xs mt-1 font-bold ${
                       market.operatingStatus === 'closed' ? 'text-red-500' :
                       market.operatingStatus === 'scheduled' ? 'text-blue-500' :
                       'text-green-500'
                     }`}>
-                      {market.operatingStatus === 'closed' ? 'Closed' :
-                       market.operatingStatus === 'scheduled' ? `Scheduled: ${market.validDates}` :
-                       'Open'}
+                      {market.operatingStatus === 'closed' ? t("closed") :
+                       market.operatingStatus === 'scheduled' ? t("scheduled", { dates: market.validDates }) :
+                       t("open")}
                     </p>
                   </div>
                   <div className="flex flex-col gap-2 flex-shrink-0 border-l border-gray-200 pl-4">
@@ -598,13 +602,13 @@ export default function AdminDashboardClient({
                       onClick={() => openEdit(market)}
                       className="text-sm text-brand-600 hover:text-brand-800 font-medium text-left"
                     >
-                      Edit
+                      {t("edit")}
                     </button>
                     <button 
                       onClick={() => handleDelete(market.id)}
                       className="text-sm text-red-600 hover:text-red-800 font-medium text-left"
                     >
-                      Delete
+                      {t("delete")}
                     </button>
                   </div>
                 </div>
@@ -616,45 +620,45 @@ export default function AdminDashboardClient({
 
       {/* PLATFORM OVERVIEW */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-6">Platform Overview</h2>
+        <h2 className="text-xl font-semibold mb-6">{t("platformOverview")}</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-gradient-to-br from-brand-50 to-brand-100 p-6 rounded-xl border border-brand-200">
-            <p className="text-sm text-brand-700 font-medium uppercase tracking-wider mb-1">Total Revenue</p>
+            <p className="text-sm text-brand-700 font-medium uppercase tracking-wider mb-1">{t("totalRevenue")}</p>
             <p className="text-3xl font-bold text-brand-900">฿{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            <p className="text-xs text-brand-600 mt-2">From {completedOrders.length} completed orders</p>
+            <p className="text-xs text-brand-600 mt-2">{t("completedOrdersCount", { count: completedOrders.length })}</p>
           </div>
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
-            <p className="text-sm text-blue-700 font-medium uppercase tracking-wider mb-1">Active Markets</p>
+            <p className="text-sm text-blue-700 font-medium uppercase tracking-wider mb-1">{t("activeMarkets")}</p>
             <p className="text-3xl font-bold text-blue-900">{activeMarketsCount}</p>
-            <p className="text-xs text-blue-600 mt-2">Out of {markets.length} total markets</p>
+            <p className="text-xs text-blue-600 mt-2">{t("outOfTotalMarkets", { total: markets.length })}</p>
           </div>
           <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
-            <p className="text-sm text-green-700 font-medium uppercase tracking-wider mb-1">Approved Shops</p>
+            <p className="text-sm text-green-700 font-medium uppercase tracking-wider mb-1">{t("approvedShops")}</p>
             <p className="text-3xl font-bold text-green-900">{approvedShopsCount}</p>
-            <p className="text-xs text-green-600 mt-2">Across all markets</p>
+            <p className="text-xs text-green-600 mt-2">{t("acrossAllMarkets")}</p>
           </div>
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
-            <p className="text-sm text-purple-700 font-medium uppercase tracking-wider mb-1">Total Users</p>
+            <p className="text-sm text-purple-700 font-medium uppercase tracking-wider mb-1">{t("totalUsers")}</p>
             <p className="text-3xl font-bold text-purple-900">{totalUsers}</p>
-            <p className="text-xs text-purple-600 mt-2">Registered platform users</p>
+            <p className="text-xs text-purple-600 mt-2">{t("registeredPlatformUsers")}</p>
           </div>
         </div>
 
-        <h3 className="text-lg font-medium mb-4 border-b border-gray-200 pb-2">Global Transaction List</h3>
+        <h3 className="text-lg font-medium mb-4 border-b border-gray-200 pb-2">{t("globalTransactionList")}</h3>
         {completedOrders.length === 0 ? (
-          <p className="text-gray-500 text-sm">No completed transactions have occurred on the platform yet.</p>
+          <p className="text-gray-500 text-sm">{t("noCompletedTransactions")}</p>
         ) : (
           <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200 relative">
               <thead className="bg-gray-50 sticky top-0 shadow-sm">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Market</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shop</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shopper</th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("date")}</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("market")}</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("shop")}</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("shopper")}</th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("amount")}</th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("actions")}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -668,10 +672,10 @@ export default function AdminDashboardClient({
                       {new Date(order.createdAt).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {market ? market.name : 'Unknown'}
+                      {market ? market.name : t("unknown")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {shop ? shop.name : 'Unknown'}
+                      {shop ? shop.name : t("unknown")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {order.shopperName}
@@ -684,7 +688,7 @@ export default function AdminDashboardClient({
                         onClick={() => setSelectedTransaction(order)}
                         className="text-brand-600 hover:text-brand-900 bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded transition"
                       >
-                        View Details
+                        {t("viewDetails")}
                       </button>
                     </td>
                   </tr>
@@ -703,13 +707,13 @@ export default function AdminDashboardClient({
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">All Shops</h2>
+              <h2 className="text-xl font-semibold">{t("allShops")}</h2>
               <select
                 className="border-gray-300 shadow-sm border p-2 rounded-md text-sm focus:ring-brand-500 focus:border-brand-500"
                 value={selectedMarketFilter}
                 onChange={(e) => setSelectedMarketFilter(e.target.value)}
               >
-                <option value="all">All Markets</option>
+                <option value="all">{t("allMarkets")}</option>
                 {markets.map(m => (
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
@@ -717,11 +721,11 @@ export default function AdminDashboardClient({
             </div>
             
             {filteredShops.length === 0 ? (
-              <p className="text-gray-500 text-sm">No shops exist in this market yet.</p>
+              <p className="text-gray-500 text-sm">{t("noShopsExist")}</p>
             ) : (
               <ul className="divide-y divide-gray-200">
                 {filteredShops.map((shop) => {
-                  const marketName = markets.find(m => m.id === shop.marketId)?.name || "Unknown Market";
+                  const marketName = markets.find(m => m.id === shop.marketId)?.name || t("unknownMarket");
                   return (
                     <li key={shop.id} className="py-4 flex justify-between items-start gap-4">
                       <div className="flex gap-4">
@@ -742,28 +746,28 @@ export default function AdminDashboardClient({
                             {marketName}
                           </p>
                           <p className="text-sm text-gray-600 mt-2">{shop.description}</p>
-                          <p className="text-sm text-gray-500 mt-1">Owner: {shop.ownerEmail}</p>
+                          <p className="text-sm text-gray-500 mt-1">{t("owner")}: {shop.ownerEmail}</p>
                         </div>
                       </div>
                       
                     
                     {editingShop?.id === shop.id ? (
                       <form onSubmit={handleUpdateShop} className="bg-gray-50 p-4 rounded border border-gray-200 min-w-[300px]">
-                        <h4 className="font-semibold text-sm mb-2">Edit Status</h4>
+                        <h4 className="font-semibold text-sm mb-2">{t("editStatus")}</h4>
                         <div className="mb-3">
                           <select
                             className="block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
                             value={shopFormData.operatingStatus}
                             onChange={(e) => setShopFormData({ ...shopFormData, operatingStatus: e.target.value })}
                           >
-                            <option value="always_open">Open</option>
-                            <option value="closed">Closed / Deactivated</option>
-                            <option value="scheduled">Scheduled Dates</option>
+                            <option value="always_open">{t("open")}</option>
+                            <option value="closed">{t("closedDeactivated")}</option>
+                            <option value="scheduled">{t("scheduledDates")}</option>
                           </select>
                         </div>
                         {shopFormData.operatingStatus === "scheduled" && (
                           <div className="mb-3">
-                            <label className="block text-xs text-gray-600 mb-1">Valid Until</label>
+                            <label className="block text-xs text-gray-600 mb-1">{t("validUntil")}</label>
                             <input
                               type="date"
                               className="block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
@@ -778,14 +782,14 @@ export default function AdminDashboardClient({
                             onClick={() => setEditingShop(null)}
                             className="text-xs text-gray-600 hover:text-gray-800 font-medium px-3 py-1"
                           >
-                            Cancel
+                            {t("cancel")}
                           </button>
                           <button
                             type="submit"
                             disabled={shopUpdating}
                             className="bg-brand-600 text-white text-xs font-medium px-4 py-1.5 rounded hover:bg-brand-700 disabled:opacity-50"
                           >
-                            {shopUpdating ? "Saving..." : "Save"}
+                            {shopUpdating ? t("saving") : t("save")}
                           </button>
                         </div>
                       </form>
@@ -796,9 +800,9 @@ export default function AdminDashboardClient({
                           shop.operatingStatus === 'scheduled' ? 'text-blue-500' :
                           'text-green-500'
                         }`}>
-                          {shop.operatingStatus === 'closed' ? 'Closed' :
-                           shop.operatingStatus === 'scheduled' ? `Scheduled: ${shop.validDates}` :
-                           'Open'}
+                          {shop.operatingStatus === 'closed' ? t("closed") :
+                           shop.operatingStatus === 'scheduled' ? t("scheduled", { dates: shop.validDates }) :
+                           t("open")}
                         </p>
                         <button 
                           onClick={() => {
@@ -810,7 +814,7 @@ export default function AdminDashboardClient({
                           }}
                           className="text-sm bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-50 transition"
                         >
-                          Edit Status
+                          {t("editStatus")}
                         </button>
                       </div>
                     )}
@@ -829,11 +833,11 @@ export default function AdminDashboardClient({
           {/* Chat List Sidebar */}
           <div className="w-1/3 border-r border-gray-200 flex flex-col bg-gray-50">
             <div className="p-4 border-b border-gray-200 bg-white">
-              <h2 className="font-semibold text-gray-900">Conversations</h2>
+              <h2 className="font-semibold text-gray-900">{t("conversations")}</h2>
             </div>
             <div className="flex-1 overflow-y-auto">
               {chats.length === 0 ? (
-                <p className="text-sm text-gray-500 p-4 text-center">No messages yet.</p>
+                <p className="text-sm text-gray-500 p-4 text-center">{t("noMessagesYet")}</p>
               ) : (
                 chats.map(chat => (
                   <button
@@ -868,7 +872,7 @@ export default function AdminDashboardClient({
                           setChatToDelete(chat.userEmail);
                         }}
                         className="text-gray-400 hover:text-red-500 p-1 rounded transition"
-                        title="Delete Conversation"
+                        title={t("deleteConversation")}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -890,7 +894,7 @@ export default function AdminDashboardClient({
                   <button 
                     onClick={() => setChatToDelete(selectedChat.userEmail)}
                     className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-md transition flex items-center justify-center"
-                    title="Delete Conversation"
+                    title={t("deleteConversation")}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -916,7 +920,7 @@ export default function AdminDashboardClient({
                   <input
                     type="text"
                     className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                    placeholder="Type your reply..."
+                    placeholder={t("typeReply")}
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     disabled={chatLoading}
@@ -926,7 +930,7 @@ export default function AdminDashboardClient({
                     disabled={chatLoading || !chatInput.trim()}
                     className="bg-brand-600 text-white rounded-lg px-6 py-2 font-medium hover:bg-brand-700 disabled:opacity-50 transition"
                   >
-                    Send
+                    {t("send")}
                   </button>
                 </form>
               </>
@@ -935,7 +939,7 @@ export default function AdminDashboardClient({
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-16 h-16 mb-4 text-gray-300">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                 </svg>
-                <p>Select a conversation to view and reply</p>
+                <p>{t("selectConversationToView")}</p>
               </div>
             )}
           </div>
@@ -947,10 +951,10 @@ export default function AdminDashboardClient({
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
-              <h2 className="text-xl font-semibold">Ads Settings</h2>
+              <h2 className="text-xl font-semibold">{t("adsSettings")}</h2>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-gray-700">Max Ads (Homepage):</label>
+                  <label className="text-sm font-medium text-gray-700">{t("maxAdsHomepage")}</label>
                   <input 
                     type="number" 
                     min="1" max="10"
@@ -960,7 +964,7 @@ export default function AdminDashboardClient({
                   />
                 </div>
                 <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-gray-700">Market Carousel Speed (sec):</label>
+                  <label className="text-sm font-medium text-gray-700">{t("marketCarouselSpeed")}</label>
                   <input 
                     type="number" 
                     min="1" max="30"
@@ -974,7 +978,7 @@ export default function AdminDashboardClient({
 
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
-                <h2 className="text-xl font-semibold text-brand-700">Main Page Ads</h2>
+                <h2 className="text-xl font-semibold text-brand-700">{t("mainPageAds")}</h2>
                 <button 
                   onClick={() => {
                     setIsCreatingAd(!isCreatingAd || adFormData.placement !== "Main Page");
@@ -983,14 +987,14 @@ export default function AdminDashboardClient({
                   }}
                   className="bg-brand-600 text-white px-3 py-1.5 text-sm rounded-md font-medium hover:bg-brand-700 transition"
                 >
-                  + Create Main Page Ad
+                  {t("createMainPageAd")}
                 </button>
               </div>
               
               {(isCreatingAd || editingAd) && adFormData.placement === "Main Page" && renderAdForm()}
 
               {initialAds.filter(ad => (ad.placement || "Main Page") === "Main Page").length === 0 ? (
-                <p className="text-gray-500 text-sm py-4">No Main Page ads created yet.</p>
+                <p className="text-gray-500 text-sm py-4">{t("noMainPageAds")}</p>
               ) : (
                 <ul className="divide-y divide-gray-200">
                   {initialAds.filter(ad => (ad.placement || "Main Page") === "Main Page").map((ad: any) => {
@@ -1017,8 +1021,8 @@ export default function AdminDashboardClient({
                           setEditingAd(ad);
                           setAdFormData({ title: ad.title, description: ad.description, imageUrl: ad.imageUrl, linkUrl: ad.linkUrl || "", status: displayStatus, placement: ad.placement || "Main Page", validUntil: ad.validUntil });
                           setIsCreatingAd(false);
-                        }} className="text-sm text-brand-600 hover:underline">Edit</button>
-                        <button onClick={() => handleAdDelete(ad.id)} className="text-sm text-red-600 hover:underline">Delete</button>
+                        }} className="text-sm text-brand-600 hover:underline">{t("edit")}</button>
+                        <button onClick={() => handleAdDelete(ad.id)} className="text-sm text-red-600 hover:underline">{t("delete")}</button>
                       </div>
                     </li>
                   );
@@ -1029,7 +1033,7 @@ export default function AdminDashboardClient({
 
             <div>
               <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
-                <h2 className="text-xl font-semibold text-brand-700">Market Page Ads</h2>
+                <h2 className="text-xl font-semibold text-brand-700">{t("marketPageAds")}</h2>
                 <button 
                   onClick={() => {
                     setIsCreatingAd(!isCreatingAd || adFormData.placement !== "Market Page");
@@ -1038,14 +1042,14 @@ export default function AdminDashboardClient({
                   }}
                   className="bg-brand-600 text-white px-3 py-1.5 text-sm rounded-md font-medium hover:bg-brand-700 transition"
                 >
-                  + Create Market Page Ad
+                  {t("createMarketPageAd")}
                 </button>
               </div>
 
               {(isCreatingAd || editingAd) && adFormData.placement === "Market Page" && renderAdForm()}
 
               {initialAds.filter(ad => ad.placement === "Market Page").length === 0 ? (
-                <p className="text-gray-500 text-sm py-4">No Market Page ads created yet.</p>
+                <p className="text-gray-500 text-sm py-4">{t("noMarketPageAds")}</p>
               ) : (
                 <ul className="divide-y divide-gray-200">
                   {initialAds.filter(ad => ad.placement === "Market Page").map((ad: any) => {
@@ -1072,8 +1076,8 @@ export default function AdminDashboardClient({
                           setEditingAd(ad);
                           setAdFormData({ title: ad.title, description: ad.description, imageUrl: ad.imageUrl, linkUrl: ad.linkUrl || "", status: displayStatus, placement: ad.placement || "Market Page", validUntil: ad.validUntil });
                           setIsCreatingAd(false);
-                        }} className="text-sm text-brand-600 hover:underline">Edit</button>
-                        <button onClick={() => handleAdDelete(ad.id)} className="text-sm text-red-600 hover:underline">Delete</button>
+                        }} className="text-sm text-brand-600 hover:underline">{t("edit")}</button>
+                        <button onClick={() => handleAdDelete(ad.id)} className="text-sm text-red-600 hover:underline">{t("delete")}</button>
                       </div>
                     </li>
                   );
@@ -1089,16 +1093,16 @@ export default function AdminDashboardClient({
       {chatToDelete && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Delete Conversation?</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">{t("deleteConversationConfirmTitle")}</h2>
             <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to delete this conversation with <strong>{chatToDelete}</strong>? This action cannot be undone.
+              {t("deleteConversationConfirmDesc", { email: chatToDelete })}
             </p>
             <div className="flex justify-end pt-4">
               <button 
                 onClick={handleDeleteChat}
                 className="bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 transition"
               >
-                Delete Conversation
+                {t("deleteConversation")}
               </button>
             </div>
           </div>
@@ -1110,7 +1114,7 @@ export default function AdminDashboardClient({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-              <h3 className="text-lg font-bold text-gray-900">Transaction Details</h3>
+              <h3 className="text-lg font-bold text-gray-900">{t("transactionDetails")}</h3>
               <button 
                 onClick={() => setSelectedTransaction(null)}
                 className="text-gray-400 hover:text-gray-600"
@@ -1123,24 +1127,24 @@ export default function AdminDashboardClient({
             <div className="p-6 overflow-y-auto">
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Order ID</p>
+                  <p className="text-sm text-gray-500 font-medium">{t("orderId")}</p>
                   <p className="text-gray-900 font-mono text-sm">{selectedTransaction.id}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Date</p>
+                  <p className="text-sm text-gray-500 font-medium">{t("date")}</p>
                   <p className="text-gray-900 text-sm">{new Date(selectedTransaction.createdAt).toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Shopper</p>
+                  <p className="text-sm text-gray-500 font-medium">{t("shopper")}</p>
                   <p className="text-gray-900 text-sm">{selectedTransaction.shopperName} ({selectedTransaction.shopperEmail})</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Delivery Address</p>
+                  <p className="text-sm text-gray-500 font-medium">{t("deliveryAddress")}</p>
                   <p className="text-gray-900 text-sm">{selectedTransaction.deliveryAddress}</p>
                 </div>
               </div>
 
-              <h4 className="font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">Order Items</h4>
+              <h4 className="font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">{t("orderItems")}</h4>
               <div className="space-y-4">
                 {selectedTransaction.items?.map((item: any, idx: number) => (
                   <div key={idx} className="flex justify-between items-start border border-gray-100 p-3 rounded-lg bg-gray-50">
@@ -1152,7 +1156,7 @@ export default function AdminDashboardClient({
                       )}
                       <div>
                         <p className="font-medium text-gray-900 text-sm">{item.productName}</p>
-                        <p className="text-gray-500 text-xs">Qty: {item.quantity}</p>
+                        <p className="text-gray-500 text-xs">{t("qty", { qty: item.quantity })}</p>
                         {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1">
                             {Object.entries(item.selectedOptions).map(([k, v]) => (
@@ -1163,7 +1167,7 @@ export default function AdminDashboardClient({
                           </div>
                         )}
                         {item.note && (
-                          <p className="text-[10px] text-gray-500 mt-1 italic">Note: {item.note}</p>
+                          <p className="text-[10px] text-gray-500 mt-1 italic">{t("note", { note: item.note })}</p>
                         )}
                       </div>
                     </div>
@@ -1173,7 +1177,7 @@ export default function AdminDashboardClient({
               </div>
 
               <div className="mt-6 pt-4 border-t border-gray-200 flex justify-between items-center">
-                <span className="font-bold text-gray-900 text-lg">Total Amount</span>
+                <span className="font-bold text-gray-900 text-lg">{t("amount")}</span>
                 <span className="font-bold text-brand-600 text-xl">฿{selectedTransaction.totalAmount.toFixed(2)}</span>
               </div>
             </div>
@@ -1182,7 +1186,7 @@ export default function AdminDashboardClient({
                 onClick={() => setSelectedTransaction(null)}
                 className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition"
               >
-                Close
+                {t("close")}
               </button>
             </div>
           </div>
