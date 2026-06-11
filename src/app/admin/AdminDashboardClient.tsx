@@ -9,13 +9,15 @@ export default function AdminDashboardClient({
   initialShops = [],
   initialOrders = [],
   initialAds = [],
-  initialAdsSettings = null
+  initialAdsSettings = null,
+  totalUsers = 0
 }: { 
   initialMarkets: any[],
   initialShops?: any[],
   initialOrders?: any[],
   initialAds?: any[],
-  initialAdsSettings?: any
+  initialAdsSettings?: any,
+  totalUsers?: number
 }) {
   const router = useRouter();
   const [markets, setMarkets] = useState(initialMarkets);
@@ -615,7 +617,7 @@ export default function AdminDashboardClient({
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
         <h2 className="text-xl font-semibold mb-6">Platform Overview</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-gradient-to-br from-brand-50 to-brand-100 p-6 rounded-xl border border-brand-200">
             <p className="text-sm text-brand-700 font-medium uppercase tracking-wider mb-1">Total Revenue</p>
             <p className="text-3xl font-bold text-brand-900">฿{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
@@ -630,6 +632,11 @@ export default function AdminDashboardClient({
             <p className="text-sm text-green-700 font-medium uppercase tracking-wider mb-1">Approved Shops</p>
             <p className="text-3xl font-bold text-green-900">{approvedShopsCount}</p>
             <p className="text-xs text-green-600 mt-2">Across all markets</p>
+          </div>
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+            <p className="text-sm text-purple-700 font-medium uppercase tracking-wider mb-1">Total Users</p>
+            <p className="text-3xl font-bold text-purple-900">{totalUsers}</p>
+            <p className="text-xs text-purple-600 mt-2">Registered platform users</p>
           </div>
         </div>
 
