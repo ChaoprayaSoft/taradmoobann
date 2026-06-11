@@ -97,7 +97,11 @@
     "requestAccessDesc": "Please provide a brief note to the Market Owner (e.g., your house number or name) to verify your residency.",
     "applicationNote": "Application Note *",
     "submitApplication": "Submit Application",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "villageName": "Village Name",
+    "houseNo": "House No.",
+    "addressLine": "Address",
+    "telephone": "Telephone No."
   },
   "ShopperWallet": {
     "myWallet": "My Wallet",
@@ -391,7 +395,11 @@
     "placingOrder": "Placing Order...",
     "placeOrder": "Place Order",
     "cashOnDelivery": "Cash on Delivery",
-    "selectOrAddAddress": "Please select or add a delivery address."
+    "selectOrAddAddress": "Please select or add a delivery address.",
+    "villageName": "Village Name",
+    "houseNo": "House No.",
+    "addressLine": "Address",
+    "telephone": "Telephone No."
   },
   "MarketShopping": {
     "allCategories": "All Categories",

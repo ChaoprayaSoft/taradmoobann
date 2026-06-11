@@ -125,9 +125,36 @@ export default function ShopperDashboardClient({
   const [ownedShopsCount, setOwnedShopsCount] = useState(
     initialShops.filter(s => s.ownerEmail === session?.user?.email).length
   );
-  const [editValue, setEditValue] = useState("");
+  
+  const [editAddress, setEditAddress] = useState({
+    villageName: "",
+    houseNo: "",
+    address: "",
+    telephone: ""
+  });
+  
   const [isSavingAddress, setIsSavingAddress] = useState(false);
   const [addressSaved, setAddressSaved] = useState(false);
+
+  const formatAddressForDisplay = (addrStr: string) => {
+    try {
+      const parsed = JSON.parse(addrStr);
+      if (parsed.villageName !== undefined) {
+        return `${t("villageName")}: ${parsed.villageName}\n${t("houseNo")}: ${parsed.houseNo}\n${t("addressLine")}: ${parsed.address}\n${t("telephone")}: ${parsed.telephone}`;
+      }
+    } catch(e) {}
+    return addrStr;
+  };
+
+  const parseAddress = (addrStr: string) => {
+    try {
+      const parsed = JSON.parse(addrStr);
+      if (parsed.villageName !== undefined) {
+        return parsed;
+      }
+    } catch(e) {}
+    return { villageName: "", houseNo: "", address: addrStr, telephone: "" };
+  };
 
   const saveAddresses = async (newAddresses: string[]) => {
     setIsSavingAddress(true);
@@ -157,14 +184,17 @@ export default function ShopperDashboardClient({
     if (editingIndex === null) return;
 
     const newAddresses = [...addresses];
-    if (editValue.trim() === "") {
+    const isEmpty = !editAddress.villageName.trim() && !editAddress.houseNo.trim() && !editAddress.address.trim() && !editAddress.telephone.trim();
+
+    if (isEmpty) {
       // Remove address if empty
       newAddresses.splice(editingIndex, 1);
     } else {
+      const jsonStr = JSON.stringify(editAddress);
       if (editingIndex >= newAddresses.length) {
-        newAddresses.push(editValue);
+        newAddresses.push(jsonStr);
       } else {
-        newAddresses[editingIndex] = editValue;
+        newAddresses[editingIndex] = jsonStr;
       }
     }
 
@@ -172,7 +202,12 @@ export default function ShopperDashboardClient({
   };
 
   const handleAddNewAddress = () => {
-    setEditValue("");
+    setEditAddress({
+      villageName: "",
+      houseNo: "",
+      address: "",
+      telephone: ""
+    });
     setEditingIndex(addresses.length);
   };
 
@@ -841,13 +876,40 @@ export default function ShopperDashboardClient({
             <div key={idx} className="border border-gray-200 rounded-md p-4 bg-gray-50">
               {editingIndex === idx ? (
                 <form onSubmit={handleSaveEdit} className="flex flex-col sm:flex-row gap-3">
-                  <textarea
-                    required
-                    rows={2}
-                    className="flex-1 rounded-md border-gray-300 shadow-sm border p-3 focus:ring-brand-500 focus:border-brand-500 text-sm"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                  />
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                      required
+                      type="text"
+                      placeholder={t("villageName")}
+                      className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                      value={editAddress.villageName}
+                      onChange={(e) => setEditAddress({ ...editAddress, villageName: e.target.value })}
+                    />
+                    <input
+                      required
+                      type="text"
+                      placeholder={t("houseNo")}
+                      className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                      value={editAddress.houseNo}
+                      onChange={(e) => setEditAddress({ ...editAddress, houseNo: e.target.value })}
+                    />
+                    <input
+                      required
+                      type="text"
+                      placeholder={t("telephone")}
+                      className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                      value={editAddress.telephone}
+                      onChange={(e) => setEditAddress({ ...editAddress, telephone: e.target.value })}
+                    />
+                    <input
+                      required
+                      type="text"
+                      placeholder={t("addressLine")}
+                      className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                      value={editAddress.address}
+                      onChange={(e) => setEditAddress({ ...editAddress, address: e.target.value })}
+                    />
+                  </div>
                   <div className="flex flex-col gap-2">
                     <button
                       type="submit"
@@ -867,10 +929,10 @@ export default function ShopperDashboardClient({
                 </form>
               ) : (
                 <div className="flex justify-between items-start gap-4">
-                  <p className="text-sm text-gray-800 whitespace-pre-wrap flex-1">{addr}</p>
+                  <p className="text-sm text-gray-800 whitespace-pre-wrap flex-1 leading-relaxed">{formatAddressForDisplay(addr)}</p>
                   <button
                     onClick={() => {
-                      setEditValue(addr);
+                      setEditAddress(parseAddress(addr));
                       setEditingIndex(idx);
                     }}
                     className="text-brand-600 hover:text-brand-800 text-sm font-medium px-3 py-1 bg-white border border-brand-200 rounded hover:bg-brand-50 transition flex-shrink-0"
@@ -885,14 +947,40 @@ export default function ShopperDashboardClient({
           {editingIndex === addresses.length && (
             <div className="border border-brand-200 rounded-md p-4 bg-brand-50">
               <form onSubmit={handleSaveEdit} className="flex flex-col sm:flex-row gap-3">
-                <textarea
-                  required
-                  rows={2}
-                  className="flex-1 rounded-md border-gray-300 shadow-sm border p-3 focus:ring-brand-500 focus:border-brand-500 text-sm"
-                  placeholder="E.g., 123/45 Soi Sukhumvit 71, Wattana, Bangkok 10110"
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                />
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    required
+                    type="text"
+                    placeholder={t("villageName")}
+                    className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                    value={editAddress.villageName}
+                    onChange={(e) => setEditAddress({ ...editAddress, villageName: e.target.value })}
+                  />
+                  <input
+                    required
+                    type="text"
+                    placeholder={t("houseNo")}
+                    className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                    value={editAddress.houseNo}
+                    onChange={(e) => setEditAddress({ ...editAddress, houseNo: e.target.value })}
+                  />
+                  <input
+                    required
+                    type="text"
+                    placeholder={t("telephone")}
+                    className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                    value={editAddress.telephone}
+                    onChange={(e) => setEditAddress({ ...editAddress, telephone: e.target.value })}
+                  />
+                  <input
+                    required
+                    type="text"
+                    placeholder={t("addressLine")}
+                    className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                    value={editAddress.address}
+                    onChange={(e) => setEditAddress({ ...editAddress, address: e.target.value })}
+                  />
+                </div>
                 <div className="flex flex-col gap-2">
                   <button
                     type="submit"

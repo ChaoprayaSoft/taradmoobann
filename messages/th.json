@@ -97,7 +97,11 @@
     "requestAccessDesc": "โปรดระบุข้อความสั้น ๆ ถึงเจ้าของตลาด (เช่น บ้านเลขที่ หรือชื่อของคุณ) เพื่อยืนยันตัวตนในหมู่บ้าน",
     "applicationNote": "ข้อความถึงเจ้าของตลาด *",
     "submitApplication": "ส่งคำขอเข้าร่วม",
-    "submitting": "กำลังส่งคำขอ..."
+    "submitting": "กำลังส่งคำขอ...",
+    "villageName": "ชื่อหมู่บ้าน",
+    "houseNo": "บ้านเลขที่",
+    "addressLine": "ที่อยู่",
+    "telephone": "เบอร์โทรศัพท์"
   },
   "ShopperWallet": {
     "myWallet": "กระเป๋าเงินของฉัน",
@@ -391,7 +395,11 @@
     "placingOrder": "กำลังสั่งซื้อ...",
     "placeOrder": "สั่งซื้อ",
     "cashOnDelivery": "เก็บเงินปลายทาง",
-    "selectOrAddAddress": "กรุณาเลือกหรือเพิ่มที่อยู่จัดส่ง"
+    "selectOrAddAddress": "กรุณาเลือกหรือเพิ่มที่อยู่จัดส่ง",
+    "villageName": "ชื่อหมู่บ้าน",
+    "houseNo": "บ้านเลขที่",
+    "addressLine": "ที่อยู่",
+    "telephone": "เบอร์โทรศัพท์"
   },
   "MarketShopping": {
     "allCategories": "ทุกหมวดหมู่",

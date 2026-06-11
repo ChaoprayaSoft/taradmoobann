@@ -9,12 +9,32 @@ import { useTranslations } from "next-intl";
 export default function CheckoutClient({ userAddresses }: { userAddresses: string[] }) {
   const { cartItems, clearCart } = useCart();
   const router = useRouter();
-  
+  const t = useTranslations("Checkout");
+
   const [selectedAddress, setSelectedAddress] = useState<string>(userAddresses[0] || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const t = useTranslations("Checkout");
+
+  const formatAddressForDisplay = (addrStr: string) => {
+    try {
+      const parsed = JSON.parse(addrStr);
+      if (parsed.villageName !== undefined) {
+        return `${t("villageName")}: ${parsed.villageName}\n${t("houseNo")}: ${parsed.houseNo}\n${t("addressLine")}: ${parsed.address}\n${t("telephone")}: ${parsed.telephone}`;
+      }
+    } catch(e) {}
+    return addrStr;
+  };
+
+  const formatAddressForDB = (addrStr: string) => {
+    try {
+      const parsed = JSON.parse(addrStr);
+      if (parsed.villageName !== undefined) {
+        return `Village Name: ${parsed.villageName}\nHouse No.: ${parsed.houseNo}\nAddress: ${parsed.address}\nTelephone No.: ${parsed.telephone}`;
+      }
+    } catch(e) {}
+    return addrStr;
+  };
 
   // If cart is empty and we haven't just successfully submitted
   if (cartItems.length === 0 && !success) {
@@ -75,7 +95,7 @@ export default function CheckoutClient({ userAddresses }: { userAddresses: strin
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cartItems,
-          deliveryAddress: selectedAddress
+          deliveryAddress: formatAddressForDB(selectedAddress)
         })
       });
 
@@ -126,7 +146,7 @@ export default function CheckoutClient({ userAddresses }: { userAddresses: strin
                       onChange={(e) => setSelectedAddress(e.target.value)}
                       className="mt-1 text-brand-600 focus:ring-brand-500"
                     />
-                    <span className="text-gray-800 whitespace-pre-wrap flex-1">{addr}</span>
+                    <span className="text-gray-800 whitespace-pre-wrap flex-1 leading-relaxed">{formatAddressForDisplay(addr)}</span>
                   </label>
                 ))}
               </div>
