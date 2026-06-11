@@ -15,5 +15,5 @@ export default createMiddleware({
 export const config = {
   // Match only internationalized pathnames
   // We exclude /api, /_next, etc. so they are not affected by middleware
-  matcher: ['/', '/(th|en)/:path*']
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
 };
