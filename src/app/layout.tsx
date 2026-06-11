@@ -9,6 +9,7 @@ import ChatWidget from "@/components/ChatWidget";
 import NotificationPrompt from "@/components/NotificationPrompt";
 import Logo from "@/components/Logo";
 import WelcomeModal from "@/components/WelcomeModal";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -54,6 +55,7 @@ export default function RootLayout({
             <ChatWidget />
             <NotificationPrompt />
             <WelcomeModal />
+            <ScrollToTopButton />
           </div>
         </Providers>
       </body>
