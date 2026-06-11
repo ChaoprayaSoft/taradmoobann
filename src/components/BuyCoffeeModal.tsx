@@ -5,10 +5,10 @@ import generatePayload from "promptpay-qr";
 import { QRCodeSVG } from "qrcode.react";
 
 const DRINKS = [
-  { name: "Pure Matcha", price: 30, icon: "🍵" },
-  { name: "Matcha Latte", price: 40, icon: "🍵" },
+  { name: "Soy Milk (น้ำเต้าหู้)", price: 7, icon: "🥛" },
+  { name: "กาแฟโบราณ", price: 15, icon: "🍵" },
+  { name: "Boba Tea (ชานมไข่มุก)", price: 25, icon: "🧋" },
   { name: "Americano", price: 35, icon: "☕" },
-  { name: "Soy Milk", price: 7, icon: "🥛" },
   { name: "Starbuck", price: 100, icon: "🥤" },
 ];
 
@@ -32,7 +32,7 @@ export default function BuyCoffeeModal({ isOpen, onClose }: { isOpen: boolean; o
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 relative">
-        <button 
+        <button
           onClick={handleClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
         >
@@ -72,9 +72,9 @@ export default function BuyCoffeeModal({ isOpen, onClose }: { isOpen: boolean; o
           <div className="text-center animate-fade-in">
             <div className="bg-white p-2 border-4 border-gray-800 inline-block rounded-xl shadow-sm mb-4">
               {selectedDrink && (
-                <QRCodeSVG 
-                  value={generatePayload("0909739266", { amount: selectedDrink.price })} 
-                  size={192} 
+                <QRCodeSVG
+                  value={generatePayload("0909739266", { amount: selectedDrink.price })}
+                  size={192}
                 />
               )}
             </div>
@@ -83,7 +83,7 @@ export default function BuyCoffeeModal({ isOpen, onClose }: { isOpen: boolean; o
               {selectedDrink?.name}
             </p>
             <p className="text-orange-600 font-bold text-xl mb-4">{selectedDrink?.price} Baht</p>
-            <button 
+            <button
               onClick={() => setShowQR(false)}
               className="text-sm text-gray-500 hover:text-gray-700 underline"
             >
