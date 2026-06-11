@@ -28,7 +28,10 @@ export async function POST(req: Request) {
     }
 
     const { name, description, price, imageUrls, tags, shopId, options } = await req.json();
-    if (!name || !price || !shopId) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const parsedPrice = parseFloat(price);
+    if (!name || isNaN(parsedPrice) || parsedPrice < 0 || !shopId) {
+      return NextResponse.json({ error: "Missing required fields or invalid price" }, { status: 400 });
+    }
 
     const verification = await verifyShopOwnership(shopId, userEmail, roles);
     if (verification.error) return NextResponse.json({ error: verification.error }, { status: verification.status });
@@ -73,7 +76,7 @@ export async function POST(req: Request) {
       shopId,
       name,
       description: description || "",
-      price: parseFloat(price),
+      price: parsedPrice,
       imageUrls: imageUrls || [],
       tags: parsedTags,
       options: options || [],
@@ -136,8 +139,9 @@ export async function PUT(req: Request) {
     }
 
     const { productId, name, description, price, imageUrls, tags, shopId, options } = await req.json();
-    if (!productId || !name || !price || !shopId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const parsedPrice = parseFloat(price);
+    if (!productId || !name || isNaN(parsedPrice) || parsedPrice < 0 || !shopId) {
+      return NextResponse.json({ error: "Missing required fields or invalid price" }, { status: 400 });
     }
 
     const verification = await verifyShopOwnership(shopId, userEmail, roles);
@@ -159,7 +163,7 @@ export async function PUT(req: Request) {
     const updateData: any = {
       name,
       description: description || "",
-      price: parseFloat(price),
+      price: parsedPrice,
       tags: parsedTags,
       options: options || [],
       updatedAt: new Date().toISOString(),

@@ -25,23 +25,30 @@ export async function POST(req: Request) {
     const shopperEmail = session.user.email;
     const shopperName = session.user.name || "Unknown Shopper";
 
-    // Group items by shopId
+    // Group items by shopId and validate prices against the database
     const ordersByShop: Record<string, any[]> = {};
     for (const item of cartItems) {
       const shopId = item.product.shopId;
-      if (!shopId) continue;
+      if (!shopId || !item.product.id) continue;
       
+      // CRITICAL FIX: Never trust the price sent by the client. Fetch authoritative price from DB.
+      const productDoc = await adminDb.collection("products").doc(item.product.id).get();
+      if (!productDoc.exists) continue; // Skip if product doesn't exist anymore
+      
+      const realProduct = productDoc.data();
+      const realPrice = realProduct?.price || 0;
+
       if (!ordersByShop[shopId]) {
         ordersByShop[shopId] = [];
       }
       ordersByShop[shopId].push({
         productId: item.product.id,
-        productName: item.product.name,
-        price: item.product.price,
-        quantity: item.quantity,
+        productName: realProduct?.name || item.product.name,
+        price: realPrice, // Authoritative price from DB
+        quantity: Math.max(1, item.quantity), // Prevent negative or zero quantities
         selectedOptions: item.selectedOptions || {},
         note: item.note || "",
-        imageUrl: (item.product.imageUrls && item.product.imageUrls.length > 0) ? item.product.imageUrls[0] : null
+        imageUrl: (realProduct?.imageUrls && realProduct?.imageUrls.length > 0) ? realProduct?.imageUrls[0] : null
       });
     }
 
