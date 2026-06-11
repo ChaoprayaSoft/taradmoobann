@@ -234,7 +234,9 @@
     "qty": "Qty: {qty}",
     "close": "Close",
     "villageName": "Village Name",
-    "villageNamePlaceholder": "e.g. Happy Village"
+    "villageNamePlaceholder": "e.g. Happy Village",
+    "deleteMarketTitle": "Delete Market?",
+    "deleteMarketConfirm": "Are you sure you want to delete {name}? This action cannot be undone."
   },
   "ShopOwnerDashboard": {
     "shopDashboard": "Shop Dashboard",

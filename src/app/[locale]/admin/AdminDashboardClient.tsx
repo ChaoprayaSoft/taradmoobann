@@ -25,6 +25,7 @@ export default function AdminDashboardClient({
   const [markets, setMarkets] = useState(initialMarkets);
   const [isCreating, setIsCreating] = useState(false);
   const [editingMarket, setEditingMarket] = useState<any | null>(null);
+  const [marketToDelete, setMarketToDelete] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -245,13 +246,14 @@ export default function AdminDashboardClient({
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this market? This action cannot be undone.")) return;
+  const executeDeleteMarket = async () => {
+    if (!marketToDelete) return;
     
     try {
-      const res = await fetch(`/api/admin/markets?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/markets?id=${marketToDelete.id}`, { method: "DELETE" });
       if (res.ok) {
         router.refresh();
+        setMarketToDelete(null);
       } else {
         const data = await res.json();
         alert(data.error || "Failed to delete market");
@@ -496,7 +498,7 @@ export default function AdminDashboardClient({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">{t("villageName")}</label>
+              <label className="block text-sm font-medium text-gray-700">{t("villageName")} *</label>
               <input
                 required
                 type="text"
@@ -507,8 +509,9 @@ export default function AdminDashboardClient({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">{t("locationDescription")}</label>
+              <label className="block text-sm font-medium text-gray-700">{t("locationDescription")} *</label>
               <textarea
+                required
                 rows={3}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
                 value={formData.description}
@@ -641,7 +644,7 @@ export default function AdminDashboardClient({
                       {t("edit")}
                     </button>
                     <button 
-                      onClick={() => handleDelete(market.id)}
+                      onClick={() => setMarketToDelete(market)}
                       className="text-sm text-red-600 hover:text-red-800 font-medium text-left"
                     >
                       {t("delete")}
@@ -653,6 +656,43 @@ export default function AdminDashboardClient({
           </ul>
         )}
       </div>
+
+      {marketToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {t("deleteMarketTitle") || "Delete Market?"}
+              </h2>
+              <button 
+                onClick={() => setMarketToDelete(null)}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-600">
+                {t("deleteMarketConfirm", { name: marketToDelete.name }) || `Are you sure you want to delete ${marketToDelete.name}? This action cannot be undone.`}
+              </p>
+              <div className="pt-4 flex justify-end gap-3 mt-6">
+                <button 
+                  onClick={() => setMarketToDelete(null)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
+                >
+                  {t("cancel")}
+                </button>
+                <button 
+                  onClick={executeDeleteMarket}
+                  className="bg-red-600 text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition"
+                >
+                  {t("delete")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* PLATFORM OVERVIEW */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">

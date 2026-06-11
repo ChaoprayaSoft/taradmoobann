@@ -234,7 +234,9 @@
     "qty": "จำนวน: {qty}",
     "close": "ปิด",
     "villageName": "ชื่อหมู่บ้าน",
-    "villageNamePlaceholder": "เช่น หมู่บ้านสุขสันต์"
+    "villageNamePlaceholder": "เช่น หมู่บ้านสุขสันต์",
+    "deleteMarketTitle": "ลบตลาด?",
+    "deleteMarketConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบ {name}? การดำเนินการนี้ไม่สามารถยกเลิกได้"
   },
   "ShopOwnerDashboard": {
     "shopDashboard": "แดชบอร์ดร้านค้า",
