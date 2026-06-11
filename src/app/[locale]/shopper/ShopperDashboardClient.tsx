@@ -45,6 +45,8 @@ export default function ShopperDashboardClient({
   const { data: session } = useSession();
   const t = useTranslations("ShopperDashboard");
 
+  const uniqueVillageNames = Array.from(new Set(allMarkets.map(m => m.villageName).filter(Boolean)));
+
   // Membership Request State
   const [requestingMarketId, setRequestingMarketId] = useState<string | null>(null);
   const [applicationNote, setApplicationNote] = useState("");
@@ -877,14 +879,17 @@ export default function ShopperDashboardClient({
               {editingIndex === idx ? (
                 <form onSubmit={handleSaveEdit} className="flex flex-col sm:flex-row gap-3">
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input
+                    <select
                       required
-                      type="text"
-                      placeholder={t("villageName")}
                       className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
                       value={editAddress.villageName}
                       onChange={(e) => setEditAddress({ ...editAddress, villageName: e.target.value })}
-                    />
+                    >
+                      <option value="" disabled>{t("villageName")}</option>
+                      {uniqueVillageNames.map(v => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
                     <input
                       required
                       type="text"
@@ -948,14 +953,17 @@ export default function ShopperDashboardClient({
             <div className="border border-brand-200 rounded-md p-4 bg-brand-50">
               <form onSubmit={handleSaveEdit} className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
+                  <select
                     required
-                    type="text"
-                    placeholder={t("villageName")}
                     className="rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
                     value={editAddress.villageName}
                     onChange={(e) => setEditAddress({ ...editAddress, villageName: e.target.value })}
-                  />
+                  >
+                    <option value="" disabled>{t("villageName")}</option>
+                    {uniqueVillageNames.map(v => (
+                      <option key={v} value={v}>{v}</option>
+                    ))}
+                  </select>
                   <input
                     required
                     type="text"
@@ -1033,8 +1041,8 @@ export default function ShopperDashboardClient({
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Open a Shop</h2>
-                <p className="text-gray-500 text-sm mt-1">Select an approved market and submit your shop details.</p>
+                <h2 className="text-xl font-semibold text-gray-900">{t("openShopTitle")}</h2>
+                <p className="text-gray-500 text-sm mt-1">{t("openShopDesc")}</p>
               </div>
               <button
                 onClick={() => setIsOpeningShop(false)}
@@ -1050,7 +1058,7 @@ export default function ShopperDashboardClient({
 
               <form onSubmit={handleShopSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Select Market *</label>
+                  <label className="block text-sm font-medium text-gray-700">{t("selectMarket")}</label>
                   <select
                     required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
@@ -1062,19 +1070,30 @@ export default function ShopperDashboardClient({
                     ))}
                   </select>
                 </div>
+                {formData.marketId && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">{t("villageName")}</label>
+                    <input
+                      type="text"
+                      disabled
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-gray-50 text-gray-500 cursor-not-allowed"
+                      value={approvedMarkets.find(m => m.id === formData.marketId)?.villageName || ""}
+                    />
+                  </div>
+                )}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Shop Name *</label>
+                  <label className="block text-sm font-medium text-gray-700">{t("shopNameLabel")}</label>
                   <input
                     required
                     type="text"
-                    placeholder="e.g. Grandma's Bakery"
+                    placeholder={t("shopNamePlaceholder")}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Category *</label>
+                  <label className="block text-sm font-medium text-gray-700">{t("categoryLabel")}</label>
                   <select
                     required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
@@ -1087,7 +1106,7 @@ export default function ShopperDashboardClient({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <label className="block text-sm font-medium text-gray-700">{t("descriptionLabel")}</label>
                   <textarea
                     rows={3}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
@@ -1096,7 +1115,7 @@ export default function ShopperDashboardClient({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Location Type *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t("locationType")}</label>
                   <div className="flex gap-6 mb-3">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input
@@ -1107,7 +1126,7 @@ export default function ShopperDashboardClient({
                         onChange={() => setLocationType("house")}
                         className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
                       />
-                      House Number
+                      {t("houseNumberOpt")}
                     </label>
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input
@@ -1118,7 +1137,7 @@ export default function ShopperDashboardClient({
                         onChange={() => setLocationType("area")}
                         className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
                       />
-                      Nearby Area
+                      {t("nearbyAreaOpt")}
                     </label>
                   </div>
 
@@ -1127,7 +1146,7 @@ export default function ShopperDashboardClient({
                       <input
                         required
                         type="number"
-                        placeholder="e.g. 123"
+                        placeholder={t("houseNumberPlaceholder")}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
                         value={formData.houseNumber}
                         onChange={(e) => setFormData({ ...formData, houseNumber: e.target.value })}
@@ -1139,7 +1158,7 @@ export default function ShopperDashboardClient({
                         required
                         type="text"
                         maxLength={100}
-                        placeholder="e.g. Near the main gate"
+                        placeholder={t("nearbyAreaPlaceholder")}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
                         value={formData.location}
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -1148,7 +1167,7 @@ export default function ShopperDashboardClient({
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Shop Cover Image</label>
+                  <label className="block text-sm font-medium text-gray-700">{t("shopCoverImage")}</label>
                   <input
                     type="file"
                     accept="image/*"
@@ -1162,14 +1181,14 @@ export default function ShopperDashboardClient({
                     onClick={() => setIsOpeningShop(false)}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
                   >
-                    Cancel
+                    {t("cancelButton")}
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
                     className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
                   >
-                    {loading ? "Submitting..." : "Submit Shop"}
+                    {loading ? t("submittingShop") : t("submitShopButton")}
                   </button>
                 </div>
               </form>
