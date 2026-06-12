@@ -1424,33 +1424,13 @@ export default function ShopperDashboardClient({
                   </div>
 
                   <div className="flex flex-col gap-2 min-w-[140px]">
-                    {order.status === "Pending Completion" && (
+                    {(order.status === "Pending Completion" || order.status === "Out for Delivery") && (
                       <button
                         disabled={completingOrderId === order.id}
                         onClick={() => handleAcceptDelivery(order.id)}
                         className="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition disabled:opacity-50"
                       >
                         Accept Delivery
-                      </button>
-                    )}
-                    {order.status === "Out for Delivery" && (
-                      <button
-                        disabled={completingOrderId === order.id}
-                        onClick={() => {
-                          const scannedId = prompt("Scan Shop Owner's QR Code (or paste Order ID):");
-                          if (scannedId === order.id) {
-                            handleAcceptDelivery(order.id);
-                          } else if (scannedId) {
-                            alert("Invalid QR Code for this order.");
-                          }
-                        }}
-                        className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50 flex items-center justify-center gap-1"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
-                        </svg>
-                        Scan QR
                       </button>
                     )}
                   </div>

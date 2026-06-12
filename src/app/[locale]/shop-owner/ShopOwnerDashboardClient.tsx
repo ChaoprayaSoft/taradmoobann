@@ -57,7 +57,6 @@ export default function ShopOwnerDashboardClient({
   
   // Order Management State
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
-  const [qrCodeModalData, setQrCodeModalData] = useState<any | null>(null);
 
   // Shop Status Management
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
@@ -1190,21 +1189,13 @@ export default function ShopOwnerDashboardClient({
                           </button>
                         )}
                         {order.status === "Out for Delivery" && (
-                          <>
-                            <button 
-                              onClick={() => setQrCodeModalData(order)}
-                              className="w-full bg-blue-600 text-white font-medium py-2 rounded text-xs hover:bg-blue-700 transition"
-                            >
-                              {t("choice1GenerateQr")}
-                            </button>
-                            <button 
-                              disabled={updatingOrderId === order.id}
-                              onClick={() => handleUpdateOrderStatus(order.id, "Pending Completion")}
-                              className="w-full bg-gray-800 text-white font-medium py-2 rounded text-xs hover:bg-gray-900 transition disabled:opacity-50"
-                            >
-                              {t("choice2RequestCompletion")}
-                            </button>
-                          </>
+                          <button 
+                            disabled={updatingOrderId === order.id}
+                            onClick={() => handleUpdateOrderStatus(order.id, "Pending Completion")}
+                            className="w-full bg-gray-800 text-white font-medium py-2 rounded text-xs hover:bg-gray-900 transition disabled:opacity-50"
+                          >
+                            {t("choice2RequestCompletion")}
+                          </button>
                         )}
                         {order.status === "Pending Completion" && (
                           <p className="text-xs text-center text-blue-600 font-medium p-2 bg-blue-50 rounded">
@@ -1439,33 +1430,6 @@ export default function ShopOwnerDashboardClient({
             )}
           </div>
         </>
-      )}
-
-      {/* QR CODE MODAL */}
-      {qrCodeModalData && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t("deliveryQrCode")}</h2>
-            <p className="text-sm text-gray-500 mb-6">{t("askShopperScanQr")}</p>
-            
-            {/* Fake QR Code placeholder since we don't have a QR generator library installed */}
-            <div className="bg-gray-100 w-64 h-64 mx-auto mb-6 flex flex-col items-center justify-center border-4 border-gray-800 rounded-lg p-4">
-              <div className="grid grid-cols-4 grid-rows-4 gap-1 w-full h-full opacity-50">
-                {Array.from({length: 16}).map((_, i) => (
-                  <div key={i} className={`bg-gray-800 ${i % 3 === 0 ? 'rounded-tl' : ''} ${i % 5 === 0 ? 'opacity-20' : ''}`}></div>
-                ))}
-              </div>
-              <p className="text-[10px] text-gray-400 absolute mt-32 bg-white px-2">Order ID: {qrCodeModalData.id}</p>
-            </div>
-            
-            <button 
-              onClick={() => setQrCodeModalData(null)}
-              className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition font-medium w-full"
-            >
-              {t("close")}
-            </button>
-          </div>
-        </div>
       )}
 
       {/* DELETE CHAT CONFIRMATION MODAL */}

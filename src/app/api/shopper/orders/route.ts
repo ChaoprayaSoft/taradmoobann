@@ -88,10 +88,21 @@ export async function POST(req: Request) {
       if (shopDoc.exists) {
         const ownerEmail = shopDoc.data()?.ownerEmail;
         if (ownerEmail) {
+          const items = ordersByShop[shopId];
+          const itemsList = items.map(i => `${i.quantity}x ${i.productName} (฿${i.price})`).join("<br/>");
+          const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          
+          const emailBody = `You have a new order from ${shopperName}.<br/><br/>
+<strong>Delivery Address:</strong><br/>
+${deliveryAddress}<br/><br/>
+<strong>Items Ordered:</strong><br/>
+${itemsList}<br/><br/>
+<strong>Total Amount:</strong> ฿${totalAmount}`;
+
           await sendNotificationToUser(
             ownerEmail,
             "New Order Received!",
-            `You have a new order from ${shopperName}.`,
+            emailBody,
             { url: "/shop-owner" }
           );
         }
