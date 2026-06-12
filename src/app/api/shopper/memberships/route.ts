@@ -51,9 +51,9 @@ export async function POST(req: Request) {
         if (marketData?.ownerEmail) {
           await sendNotificationToUser(
             marketData.ownerEmail,
-            "Market Membership Resubmitted",
-            `A shopper (${userEmail}) has resubmitted their application for your market "${marketData.name || 'Unknown'}".`,
-            { url: "/market-owner" }
+            { key: "Notifications.newMemberTitle" },
+            { key: "Notifications.newMemberBody", params: { userName: userEmail, marketName: marketData.name || "Unknown" } },
+            { url: "/admin" }
           );
         }
 
@@ -79,9 +79,9 @@ export async function POST(req: Request) {
     if (marketData?.ownerEmail) {
       await sendNotificationToUser(
         marketData.ownerEmail,
-        "New Market Membership Request",
-        `A new shopper (${userEmail}) has requested to join your market "${marketData.name || 'Unknown'}".`,
-        { url: "/market-owner" }
+        { key: "Notifications.newMemberTitle" },
+        { key: "Notifications.newMemberBody", params: { userName: userEmail, marketName: marketData.name || "Unknown" } },
+        { url: "/admin" }
       );
     }
 

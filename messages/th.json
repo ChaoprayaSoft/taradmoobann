@@ -499,5 +499,27 @@
     "shopOwner": "เจ้าของร้าน",
     "sendToStartShop": "ส่งข้อความเพื่อเริ่มการสนทนากับเจ้าของร้าน",
     "typeMessageShop": "พิมพ์ข้อความ..."
+  },
+  "Notifications": {
+    "newOrderTitle": "ได้รับคำสั่งซื้อใหม่!",
+    "newOrderBody": "คุณได้รับคำสั่งซื้อใหม่จาก {shopperName}.<br/><br/><strong>ที่อยู่จัดส่ง:</strong><br/>{deliveryAddress}<br/><br/><strong>รายการสินค้า:</strong><br/>{itemsList}<br/><br/><strong>ยอดรวม:</strong> ฿{totalAmount}",
+    "orderUpdateTitle": "อัปเดตคำสั่งซื้อ",
+    "orderUpdateBody": "คำสั่งซื้อของคุณจากร้าน {shopName} ตอนนี้อยู่ในสถานะ: {status}",
+    "shopApprovedTitle": "ร้านค้าได้รับการอนุมัติ!",
+    "shopApprovedBody": "ขอแสดงความยินดี! ร้านค้า {shopName} ของคุณได้รับการอนุมัติจากเจ้าของตลาดแล้ว",
+    "shopReviseTitle": "ร้านค้าต้องแก้ไข",
+    "shopReviseBody": "เจ้าของตลาดได้ขอให้แก้ไขร้านค้า {shopName} ของคุณ โปรดตรวจสอบในแดชบอร์ดของคุณ",
+    "membershipActiveTitle": "เปิดใช้งานสมาชิกแล้ว",
+    "membershipActiveBody": "การเป็นสมาชิกของคุณสำหรับ {marketName} ถูกเปิดใช้งานแล้ว!",
+    "membershipExpiredTitle": "สมาชิกหมดอายุ",
+    "membershipExpiredBody": "การเป็นสมาชิกของคุณสำหรับ {marketName} หมดอายุแล้ว",
+    "newShopTitle": "การลงทะเบียนร้านค้าใหม่",
+    "newShopBody": "{ownerName} ได้ร้องขอเปิดร้าน '{shopName}' ในตลาดของคุณ",
+    "newMemberTitle": "การลงทะเบียนสมาชิกใหม่",
+    "newMemberBody": "{userName} ได้ขอเข้าร่วมตลาด '{marketName}' ของคุณ",
+    "membershipApprovedTitle": "อนุมัติการเป็นสมาชิกตลาดแล้ว",
+    "membershipApprovedBody": "คำขอเข้าร่วมตลาด {marketName} ของคุณได้รับการอนุมัติแล้ว!",
+    "membershipReviseTitle": "ต้องแก้ไขข้อมูลสมาชิก",
+    "membershipReviseBody": "เจ้าของตลาดได้ขอให้คุณแก้ไขคำขอการเป็นสมาชิกสำหรับตลาด {marketName}"
   }
 }

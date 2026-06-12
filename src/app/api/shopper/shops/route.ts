@@ -116,9 +116,9 @@ export async function POST(req: Request) {
     if (marketData?.ownerEmail) {
       await sendNotificationToUser(
         marketData.ownerEmail,
-        "New Shop Request",
-        `A new shop "${name}" has been requested in your market "${marketData.name || 'Unknown'}". Please review it in your dashboard.`,
-        { url: "/market-owner" }
+        { key: "Notifications.newShopTitle" },
+        { key: "Notifications.newShopBody", params: { ownerName: session.user.name || "A user", shopName: name } },
+        { url: "/admin" }
       );
     }
 

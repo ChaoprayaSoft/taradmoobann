@@ -499,5 +499,27 @@
     "shopOwner": "Shop Owner",
     "sendToStartShop": "Send a message to start a conversation with the shop owner.",
     "typeMessageShop": "Type a message..."
+  },
+  "Notifications": {
+    "newOrderTitle": "New Order Received!",
+    "newOrderBody": "You have a new order from {shopperName}.<br/><br/><strong>Delivery Address:</strong><br/>{deliveryAddress}<br/><br/><strong>Items Ordered:</strong><br/>{itemsList}<br/><br/><strong>Total Amount:</strong> ฿{totalAmount}",
+    "orderUpdateTitle": "Order Update",
+    "orderUpdateBody": "Your order from {shopName} is now: {status}",
+    "shopApprovedTitle": "Shop Approved!",
+    "shopApprovedBody": "Congratulations! Your shop {shopName} has been approved by the market owner.",
+    "shopReviseTitle": "Shop Needs Revision",
+    "shopReviseBody": "The market owner has requested a revision for your shop {shopName}. Please check your dashboard.",
+    "membershipActiveTitle": "Membership Activated",
+    "membershipActiveBody": "Your membership for {marketName} is now active!",
+    "membershipExpiredTitle": "Membership Expired",
+    "membershipExpiredBody": "Your membership for {marketName} has expired.",
+    "newShopTitle": "New Shop Registration",
+    "newShopBody": "{ownerName} has requested to open a shop '{shopName}' in your market.",
+    "newMemberTitle": "New Membership Registration",
+    "newMemberBody": "{userName} has requested to join your market '{marketName}'.",
+    "membershipApprovedTitle": "Market Membership Approved",
+    "membershipApprovedBody": "Your request to join {marketName} has been approved!",
+    "membershipReviseTitle": "Membership Revision Needed",
+    "membershipReviseBody": "The market owner has requested a revision to your membership request for {marketName}."
   }
 }

@@ -59,8 +59,8 @@ export async function PUT(req: Request) {
       const shopName = shopDoc.data()?.name || "Your Shop";
       await sendNotificationToUser(
         orderData.shopperEmail,
-        "Order Update",
-        `Your order from ${shopName} is now: ${status}`,
+        { key: "Notifications.orderUpdateTitle" },
+        { key: "Notifications.orderUpdateBody", params: { shopName, status } },
         { url: "/shopper" }
       );
     }

@@ -47,8 +47,8 @@ export async function PUT(req: Request) {
       if (membershipData?.userEmail) {
         await sendNotificationToUser(
           membershipData.userEmail,
-          "Market Membership Approved",
-          `Your request to join the market has been approved!`,
+          { key: "Notifications.membershipApprovedTitle" },
+          { key: "Notifications.membershipApprovedBody", params: { marketName: marketDoc.data()?.name || "Unknown" } },
           { url: "/shopper" }
         );
       }
@@ -62,8 +62,8 @@ export async function PUT(req: Request) {
       if (membershipData?.userEmail) {
         await sendNotificationToUser(
           membershipData.userEmail,
-          "Action Required: Membership Request",
-          `The market owner has requested a revision to your membership request. Feedback: ${feedback || "Please provide more details."}`,
+          { key: "Notifications.membershipReviseTitle" },
+          { key: "Notifications.membershipReviseBody", params: { marketName: marketDoc.data()?.name || "Unknown" } },
           { url: "/shopper" }
         );
       }

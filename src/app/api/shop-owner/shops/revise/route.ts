@@ -56,16 +56,17 @@ export async function PUT(req: Request) {
 
     // Notify Market Owner only if it's going back to pending
     if (!isAlreadyApproved) {
-      const marketId = shopDoc.data()?.marketId;
+      const shopData = shopDoc.data();
+      const marketId = shopData?.marketId;
       if (marketId) {
         const marketDoc = await adminDb.collection("markets").doc(marketId).get();
         const marketData = marketDoc.data();
         if (marketData?.ownerEmail) {
           await sendNotificationToUser(
             marketData.ownerEmail,
-            "Shop Resubmitted",
-            `The shop "${name}" has been revised and resubmitted for your review in market "${marketData.name || 'Unknown'}".`,
-            { url: "/market-owner" }
+            { key: "Notifications.shopReviseTitle" },
+            { key: "Notifications.shopReviseBody", params: { shopName: shopData?.name || "Your Shop" } },
+            { url: "/admin" }
           );
         }
       }

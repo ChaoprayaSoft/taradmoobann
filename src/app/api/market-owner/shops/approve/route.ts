@@ -51,9 +51,9 @@ export async function POST(req: Request) {
       });
       if (shopData?.ownerEmail) {
         await sendNotificationToUser(
-          shopData.ownerEmail,
-          "Shop Approved!",
-          `Your shop "${shopData.name || 'Unknown'}" has been approved. You can now manage it from your Shop Owner dashboard.`,
+          shopDoc.data()?.ownerEmail,
+          { key: "Notifications.shopApprovedTitle" },
+          { key: "Notifications.shopApprovedBody", params: { shopName: shopDoc.data()?.name || "Your Shop" } },
           { url: "/shop-owner" }
         );
       }
@@ -65,9 +65,9 @@ export async function POST(req: Request) {
       });
       if (shopData?.ownerEmail) {
         await sendNotificationToUser(
-          shopData.ownerEmail,
-          "Action Required: Shop Request",
-          `The market owner has requested a revision for your shop "${shopData.name || 'Unknown'}". Feedback: ${feedback || "Please check your shop details."}`,
+          shopDoc.data()?.ownerEmail,
+          { key: "Notifications.shopReviseTitle" },
+          { key: "Notifications.shopReviseBody", params: { shopName: shopDoc.data()?.name || "Your Shop" } },
           { url: "/shop-owner" }
         );
       }

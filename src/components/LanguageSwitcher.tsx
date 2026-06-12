@@ -10,7 +10,14 @@ export default function LanguageSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLanguageChange = (newLocale: string) => {
+  const handleLanguageChange = async (newLocale: string) => {
+    // Save to database asynchronously (fire and forget)
+    fetch("/api/user/locale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale: newLocale })
+    }).catch(console.error);
+
     startTransition(() => {
       // Strip the current locale from the pathname to build the new one
       const pathWithoutLocale = pathname.replace(new RegExp(`^/${locale}`), "") || "/";
