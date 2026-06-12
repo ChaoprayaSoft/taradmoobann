@@ -31,13 +31,11 @@ export default async function MarketShoppingPage({ params, searchParams }: { par
       redirect("/"); // Market not found
     }
     const shopsCountSnap = await adminDb.collection("shops").where("marketId", "==", marketId).where("status", "==", "approved").count().get();
-    const membersCountSnap = await adminDb.collection("market_memberships").where("marketId", "==", marketId).where("status", "==", "approved").count().get();
 
     marketData = { 
       id: marketDoc.id, 
       ...marketDoc.data(),
-      shopsCount: shopsCountSnap.data().count,
-      membersCount: membersCountSnap.data().count
+      shopsCount: shopsCountSnap.data().count
     };
 
     // 2. Fetch all markets to populate the switch dropdown
