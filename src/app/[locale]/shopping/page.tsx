@@ -61,6 +61,17 @@ export default async function ShoppingPage() {
   whatsUpTodayProducts = whatsUpTodayProducts.sort(() => 0.5 - Math.random()).slice(0, 4);
   const nearbyProducts = allProducts.sort(() => 0.5 - Math.random()).slice(0, 8);
 
+  // 4.5 Fetch Spotlight Products
+  let spotlightProducts: any[] = [];
+  allShops.forEach(sData => {
+    if (sData.isSpotlight && sData.spotlightUntil && new Date(sData.spotlightUntil) > new Date() && sData.spotlightProductId) {
+      const product = allProducts.find((p: any) => p.id === sData.spotlightProductId);
+      if (product) {
+        spotlightProducts.push(product);
+      }
+    }
+  });
+
   // 5. Fetch Ads
   const settingsDoc = await adminDb.collection("settings").doc("ads").get();
   const maxAds = settingsDoc.exists ? (settingsDoc.data()?.maxAds || 3) : 3;
@@ -108,6 +119,7 @@ export default async function ShoppingPage() {
       whatsUpTodayProducts={whatsUpTodayProducts}
       nearbyProducts={nearbyProducts}
       activeAds={fetchedAds}
+      spotlightProducts={spotlightProducts}
     />
   );
 }

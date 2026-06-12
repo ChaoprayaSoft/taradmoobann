@@ -58,6 +58,39 @@ export default function ShopperDashboardClient({
   // Address State
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  
+  // App Feedback State
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState(false);
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedbackLoading(true);
+    try {
+      const res = await fetch("/api/shopper/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: feedbackRating, comment: feedbackComment })
+      });
+      if (!res.ok) {
+        throw new Error("Failed to submit feedback");
+      }
+      setFeedbackSuccess(true);
+      setTimeout(() => {
+        setShowFeedbackModal(false);
+        setFeedbackSuccess(false);
+        setFeedbackComment("");
+        setFeedbackRating(5);
+      }, 2000);
+    } catch (err) {
+      alert("Error submitting feedback. Please try again.");
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
   const [showCoffeeModal, setShowCoffeeModal] = useState(false);
 
   // Notification Settings State
@@ -586,6 +619,15 @@ export default function ShopperDashboardClient({
           <p className="text-gray-500 mt-1">{t("description")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setShowFeedbackModal(true)}
+            className="flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 px-4 py-2 rounded-md hover:bg-blue-100 transition shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+            <span className="font-bold text-sm">{t("leaveComment")}</span>
+          </button>
           <button
             onClick={() => setShowCoffeeModal(true)}
             className="flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-200 px-4 py-2 rounded-md hover:bg-orange-100 transition shadow-sm"
@@ -1570,6 +1612,77 @@ export default function ShopperDashboardClient({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* APP FEEDBACK MODAL */}
+      {showFeedbackModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-bold text-gray-900">{t("leaveComment")}</h2>
+              <button onClick={() => setShowFeedbackModal(false)} className="text-gray-400 hover:text-gray-600 transition">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {feedbackSuccess ? (
+                <div className="text-center py-8">
+                  <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                    <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">{t("feedbackSuccess")}</h3>
+                  <p className="text-gray-500 text-sm">{t("feedbackSuccessDesc")}</p>
+                </div>
+              ) : (
+                <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("rating")}</label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setFeedbackRating(star)}
+                          className="focus:outline-none"
+                        >
+                          <svg 
+                            className={`w-8 h-8 ${feedbackRating >= star ? "text-yellow-400" : "text-gray-300"}`} 
+                            fill="currentColor" 
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("comment")}</label>
+                    <textarea
+                      required
+                      rows={4}
+                      className="w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 p-2"
+                      placeholder={t("commentPlaceholder") || "Any features you'd like to see?"}
+                      value={feedbackComment}
+                      onChange={(e) => setFeedbackComment(e.target.value)}
+                    ></textarea>
+                  </div>
+                  <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 mt-6">
+                    <button type="button" onClick={() => setShowFeedbackModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition">
+                      {t("cancel")}
+                    </button>
+                    <button type="submit" disabled={feedbackLoading} className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 disabled:opacity-50 transition">
+                      {feedbackLoading ? t("submitting") : t("submit")}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       )}

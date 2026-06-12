@@ -147,7 +147,14 @@
     "shopCoverImage": "รูปภาพปกร้านค้า",
     "cancelButton": "ยกเลิก",
     "submitShopButton": "ส่งข้อมูลร้านค้า",
-    "submittingShop": "กำลังส่ง..."
+    "submittingShop": "กำลังส่ง...",
+    "leaveComment": "แสดงความคิดเห็น",
+    "feedbackSuccess": "ขอบคุณสำหรับความคิดเห็นของคุณ!",
+    "feedbackSuccessDesc": "เราซาบซึ้งในความคิดเห็นของคุณและจะนำไปปรับปรุงแอปให้ดียิ่งขึ้น",
+    "rating": "คะแนน",
+    "comment": "ความคิดเห็น",
+    "commentPlaceholder": "ฟีเจอร์ใดที่คุณอยากเห็นเพิ่ม?",
+    "submit": "ส่ง"
   },
   "ShopperWallet": {
     "myWallet": "กระเป๋าเงินของฉัน",
@@ -266,7 +273,11 @@
     "villageName": "ชื่อหมู่บ้าน",
     "villageNamePlaceholder": "เช่น หมู่บ้านสุขสันต์",
     "deleteMarketTitle": "ลบตลาด?",
-    "deleteMarketConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบ {name}? การดำเนินการนี้ไม่สามารถยกเลิกได้"
+    "deleteMarketConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบ {name}? การดำเนินการนี้ไม่สามารถยกเลิกได้",
+    "appFeedback": "ข้อเสนอแนะแอป",
+    "totalComments": "ความคิดเห็นทั้งหมด",
+    "avgRating": "คะแนนเฉลี่ย",
+    "noFeedbackYet": "ยังไม่มีข้อเสนอแนะ"
   },
   "ShopOwnerDashboard": {
     "shopDashboard": "แดชบอร์ดร้านค้า",

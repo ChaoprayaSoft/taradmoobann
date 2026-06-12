@@ -125,7 +125,14 @@
     "shopCoverImage": "Shop Cover Image",
     "cancelButton": "Cancel",
     "submitShopButton": "Submit Shop",
-    "submittingShop": "Submitting..."
+    "submittingShop": "Submitting...",
+    "leaveComment": "Leave a Comment",
+    "feedbackSuccess": "Thank you for your feedback!",
+    "feedbackSuccessDesc": "We appreciate your input and will use it to improve the app.",
+    "rating": "Rating",
+    "comment": "Comment",
+    "commentPlaceholder": "Any features you'd like to see?",
+    "submit": "Submit"
   },
   "ShopperWallet": {
     "myWallet": "My Wallet",
@@ -244,7 +251,11 @@
     "villageName": "Village Name",
     "villageNamePlaceholder": "e.g. Happy Village",
     "deleteMarketTitle": "Delete Market?",
-    "deleteMarketConfirm": "Are you sure you want to delete {name}? This action cannot be undone."
+    "deleteMarketConfirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+    "appFeedback": "App Feedback",
+    "totalComments": "Total Comments",
+    "avgRating": "Average Rating",
+    "noFeedbackYet": "No feedback received yet."
   },
   "ShopOwnerDashboard": {
     "shopDashboard": "Shop Dashboard",
