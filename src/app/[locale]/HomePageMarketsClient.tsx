@@ -5,14 +5,18 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
+import ProductCard from "@/components/ProductCard";
+
 export default function HomePageMarketsClient({ 
   markets, 
   userEmail,
-  spotlightProducts 
+  spotlightProducts,
+  whatsUpTodayProducts = []
 }: { 
   markets: any[], 
   userEmail: string,
-  spotlightProducts: any[]
+  spotlightProducts: any[],
+  whatsUpTodayProducts?: any[]
 }) {
   const router = useRouter();
   const [showSignInModal, setShowSignInModal] = useState(false);
@@ -20,11 +24,11 @@ export default function HomePageMarketsClient({
 
   const handleEnterMarket = (e: React.MouseEvent, marketId: string) => {
     e.preventDefault();
-    if (!userEmail) {
-      setShowSignInModal(true);
-      return;
-    }
     router.push(`/market/${marketId}`);
+  };
+
+  const navigateToProduct = (marketId: string, shopId: string) => {
+    router.push(`/market/${marketId}?shopId=${shopId}`);
   };
 
   return (
@@ -82,6 +86,28 @@ export default function HomePageMarketsClient({
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* What's up today Section */}
+      {whatsUpTodayProducts.length > 0 && (
+        <div className="w-full mb-12 text-left">
+          <div className="flex items-center gap-2 mb-6 px-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-brand-500">
+              <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.75a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.913-.143z" clipRule="evenodd" />
+            </svg>
+            <h2 className="text-2xl font-bold text-gray-900">{t("whatsUpToday")}</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4">
+            {whatsUpTodayProducts.map(product => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                shopName={product.shopName}
+                onClickProduct={() => product.marketId && product.shopId ? navigateToProduct(product.marketId, product.shopId) : undefined}
+              />
+            ))}
           </div>
         </div>
       )}

@@ -5,14 +5,20 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
+import ProductCard from "@/components/ProductCard";
+
 export default function ShoppingClient({ 
   markets, 
   userVillageName,
-  userEmail 
+  userEmail,
+  whatsUpTodayProducts = [],
+  nearbyProducts = []
 }: { 
   markets: any[], 
   userVillageName: string,
-  userEmail: string | null 
+  userEmail: string | null,
+  whatsUpTodayProducts?: any[],
+  nearbyProducts?: any[]
 }) {
   const router = useRouter();
   const t = useTranslations("Shopping");
@@ -26,11 +32,11 @@ export default function ShoppingClient({
 
   const handleEnterMarket = (e: React.MouseEvent, marketId: string) => {
     e.preventDefault();
-    if (!userEmail) {
-      setShowSignInModal(true);
-      return;
-    }
     router.push(`/market/${marketId}`);
+  };
+
+  const navigateToProduct = (marketId: string, shopId: string) => {
+    router.push(`/market/${marketId}?shopId=${shopId}`);
   };
 
   return (
@@ -102,6 +108,40 @@ export default function ShoppingClient({
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* What's up today Section */}
+      {userVillageName && whatsUpTodayProducts.length > 0 && (
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t("whatsUpToday")}</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {whatsUpTodayProducts.map(product => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                shopName={product.shopName}
+                onClickProduct={() => navigateToProduct(product.marketId, product.shopId)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Nearby Neighborhood Section */}
+      {nearbyProducts.length > 0 && (
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t("nearbyNeighborhood")}</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {nearbyProducts.map(product => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                shopName={product.shopName}
+                onClickProduct={() => navigateToProduct(product.marketId, product.shopId)}
+              />
+            ))}
+          </div>
         </div>
       )}
 

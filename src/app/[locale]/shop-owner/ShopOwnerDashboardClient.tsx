@@ -792,11 +792,17 @@ export default function ShopOwnerDashboardClient({
           </div>
 
           {isAddingProduct && (
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold mb-4">{editingProduct ? t("editProduct") : t("addNewProduct")}</h2>
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
+              <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">{editingProduct ? t("editProduct") : t("addNewProduct")}</h2>
+                  <button onClick={cancelProductForm} className="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
               {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
               
-              <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">{t("productName")}</label>
                   <input
@@ -998,7 +1004,14 @@ export default function ShopOwnerDashboardClient({
                     </ul>
                   )}
                 </div>
-                <div className="pt-2">
+                <div className="pt-4 flex gap-3 justify-end border-t border-gray-100">
+                  <button 
+                    type="button" 
+                    onClick={cancelProductForm}
+                    className="px-6 py-2 rounded-md font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
+                  >
+                    {t("cancel")}
+                  </button>
                   <button 
                     type="submit" 
                     disabled={loading}
@@ -1009,6 +1022,7 @@ export default function ShopOwnerDashboardClient({
                 </div>
               </form>
             </div>
+          </div>
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

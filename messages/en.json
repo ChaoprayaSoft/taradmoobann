@@ -3,6 +3,7 @@
     "welcome": "Welcome to",
     "description": "Your local neighborhood online market.",
     "spotlightProducts": "Spotlight Products",
+    "whatsUpToday": "What's up today?",
     "spotlight": "Spotlight",
     "noImage": "No Image",
     "inMarket": "In {marketName}",
@@ -24,7 +25,9 @@
     "submitRequest": "Submit Request",
     "signInRequired": "Sign In Required",
     "signInRequiredDesc": "You need to sign in or create an account before you can join a market and start shopping.",
-    "signInWithGoogle": "Sign in with Google"
+    "signInPromptDesc": "You must be signed in to enter a market. Would you like to sign in now?",
+    "signInWithGoogle": "Sign in with Google",
+    "signIn": "Sign In"
   },
   "Navigation": {
     "home": "Home",
@@ -489,6 +492,8 @@
     "yourLocalMarkets": "Your Local Markets",
     "marketsInYourVillage": "Markets in Your Village",
     "otherMarkets": "Other Markets",
+    "whatsUpToday": "What's up today?",
+    "nearbyNeighborhood": "Nearby neighborhood",
     "noLocalMarkets": "There are no markets currently available in your village.",
     "noVillageSet": "You have not set a village name yet. Please add a delivery address to find markets in your village.",
     "noOtherMarkets": "There are no other markets available right now.",

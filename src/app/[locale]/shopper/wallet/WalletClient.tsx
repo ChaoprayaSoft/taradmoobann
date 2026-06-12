@@ -13,9 +13,9 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
   const [error, setError] = useState("");
 
   const packages = [
-    { coins: 10, price: 5 },
-    { coins: 25, price: 10 },
-    { coins: 60, price: 20 },
+    { coins: 40, price: 20 },
+    { coins: 55, price: 25 },
+    { coins: 120, price: 50 },
   ];
 
   const handleTopUp = async () => {

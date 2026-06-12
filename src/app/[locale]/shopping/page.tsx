@@ -12,7 +12,7 @@ export default async function ShoppingPage() {
 
   // 1. Fetch all markets
   const marketsSnapshot = await adminDb.collection("markets").where("isActive", "==", true).get();
-  const allMarkets = marketsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const allMarkets = marketsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
 
   // 2. Determine user's default village
   let userVillageName = "";
@@ -26,11 +26,41 @@ export default async function ShoppingPage() {
     }
   }
 
+  // 3. Fetch all approved shops
+  const shopsSnapshot = await adminDb.collection("shops").where("status", "==", "approved").get();
+  const allShops = shopsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+
+  // 4. Fetch all available products
+  const productsSnapshot = await adminDb.collection("products").where("isAvailable", "==", true).get();
+  const allProducts = productsSnapshot.docs.map(doc => {
+    const data = doc.data();
+    const shop = allShops.find(s => s.id === data.shopId);
+    return {
+      id: doc.id,
+      ...data,
+      shopName: shop ? shop.name : "Unknown Shop",
+      marketId: shop ? shop.marketId : null
+    };
+  }).filter(p => p.marketId); // Only include products whose shop and market exist
+
+  // Separate products into village and global
+  let whatsUpTodayProducts: any[] = [];
+  if (userVillageName) {
+    const villageMarkets = allMarkets.filter(m => m.villageName === userVillageName).map(m => m.id);
+    whatsUpTodayProducts = allProducts.filter(p => villageMarkets.includes(p.marketId));
+  }
+  
+  // Shuffle arrays
+  whatsUpTodayProducts = whatsUpTodayProducts.sort(() => 0.5 - Math.random()).slice(0, 10);
+  const nearbyProducts = allProducts.sort(() => 0.5 - Math.random()).slice(0, 15);
+
   return (
     <ShoppingClient 
       markets={allMarkets} 
       userVillageName={userVillageName} 
       userEmail={userEmail} 
+      whatsUpTodayProducts={whatsUpTodayProducts}
+      nearbyProducts={nearbyProducts}
     />
   );
 }

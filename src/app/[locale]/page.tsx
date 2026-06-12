@@ -19,6 +19,7 @@ export default async function Home() {
   let marketStatusMap = new Map<string, string>();
   let activeAds: any[] = [];
   let spotlightProducts: any[] = [];
+  let globalActiveProducts: any[] = [];
 
   try {
     const snapshot = await adminDb.collection("markets").get();
@@ -124,6 +125,37 @@ export default async function Home() {
       }
     }
 
+    // Fetch Global Active Products for "What's up today?"
+    const allProductsSnap = await adminDb.collection("products").where("isAvailable", "==", true).get();
+    globalActiveProducts = allProductsSnap.docs.map(doc => {
+      const data = doc.data();
+      return { id: doc.id, ...data };
+    });
+
+    if (globalActiveProducts.length > 0) {
+      const shopIds = Array.from(new Set(globalActiveProducts.map(p => p.shopId)));
+      const shopDocs = await Promise.all(shopIds.map(id => adminDb.collection("shops").doc(id).get()));
+      const shopMap = new Map();
+      shopDocs.forEach(doc => {
+        if (doc.exists) {
+          shopMap.set(doc.id, doc.data());
+        }
+      });
+      globalActiveProducts = globalActiveProducts.map(p => {
+        const shop = shopMap.get(p.shopId);
+        const market = markets.find(m => m.id === shop?.marketId);
+        return {
+          ...p,
+          shopName: shop?.name || "Unknown Shop",
+          marketId: market?.id || null
+        };
+      }).filter(p => p.marketId);
+
+      globalActiveProducts = globalActiveProducts.sort(() => 0.5 - Math.random()).slice(0, 10);
+    }
+    
+    // globalActiveProducts will be passed to HomePageMarketsClient
+
   } catch (error) {
     console.error("Failed to load markets for homepage:", error);
   }
@@ -147,6 +179,7 @@ export default async function Home() {
         markets={markets} 
         userEmail={userEmail}
         spotlightProducts={spotlightProducts}
+        whatsUpTodayProducts={globalActiveProducts}
       />
 
       <AdsSection ads={activeAds} />

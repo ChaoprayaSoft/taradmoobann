@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import { useCart } from "./CartProvider";
+import { useSession, signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
-export default function ProductCard({ product, shopName, isClosed, shopHouseNumber, shopLocation }: { product: any, shopName?: string, isClosed?: boolean, shopHouseNumber?: string, shopLocation?: string }) {
+export default function ProductCard({ product, shopName, isClosed, shopHouseNumber, shopLocation, onClickProduct }: { product: any, shopName?: string, isClosed?: boolean, shopHouseNumber?: string, shopLocation?: string, onClickProduct?: () => void }) {
+  const { data: session } = useSession();
+  const t = useTranslations("HomePage");
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const { addToCart } = useCart();
   
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string | string[]>>({});
   const [note, setNote] = useState("");
 
@@ -25,6 +30,14 @@ export default function ProductCard({ product, shopName, isClosed, shopHouseNumb
   };
 
   const handleOpenConfig = () => {
+    if (onClickProduct) {
+      onClickProduct();
+      return;
+    }
+    if (!session) {
+      setShowSignInModal(true);
+      return;
+    }
     // Pre-select first choice for required options
     const defaults: Record<string, string | string[]> = {};
     options.forEach((opt: any) => {
@@ -228,6 +241,29 @@ export default function ProductCard({ product, shopName, isClosed, shopHouseNumb
                 className="px-4 py-2 text-white bg-brand-600 rounded-md hover:bg-brand-700 font-medium text-sm transition"
               >
                 Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Guest Sign In Modal */}
+      {showSignInModal && (
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('signInRequired')}</h3>
+            <p className="text-gray-500 mb-6 text-sm">{t('signInRequiredDesc')}</p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => signIn("google")}
+                className="w-full py-2.5 bg-brand-600 text-white rounded-md hover:bg-brand-700 font-medium transition"
+              >
+                {t('signInWithGoogle')}
+              </button>
+              <button
+                onClick={() => setShowSignInModal(false)}
+                className="w-full py-2.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium transition"
+              >
+                {t('cancel')}
               </button>
             </div>
           </div>
