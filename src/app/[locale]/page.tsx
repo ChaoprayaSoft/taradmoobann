@@ -126,11 +126,11 @@ export default async function Home() {
     }
 
     // Fetch Global Active Products for "What's up today?"
-    const allProductsSnap = await adminDb.collection("products").where("isAvailable", "==", true).get();
+    const allProductsSnap = await adminDb.collection("products").get();
     globalActiveProducts = allProductsSnap.docs.map(doc => {
       const data = doc.data();
-      return { id: doc.id, ...data };
-    });
+      return { id: doc.id, ...data } as any;
+    }).filter(p => p.isAvailable === undefined || p.isAvailable === true);
 
     if (globalActiveProducts.length > 0) {
       const shopIds = Array.from(new Set(globalActiveProducts.map(p => p.shopId)));

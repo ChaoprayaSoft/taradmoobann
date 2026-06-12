@@ -11,7 +11,7 @@ export default async function ShoppingPage() {
   const userEmail = session?.user?.email || null;
 
   // 1. Fetch all markets
-  const marketsSnapshot = await adminDb.collection("markets").where("isActive", "==", true).get();
+  const marketsSnapshot = await adminDb.collection("markets").get();
   const allMarkets = marketsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
 
   // 2. Determine user's default village
@@ -36,7 +36,7 @@ export default async function ShoppingPage() {
   const allShops = shopsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
 
   // 4. Fetch all available products
-  const productsSnapshot = await adminDb.collection("products").where("isAvailable", "==", true).get();
+  const productsSnapshot = await adminDb.collection("products").get();
   const allProducts = productsSnapshot.docs.map(doc => {
     const data = doc.data();
     const shop = allShops.find(s => s.id === data.shopId);
@@ -45,8 +45,8 @@ export default async function ShoppingPage() {
       ...data,
       shopName: shop ? shop.name : "Unknown Shop",
       marketId: shop ? shop.marketId : null
-    };
-  }).filter(p => p.marketId); // Only include products whose shop and market exist
+    } as any;
+  }).filter(p => p.marketId && (p.isAvailable === undefined || p.isAvailable === true)); // Only include products whose shop and market exist and are available
 
   // Separate products into village and global
   let whatsUpTodayProducts: any[] = [];
