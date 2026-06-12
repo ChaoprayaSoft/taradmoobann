@@ -1251,6 +1251,45 @@ export default function ShopperDashboardClient({
         )}
       </div>
 
+      {/* DISCOVER MARKETS */}
+      <div id="discover-markets" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">{t("discoverMarketsTitle")}</h2>
+        {discoverableMarkets.length === 0 ? (
+          <p className="text-gray-500 text-sm">{t("noNewMarkets")}</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {discoverableMarkets.map(market => (
+              <div key={market.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col h-full">
+                <button
+                  onClick={() => router.push(`/market/${market.id}`)}
+                  className="w-full h-32 block overflow-hidden group text-left relative focus:outline-none"
+                >
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
+                    <span className="text-white font-medium bg-black/50 px-3 py-1 rounded-full">{t("enterMarket")}</span>
+                  </div>
+                  {market.coverImage ? (
+                    <img src={market.coverImage} alt={market.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 transition-colors duration-300 group-hover:bg-gray-200">
+                      {t("noImage")}
+                    </div>
+                  )}
+                </button>
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="font-bold text-gray-900">{market.name}</h3>
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{market.description}</p>
+                  <button
+                    onClick={() => router.push(`/market/${market.id}`)}
+                    className="mt-4 w-full bg-brand-50 text-brand-700 py-2 rounded text-sm font-semibold hover:bg-brand-100 transition"
+                  >
+                    {t("enterMarket")}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Order Details Modal */}
       {selectedOrderDetails && (
