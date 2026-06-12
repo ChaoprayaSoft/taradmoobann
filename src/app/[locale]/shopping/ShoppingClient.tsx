@@ -22,13 +22,8 @@ export default function ShoppingClient({
 }) {
   const router = useRouter();
   const t = useTranslations("Shopping");
-  const [activeTab, setActiveTab] = useState<"local" | "other">(userVillageName ? "local" : "other");
+  const displayMarkets = markets;
   const [showSignInModal, setShowSignInModal] = useState(false);
-
-  const localMarkets = markets.filter(m => m.villageName === userVillageName);
-  const otherMarkets = markets.filter(m => m.villageName !== userVillageName);
-
-  const displayMarkets = activeTab === "local" ? localMarkets : otherMarkets;
 
   const handleEnterMarket = (e: React.MouseEvent, marketId: string) => {
     e.preventDefault();
@@ -45,27 +40,13 @@ export default function ShoppingClient({
         <h1 className="text-3xl font-bold text-gray-900">{t("yourLocalMarkets")}</h1>
         
         <div className="flex bg-gray-100 p-1 rounded-lg self-start">
-          <button
-            onClick={() => setActiveTab("local")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition ${activeTab === "local" ? "bg-white text-brand-700 shadow-sm" : "text-gray-600 hover:text-gray-900"}`}
-          >
-            {t("marketsInYourVillage")}
-          </button>
-          <button
-            onClick={() => setActiveTab("other")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition ${activeTab === "other" ? "bg-white text-brand-700 shadow-sm" : "text-gray-600 hover:text-gray-900"}`}
-          >
-            {t("otherMarkets")}
-          </button>
         </div>
       </div>
 
       {displayMarkets.length === 0 ? (
         <div className="text-center p-12 bg-gray-50 rounded-xl border border-dashed border-gray-200 mt-8">
           <p className="text-gray-500">
-            {activeTab === "local" 
-              ? (userVillageName ? t("noLocalMarkets") : t("noVillageSet")) 
-              : t("noOtherMarkets")}
+            {t("noOtherMarkets")}
           </p>
         </div>
       ) : (
@@ -112,21 +93,36 @@ export default function ShoppingClient({
       )}
 
       {/* What's up today Section */}
-      {userVillageName && whatsUpTodayProducts.length > 0 && (
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t("whatsUpToday")}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {whatsUpTodayProducts.map(product => (
-              <ProductCard 
-                key={product.id} 
-                product={product} 
-                shopName={product.shopName}
-                onClickProduct={() => navigateToProduct(product.marketId, product.shopId)}
-              />
-            ))}
+      <div className="mt-16">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">{t("whatsUpToday")}</h2>
+        {userVillageName ? (
+          whatsUpTodayProducts.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {whatsUpTodayProducts.map(product => (
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  shopName={product.shopName}
+                  onClickProduct={() => navigateToProduct(product.marketId, product.shopId)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">{t("noWhatsUpToday")}</p>
+          )
+        ) : (
+          <div className="text-center bg-gray-50 p-8 rounded-xl border border-gray-200">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t("signInToSeeSpecials")}</h3>
+            <p className="text-gray-500 mb-6">{t("signInToSeeSpecialsDesc")}</p>
+            <button
+              onClick={() => signIn("google")}
+              className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition"
+            >
+              {t("signIn")}
+            </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Nearby Neighborhood Section */}
       {nearbyProducts.length > 0 && (
