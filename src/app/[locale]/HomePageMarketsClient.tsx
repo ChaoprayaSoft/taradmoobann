@@ -71,6 +71,7 @@ export default function HomePageMarketsClient({
                   <div className="p-4 flex flex-col flex-1">
                     <h3 className="font-bold text-gray-900 line-clamp-1">{product.name}</h3>
                     <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mt-0.5">{t("inMarket", { marketName: product.marketName })}</p>
+                    {product.villageName && <p className="text-[10px] uppercase tracking-wider text-brand-600 font-bold mt-0.5">{product.villageName}</p>}
                     <p className="text-brand-600 font-bold mt-1">฿{product.price}</p>
                     <p className="text-xs text-gray-500 line-clamp-2 mt-2 flex-1">{product.description}</p>
                     
@@ -105,6 +106,7 @@ export default function HomePageMarketsClient({
                 key={product.id} 
                 product={product} 
                 shopName={product.shopName}
+                villageName={product.villageName}
                 onClickProduct={() => product.marketId && product.shopId ? navigateToProduct(product.marketId, product.shopId) : undefined}
               />
             ))}

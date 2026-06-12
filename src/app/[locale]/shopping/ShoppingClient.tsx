@@ -7,18 +7,23 @@ import { useTranslations } from "next-intl";
 
 import ProductCard from "@/components/ProductCard";
 
+import HomePageMarketsClient from "../HomePageMarketsClient";
+import AdsSection from "@/components/AdsSection";
+
 export default function ShoppingClient({ 
   markets, 
   userVillageName,
   userEmail,
   whatsUpTodayProducts = [],
-  nearbyProducts = []
+  nearbyProducts = [],
+  activeAds = []
 }: { 
   markets: any[], 
   userVillageName: string,
   userEmail: string | null,
   whatsUpTodayProducts?: any[],
-  nearbyProducts?: any[]
+  nearbyProducts?: any[],
+  activeAds?: any[]
 }) {
   const router = useRouter();
   const t = useTranslations("Shopping");
@@ -52,6 +57,7 @@ export default function ShoppingClient({
                     key={product.id} 
                     product={product} 
                     shopName={product.shopName}
+                    villageName={product.villageName}
                     onClickProduct={() => navigateToProduct(product.marketId, product.shopId)}
                   />
                 ))}
@@ -86,10 +92,27 @@ export default function ShoppingClient({
                 key={product.id} 
                 product={product} 
                 shopName={product.shopName}
+                villageName={product.villageName}
                 onClickProduct={() => navigateToProduct(product.marketId, product.shopId)}
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Discover Local Markets */}
+      <div className="mt-16">
+        <HomePageMarketsClient 
+          markets={markets} 
+          userEmail={userEmail || ""} 
+          spotlightProducts={[]}
+        />
+      </div>
+
+      {/* Sponsored Section */}
+      {activeAds.length > 0 && (
+        <div className="mt-16">
+          <AdsSection ads={activeAds} />
         </div>
       )}
 

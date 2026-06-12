@@ -119,7 +119,8 @@ export default async function Home() {
           return {
             ...p,
             marketId: market?.id || "",
-            marketName: market?.name || "Local Market"
+            marketName: market?.name || "Local Market",
+            villageName: market?.villageName || ""
           };
         });
       }
@@ -147,7 +148,8 @@ export default async function Home() {
         return {
           ...p,
           shopName: shop?.name || "Unknown Shop",
-          marketId: market?.id || null
+          marketId: market?.id || null,
+          villageName: market?.villageName || ""
         };
       }).filter(p => p.marketId);
 

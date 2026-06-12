@@ -5,7 +5,7 @@ import { useCart } from "./CartProvider";
 import { useSession, signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
-export default function ProductCard({ product, shopName, isClosed, shopHouseNumber, shopLocation, onClickProduct }: { product: any, shopName?: string, isClosed?: boolean, shopHouseNumber?: string, shopLocation?: string, onClickProduct?: () => void }) {
+export default function ProductCard({ product, shopName, villageName, isClosed, shopHouseNumber, shopLocation, onClickProduct }: { product: any, shopName?: string, villageName?: string, isClosed?: boolean, shopHouseNumber?: string, shopLocation?: string, onClickProduct?: () => void }) {
   const { data: session } = useSession();
   const t = useTranslations("HomePage");
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
@@ -116,8 +116,12 @@ export default function ProductCard({ product, shopName, isClosed, shopHouseNumb
             ฿{product.price}
           </span>
         </div>
-        {shopName && (
-          <p className="text-xs text-brand-600 font-medium mb-1">From: {shopName}</p>
+        {(shopName || villageName) && (
+          <p className="text-xs text-brand-600 font-medium mb-1 line-clamp-1">
+            {shopName && <span>From: {shopName}</span>}
+            {shopName && villageName && <span className="mx-1">•</span>}
+            {villageName && <span>{villageName}</span>}
+          </p>
         )}
         
         {(shopHouseNumber || shopLocation) && (
