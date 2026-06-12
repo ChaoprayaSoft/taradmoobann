@@ -23,7 +23,6 @@ const CATEGORIES = [
 export default function ShopperDashboardClient({
   allMarkets,
   initialShops = [],
-  memberships,
   initialAddresses = [],
   initialOrders = [],
   userCoins = 0,
@@ -33,7 +32,6 @@ export default function ShopperDashboardClient({
 }: {
   allMarkets: any[],
   initialShops?: any[],
-  memberships: any[],
   initialAddresses: string[],
   initialOrders: any[],
   userCoins?: number,
@@ -47,12 +45,6 @@ export default function ShopperDashboardClient({
 
   const uniqueVillageNames = Array.from(new Set(allMarkets.map(m => m.villageName).filter(Boolean)));
 
-  // Membership Request State
-  const [requestingMarketId, setRequestingMarketId] = useState<string | null>(null);
-  const [applicationNote, setApplicationNote] = useState("");
-  const [membershipLoading, setMembershipLoading] = useState(false);
-  const [membershipError, setMembershipError] = useState("");
-
   // Shop Creation State
   const [isOpeningShop, setIsOpeningShop] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,13 +52,8 @@ export default function ShopperDashboardClient({
   const [success, setSuccess] = useState(false);
   const [file, setFile] = useState<File | null>(null);
 
-  // Markets the user is approved to enter
-  const approvedMarketIds = memberships.filter(m => m.status === "approved").map(m => m.marketId);
-  const approvedMarkets = allMarkets.filter(m => approvedMarketIds.includes(m.id));
-
-  // Unjoined markets
-  const membershipMarketIds = memberships.map(m => m.marketId);
-  const discoverableMarkets = allMarkets.filter(m => !membershipMarketIds.includes(m.id));
+  // All markets are discoverable
+  const discoverableMarkets = allMarkets;
 
   // Address State
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
@@ -234,9 +221,6 @@ export default function ShopperDashboardClient({
   const [shopRequests, setShopRequests] = useState<any[]>(
     initialShops ? initialShops.filter(s => s.ownerEmail === session?.user?.email && s.status !== "approved") : []
   );
-  const [membershipRequests, setMembershipRequests] = useState<any[]>(
-    memberships.filter(m => m.status !== "approved")
-  );
 
   useEffect(() => {
     if (!session?.user?.email) return;
@@ -298,8 +282,6 @@ export default function ShopperDashboardClient({
       where("userEmail", "==", session.user.email)
     );
     const unsubMems = onSnapshot(memReqQuery, (snapshot) => {
-      const allMems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMembershipRequests(allMems.filter((m: any) => m.status !== "approved"));
     });
 
     return () => {
@@ -453,7 +435,7 @@ export default function ShopperDashboardClient({
   };
 
   const [formData, setFormData] = useState({
-    marketId: approvedMarkets.length > 0 ? approvedMarkets[0].id : "",
+    marketId: allMarkets.length > 0 ? allMarkets[0].id : "",
     name: "",
     description: "",
     category: CATEGORIES[0],
@@ -463,35 +445,7 @@ export default function ShopperDashboardClient({
   });
   const [locationType, setLocationType] = useState<"house" | "area">("house");
 
-  const submitMembership = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!requestingMarketId || !applicationNote.trim()) return;
 
-    setMembershipLoading(true);
-    setMembershipError("");
-
-    try {
-      const res = await fetch("/api/shopper/memberships", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          marketId: requestingMarketId,
-          applicationNote
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to request access");
-
-      setRequestingMarketId(null);
-      setApplicationNote("");
-      router.refresh();
-    } catch (err: any) {
-      setMembershipError(err.message);
-    } finally {
-      setMembershipLoading(false);
-    }
-  };
 
   const handleShopSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -543,7 +497,7 @@ export default function ShopperDashboardClient({
       setSuccess(true);
       setIsOpeningShop(false);
       setFormData({
-        marketId: approvedMarkets.length > 0 ? approvedMarkets[0].id : "",
+        marketId: allMarkets.length > 0 ? allMarkets[0].id : "",
         name: "",
         description: "",
         category: CATEGORIES[0],
@@ -590,35 +544,10 @@ export default function ShopperDashboardClient({
     }
   };
 
-  const [resubmitMemModal, setResubmitMemModal] = useState<{ id: string, marketId: string, name: string, note: string } | null>(null);
-  const [resubmitMemLoading, setResubmitMemLoading] = useState(false);
+
 
   const [resubmitShopModal, setResubmitShopModal] = useState<{ id: string, name: string, description: string } | null>(null);
   const [resubmitShopLoading, setResubmitShopLoading] = useState(false);
-
-  const handleResubmitMembership = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!resubmitMemModal) return;
-    setResubmitMemLoading(true);
-    try {
-      const res = await fetch("/api/shopper/memberships", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ marketId: resubmitMemModal.marketId, applicationNote: resubmitMemModal.note })
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.error || "Failed to resubmit membership.");
-      } else {
-        setResubmitMemModal(null);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error resubmitting membership.");
-    } finally {
-      setResubmitMemLoading(false);
-    }
-  };
 
   const handleResubmitShop = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -676,7 +605,7 @@ export default function ShopperDashboardClient({
             <div className="flex flex-col items-center">
               <button
                 onClick={() => setIsOpeningShop(true)}
-                disabled={approvedMarkets.length === 0}
+                disabled={allMarkets.length === 0}
                 className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50 h-full flex items-center gap-2 shadow-sm disabled:cursor-not-allowed"
               >
                 {t("openShop")}
@@ -696,28 +625,12 @@ export default function ShopperDashboardClient({
                   : t("shopSlotUsed", { used: ownedShopsCount, max: userMaxShopSlots })}
               </span>
             </div>
-            {approvedMarkets.length === 0 && (
-              <div className="absolute top-full right-0 mt-3 w-64 p-3 bg-brand-900 text-white text-sm text-center rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 transform origin-top translate-y-2 group-hover:translate-y-0 border border-brand-700">
-                <div className="absolute -top-2 right-6 w-4 h-4 bg-brand-900 border-t border-l border-brand-700 transform rotate-45"></div>
-                <div className="relative z-10 flex items-start gap-2 text-left">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-brand-300 flex-shrink-0 mt-0.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                  </svg>
-                  <span className="font-medium text-brand-50 tracking-wide leading-snug">
-                    You have to be a market member to open a shop.
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
 
       {/* QUICK ACCESS BUTTONS */}
       <div className="flex flex-wrap items-center gap-3 mt-4 border-b border-gray-200 pb-4">
-        <a href="#market-memberships" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
-          {t("marketMembership")}
-        </a>
         <a href="#my-messages" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
           {t("myMessage")}
         </a>
@@ -730,11 +643,11 @@ export default function ShopperDashboardClient({
         <a href="#notification-settings" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
           {t("notifications")}
         </a>
-        {(shopRequests.length > 0 || membershipRequests.length > 0) && (
+        {shopRequests.length > 0 && (
           <a href="#my-requests" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
             {t("myRequests")}
             <span className="bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full ml-1 font-bold">
-              {shopRequests.length + membershipRequests.length}
+              {shopRequests.length}
             </span>
           </a>
         )}
@@ -782,7 +695,7 @@ export default function ShopperDashboardClient({
       </div>
 
       {/* MY REQUESTS */}
-      {(shopRequests.length > 0 || membershipRequests.length > 0) && (
+      {shopRequests.length > 0 && (
         <div id="my-requests" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">{t("myRequests")}</h2>
           <div className="space-y-4">
@@ -821,44 +734,6 @@ export default function ShopperDashboardClient({
                 </div>
               </div>
             ))}
-            {membershipRequests.map(req => {
-              const marketName = allMarkets.find(m => m.id === req.marketId)?.name || 'Unknown Market';
-              return (
-                <div key={req.id} className="border border-gray-200 rounded-md p-4 flex justify-between items-center bg-gray-50">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-gray-800">{t("membershipRequest", { name: marketName })}</span>
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${req.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
-                        {req.status === 'pending' ? t("pending") : t("needsRevision")}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">Requested on {new Date(req.createdAt).toLocaleDateString()}</p>
-                    {req.status === 'needs_revision' && req.feedback && (
-                      <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded text-sm text-red-800">
-                        <strong>Feedback:</strong> {req.feedback}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-2 shrink-0">
-                    {req.status === 'needs_revision' && (
-                      <button
-                        onClick={() => setResubmitMemModal({ id: req.id, marketId: req.marketId, name: marketName, note: req.applicationNote || '' })}
-                        className="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm"
-                      >
-                        Resubmit
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setWithdrawConfirmModal({ type: 'membership', id: req.id, name: marketName })}
-                      disabled={withdrawLoading === `mem-${req.id}`}
-                      className="text-red-600 hover:text-red-800 text-xs font-bold disabled:opacity-50 border border-red-200 hover:bg-red-50 py-1.5 px-3 rounded"
-                    >
-                      {withdrawLoading === `mem-${req.id}` ? "Withdrawing..." : "Withdraw"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
       )}
@@ -1027,12 +902,6 @@ export default function ShopperDashboardClient({
         </div>
       </div>
 
-      {approvedMarkets.length === 0 && !isOpeningShop && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-md">
-          <p className="font-medium">You must be approved to enter a market before you can open a shop in it!</p>
-        </div>
-      )}
-
       {/* SHOP CREATION MESSAGES & FORM */}
       {success && (
         <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-md">
@@ -1042,7 +911,7 @@ export default function ShopperDashboardClient({
         </div>
       )}
 
-      {isOpeningShop && approvedMarkets.length > 0 && (
+      {isOpeningShop && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-xl rounded-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
             {/* Header */}
@@ -1072,7 +941,7 @@ export default function ShopperDashboardClient({
                     value={formData.marketId}
                     onChange={(e) => setFormData({ ...formData, marketId: e.target.value })}
                   >
-                    {approvedMarkets.map(m => (
+                    {allMarkets.map(m => (
                       <option key={m.id} value={m.id}>{m.name}</option>
                     ))}
                   </select>
@@ -1084,7 +953,7 @@ export default function ShopperDashboardClient({
                       type="text"
                       disabled
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-gray-50 text-gray-500 cursor-not-allowed"
-                      value={approvedMarkets.find(m => m.id === formData.marketId)?.villageName || ""}
+                      value={allMarkets.find(m => m.id === formData.marketId)?.villageName || ""}
                     />
                   </div>
                 )}
@@ -1203,97 +1072,6 @@ export default function ShopperDashboardClient({
           </div>
         </div>
       )}
-
-      {/* MY MEMBERSHIPS */}
-      <div id="market-memberships" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900">{t("myMemberships")}</h2>
-        {memberships.length === 0 ? (
-          <p className="text-gray-500 text-sm">{t("noMemberships")}</p>
-        ) : (
-          <div className="space-y-4">
-            {memberships.map(m => {
-              const market = allMarkets.find(x => x.id === m.marketId);
-              const marketShops = initialShops?.filter((s: any) => s.marketId === m.marketId) || [];
-
-              return (
-                <div key={m.id} className="border border-gray-100 rounded-lg p-4 bg-gray-50 flex flex-col gap-4">
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                    <div className="flex items-center gap-4">
-                      {market?.coverImage ? (
-                        <img src={market.coverImage} alt={market.name} className="w-16 h-16 rounded-md object-cover flex-shrink-0" />
-                      ) : (
-                        <div className="w-16 h-16 rounded-md bg-gray-200 flex items-center justify-center text-gray-400 text-xs flex-shrink-0">
-                          No Img
-                        </div>
-                      )}
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-800">{market?.name || "Unknown Market"}</h3>
-                        <p className="text-sm text-gray-500 mt-1">Application Note: "{m.applicationNote || "None"}"</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end text-right">
-                      {m.status === "pending" && <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">{t("pending")}</span>}
-                      {m.status === "approved" && (
-                        <div className="flex flex-col items-end gap-2">
-                          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">{t("approved")}</span>
-                          <Link href={`/market/${m.marketId}`} className="text-sm bg-brand-600 text-white px-4 py-2 rounded-md hover:bg-brand-700 transition font-medium">
-                            {t("enterMarket")}
-                          </Link>
-                        </div>
-                      )}
-                      {m.status === "needs_revision" && (
-                        <div className="text-right">
-                          <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium mb-2 inline-block">{t("needsRevision")}</span>
-                          <p className="text-sm text-red-600"><b>{t("feedback")}</b> {m.feedback}</p>
-                          <button
-                            onClick={() => {
-                              setRequestingMarketId(m.marketId);
-                              setApplicationNote(m.applicationNote);
-                            }}
-                            className="mt-2 text-sm text-brand-600 hover:underline font-medium"
-                          >
-                            {t("reviseAndResubmit")}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Shop List */}
-                  {m.status === "approved" && marketShops.length > 0 && (
-                    <div className="mt-2 pt-4 border-t border-gray-200">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("shopsInMarket")}</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        {marketShops.map((shop: any) => (
-                          <Link key={shop.id} href={`/market/${m.marketId}?shopId=${shop.id}`} className="flex items-center p-3 bg-white border border-gray-200 rounded-md hover:border-brand-300 hover:shadow-sm transition group">
-                            {shop.coverImage ? (
-                              <img src={shop.coverImage} alt={shop.name} className="w-10 h-10 rounded-md object-cover mr-3" />
-                            ) : (
-                              <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400 text-xs mr-3">No Img</div>
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-brand-600">{shop.name}</p>
-                              <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                                <span className={`w-2 h-2 rounded-full ${shop.operatingStatus === 'closed' ? 'bg-red-500' :
-                                    shop.operatingStatus === 'scheduled' ? 'bg-blue-500' :
-                                      'bg-green-500'
-                                  }`}></span>
-                                {shop.operatingStatus === 'closed' ? t("closed") :
-                                  shop.operatingStatus === 'scheduled' ? t("until", { dates: shop.validDates }) :
-                                    t("open")}
-                              </p>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
 
       {/* MY MESSAGES */}
       <div id="my-messages" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
@@ -1473,91 +1251,6 @@ export default function ShopperDashboardClient({
         )}
       </div>
 
-      {/* DISCOVER MARKETS */}
-      <div id="discover-markets" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900">{t("discoverMarketsTitle")}</h2>
-        {discoverableMarkets.length === 0 ? (
-          <p className="text-gray-500 text-sm">{t("noNewMarkets")}</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {discoverableMarkets.map(market => (
-              <div key={market.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col h-full">
-                <button
-                  onClick={() => {
-                    setRequestingMarketId(market.id);
-                    setApplicationNote("");
-                  }}
-                  className="w-full h-32 block overflow-hidden group text-left relative focus:outline-none"
-                >
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
-                    <span className="text-white font-medium bg-black/50 px-3 py-1 rounded-full">{t("clickToRequest")}</span>
-                  </div>
-                  {market.coverImage ? (
-                    <img src={market.coverImage} alt={market.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 transition-colors duration-300 group-hover:bg-gray-200">
-                      {t("noImage")}
-                    </div>
-                  )}
-                </button>
-                <div className="p-4 flex flex-col flex-1">
-                  <h3 className="font-bold text-gray-900">{market.name}</h3>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{market.description}</p>
-                  <button
-                    onClick={() => {
-                      setRequestingMarketId(market.id);
-                      setApplicationNote("");
-                    }}
-                    className="mt-4 w-full bg-brand-50 text-brand-700 py-2 rounded text-sm font-semibold hover:bg-brand-100 transition"
-                  >
-                    {t("requestToEnter")}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* REQUEST MEMBERSHIP MODAL */}
-      {requestingMarketId && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t("requestAccess")}</h2>
-            <p className="text-sm text-gray-500 mb-4">{t("requestAccessDesc")}</p>
-
-            {membershipError && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{membershipError}</div>}
-
-            <form onSubmit={submitMembership}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("applicationNote")}</label>
-              <textarea
-                required
-                rows={3}
-                placeholder="Hi, I live at House #42..."
-                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500 mb-4"
-                value={applicationNote}
-                onChange={(e) => setApplicationNote(e.target.value)}
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setRequestingMarketId(null)}
-                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition"
-                >
-                  {t("cancel")}
-                </button>
-                <button
-                  type="submit"
-                  disabled={membershipLoading || !applicationNote.trim()}
-                  className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {membershipLoading ? t("submitting") : t("submitApplication")}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Order Details Modal */}
       {selectedOrderDetails && (
@@ -1764,57 +1457,6 @@ export default function ShopperDashboardClient({
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Resubmit Membership Modal */}
-      {resubmitMemModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h2 className="text-xl font-bold text-gray-900">Resubmit Membership Request</h2>
-              <button onClick={() => setResubmitMemModal(null)} className="text-gray-400 hover:text-gray-600 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <form onSubmit={handleResubmitMembership} className="p-6">
-              <p className="text-gray-600 mb-4 text-sm">
-                You are resubmitting your application to join <strong className="text-gray-900">{resubmitMemModal.name}</strong>. Please update your application note to address the feedback.
-              </p>
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Application Note (Optional)</label>
-                <textarea
-                  className="w-full rounded-md border-gray-300 shadow-sm border p-3 focus:ring-brand-500 focus:border-brand-500 text-sm"
-                  rows={4}
-                  placeholder="Introduce yourself or describe what you plan to sell..."
-                  value={resubmitMemModal.note}
-                  onChange={(e) => setResubmitMemModal({ ...resubmitMemModal, note: e.target.value })}
-                ></textarea>
-              </div>
-              <div className="flex gap-3 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setResubmitMemModal(null)}
-                  className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition text-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={resubmitMemLoading}
-                  className="px-5 py-2.5 bg-brand-600 text-white rounded-md font-bold hover:bg-brand-700 transition shadow-sm disabled:opacity-50 flex items-center justify-center text-sm min-w-[120px]"
-                >
-                  {resubmitMemLoading ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  ) : (
-                    "Resubmit"
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

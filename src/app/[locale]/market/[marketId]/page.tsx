@@ -40,63 +40,11 @@ export default async function MarketShoppingPage({ params, searchParams }: { par
       membersCount: membersCountSnap.data().count
     };
 
-    // 2. Check Membership (or if they own a shop in it)
-    const memSnapshot = await adminDb
-      .collection("market_memberships")
-      .where("userEmail", "==", userEmail)
-      .where("marketId", "==", marketId)
-      .where("status", "==", "approved")
-      .get();
-    
-    if (!memSnapshot.empty) {
-      isMember = true;
-    }
-
-    if (!isMember) {
-      const shopOwnerSnapshot = await adminDb
-        .collection("shops")
-        .where("ownerEmail", "==", userEmail)
-        .where("marketId", "==", marketId)
-        .get();
-      
-      if (!shopOwnerSnapshot.empty) {
-        isMember = true;
-      }
-    }
-
-    // Admins and Market Owners can bypass membership
-    const roles = (session.user as any)?.roles || [];
-    if (roles.includes("admin") || marketData.ownerEmail === userEmail) {
-      isMember = true;
-    }
-
-    if (!isMember) {
-      redirect("/shopper"); // Not approved to enter, redirect to request page
-    }
-
-    // Fetch all markets the user is approved for to populate dropdown
+    // 2. Fetch all markets to populate the switch dropdown
     const allMarketsSnapshot = await adminDb.collection("markets").get();
     const allMarkets = allMarketsSnapshot.docs.map(doc => doc.data());
     
-    const allMembershipsSnapshot = await adminDb
-      .collection("market_memberships")
-      .where("userEmail", "==", userEmail)
-      .where("status", "==", "approved")
-      .get();
-    const allUserMemberships = allMembershipsSnapshot.docs.map(d => d.data());
-
-    const allOwnedShopsSnapshot = await adminDb
-      .collection("shops")
-      .where("ownerEmail", "==", userEmail)
-      .get();
-    const allOwnedShops = allOwnedShopsSnapshot.docs.map(d => d.data());
-
-    userAccessibleMarkets = allMarkets.filter(m => {
-      if (roles.includes("admin") || m.ownerEmail === userEmail) return true;
-      if (allUserMemberships.some(mem => mem.marketId === m.id)) return true;
-      if (allOwnedShops.some(shop => shop.marketId === m.id)) return true;
-      return false; 
-    });
+    userAccessibleMarkets = allMarkets;
 
     // 3. Fetch Shops
     const shopsSnapshot = await adminDb

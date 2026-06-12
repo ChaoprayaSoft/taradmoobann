@@ -31,14 +31,6 @@ export default async function ShopperDashboard() {
     const allShopsSnapshot = await adminDb.collection("shops").get();
     allShops = allShopsSnapshot.docs.map(doc => doc.data());
 
-    // Fetch user's memberships
-    const membershipSnapshot = await adminDb
-      .collection("market_memberships")
-      .where("userEmail", "==", userEmail)
-      .get();
-    
-    memberships = membershipSnapshot.docs.map(doc => doc.data());
-
     // Fetch user's shops
     const shopsSnapshot = await adminDb
       .collection("shops")
@@ -46,28 +38,6 @@ export default async function ShopperDashboard() {
       .get();
     
     const ownedShops = shopsSnapshot.docs.map(doc => doc.data());
-
-    // Automatically grant "approved" membership for any market where the user owns a shop
-    ownedShops.forEach(shop => {
-      // Check if they already have an explicit membership for this market
-      const existingMembership = memberships.find(m => m.marketId === shop.marketId);
-      
-      if (!existingMembership) {
-        // Create an implicit approved membership
-        memberships.push({
-          id: `implicit_shop_owner_${shop.id}`,
-          marketId: shop.marketId,
-          userEmail,
-          status: "approved",
-          applicationNote: "Auto-approved as a Shop Owner",
-          createdAt: shop.createdAt,
-        });
-      } else if (existingMembership.status !== "approved") {
-        // Upgrade existing membership to approved
-        existingMembership.status = "approved";
-        existingMembership.applicationNote = "Auto-approved as a Shop Owner";
-      }
-    });
 
     // Fetch user's profile/addresses
     const userProfileSnapshot = await adminDb.collection("users").doc(userEmail).get();
@@ -102,7 +72,6 @@ export default async function ShopperDashboard() {
     <ShopperDashboardClient 
       allMarkets={allMarkets}
       initialShops={allShops}
-      memberships={memberships} 
       initialAddresses={userAddresses} 
       initialOrders={orders} 
       userCoins={userCoins}

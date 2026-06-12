@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { cartItems, deliveryAddress } = await req.json();
+    const { cartItems, deliveryAddress, rawDeliveryAddress } = await req.json();
 
     if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -24,6 +24,39 @@ export async function POST(req: Request) {
 
     const shopperEmail = session.user.email;
     const shopperName = session.user.name || "Unknown Shopper";
+
+    // Extract user's villageName from raw address
+    let userVillageName = "";
+    if (rawDeliveryAddress) {
+      try {
+        const parsedAddr = JSON.parse(rawDeliveryAddress);
+        userVillageName = parsedAddr.villageName || "";
+      } catch (e) {}
+    }
+
+    // Pre-flight check: Verify that the shopper's village matches all markets involved in the cart
+    const shopIds = Array.from(new Set(cartItems.map((item: any) => item.product.shopId).filter(Boolean)));
+    const marketsToVerify = Array.from(new Set<string>());
+
+    for (const shopId of shopIds) {
+      const shopDoc = await adminDb.collection("shops").doc(shopId as string).get();
+      if (!shopDoc.exists) continue;
+      
+      const shopData = shopDoc.data();
+      if (shopData?.marketId && !marketsToVerify.includes(shopData.marketId)) {
+        marketsToVerify.push(shopData.marketId);
+      }
+    }
+
+    for (const marketId of marketsToVerify) {
+      const marketDoc = await adminDb.collection("markets").doc(marketId).get();
+      if (marketDoc.exists) {
+        const marketData = marketDoc.data();
+        if (marketData?.villageName && userVillageName && marketData.villageName !== userVillageName) {
+          return NextResponse.json({ error: "cross_village_error" }, { status: 400 });
+        }
+      }
+    }
 
     // Group items by shopId and validate prices against the database
     const ordersByShop: Record<string, any[]> = {};

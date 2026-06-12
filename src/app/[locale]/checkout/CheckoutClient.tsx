@@ -95,12 +95,18 @@ export default function CheckoutClient({ userAddresses }: { userAddresses: strin
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cartItems,
-          deliveryAddress: formatAddressForDB(selectedAddress)
+          deliveryAddress: formatAddressForDB(selectedAddress),
+          rawDeliveryAddress: selectedAddress
         })
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to place order");
+      if (!res.ok) {
+        if (data.error === "cross_village_error") {
+          throw new Error(t("crossVillageError"));
+        }
+        throw new Error(data.error || "Failed to place order");
+      }
 
       clearCart();
       setSuccess(true);

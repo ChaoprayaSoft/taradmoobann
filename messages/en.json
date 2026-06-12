@@ -418,6 +418,7 @@
     "placeOrder": "Place Order",
     "cashOnDelivery": "Cash on Delivery",
     "selectOrAddAddress": "Please select or add a delivery address.",
+    "crossVillageError": "You can only place orders from shops within your own village's market. Please update your delivery address or remove items from other villages.",
     "villageName": "Village Name",
     "houseNo": "House No.",
     "addressLine": "Address",
