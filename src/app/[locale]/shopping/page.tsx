@@ -17,12 +17,17 @@ export default async function ShoppingPage() {
   // 2. Determine user's default village
   let userVillageName = "";
   if (userEmail) {
-    const addressSnapshot = await adminDb.collection("user_addresses").where("userEmail", "==", userEmail).get();
-    if (!addressSnapshot.empty) {
-      // Find the default address, or fallback to the first one
-      let defaultAddress = addressSnapshot.docs.find(doc => doc.data().isDefault);
-      if (!defaultAddress) defaultAddress = addressSnapshot.docs[0];
-      userVillageName = defaultAddress.data().villageName || "";
+    const userDoc = await adminDb.collection("users").doc(userEmail).get();
+    if (userDoc.exists) {
+      const addresses = userDoc.data()?.addresses || [];
+      if (addresses.length > 0) {
+        try {
+          const firstAddr = JSON.parse(addresses[0]);
+          userVillageName = firstAddr.villageName || "";
+        } catch(e) {
+          userVillageName = "";
+        }
+      }
     }
   }
 
