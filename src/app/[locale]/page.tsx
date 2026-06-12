@@ -145,8 +145,7 @@ export default async function Home() {
 
       <HomePageMarketsClient 
         markets={markets} 
-        marketStatusMapObj={Object.fromEntries(marketStatusMap)} 
-        userEmail={userEmail} 
+        userEmail={userEmail}
         spotlightProducts={spotlightProducts}
       />
 

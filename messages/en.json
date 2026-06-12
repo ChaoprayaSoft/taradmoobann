@@ -29,7 +29,8 @@
   "Navigation": {
     "home": "Home",
     "signIn": "Sign In",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "goShopping": "Go Shopping"
   },
   "ShopperDashboard": {
     "title": "Shopper Dashboard",
@@ -94,6 +95,10 @@
     "requestAccess": "Request Market Access",
     "requestToEnter": "Request to Enter",
     "noImage": "No Image",
+    "signInRequired": "Sign In Required",
+    "signInPromptDesc": "You must be signed in to enter a market. Would you like to sign in now?",
+    "cancel": "Cancel",
+    "signIn": "Sign In",
     "requestAccessDesc": "Please provide a brief note to the Market Owner (e.g., your house number or name) to verify your residency.",
     "applicationNote": "Application Note *",
     "submitApplication": "Submit Application",
@@ -476,11 +481,23 @@
     "unknownShop": "Unknown Shop"
   },
   "WelcomeModal": {
-    "welcomeTitle": "Welcome to TaradMooBann!",
-    "welcomeDesc": "We're thrilled to have you here. To get you started on your journey, we've deposited a welcome gift into your account!",
-    "coinsAmount": "50 Free Coins!",
-    "addedToWallet": "Added to your wallet",
-    "startExploring": "Start Exploring"
+    "title": "Welcome to Tarad Moo Bann!",
+    "description": "Discover local shops and order directly from your neighbors.",
+    "getStarted": "Get Started"
+  },
+  "Shopping": {
+    "yourLocalMarkets": "Your Local Markets",
+    "marketsInYourVillage": "Markets in Your Village",
+    "otherMarkets": "Other Markets",
+    "noLocalMarkets": "There are no markets currently available in your village.",
+    "noVillageSet": "You have not set a village name yet. Please add a delivery address to find markets in your village.",
+    "noOtherMarkets": "There are no other markets available right now.",
+    "noImage": "No Image",
+    "enterMarket": "Enter Market",
+    "signInRequired": "Sign in Required",
+    "signInPromptDesc": "You must be signed in to enter a market. Would you like to sign in now?",
+    "cancel": "Cancel",
+    "signIn": "Sign In"
   },
   "NotificationPrompt": {
     "enableTitle": "Enable Notifications?",
