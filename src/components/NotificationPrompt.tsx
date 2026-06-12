@@ -68,7 +68,7 @@ export default function NotificationPrompt() {
                 if (Notification.permission === "granted") {
                   const notif = new Notification(payload.notification.title || t("newNotification"), { 
                     body: payload.notification.body,
-                    icon: '/favicon.ico',
+                    icon: '/icon.svg',
                     data: payload.data
                   });
                   notif.onclick = function() {
