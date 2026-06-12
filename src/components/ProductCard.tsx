@@ -5,7 +5,7 @@ import { useCart } from "./CartProvider";
 import { useSession, signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
-export default function ProductCard({ product, shopName, villageName, isClosed, shopHouseNumber, shopLocation, onClickProduct }: { product: any, shopName?: string, villageName?: string, isClosed?: boolean, shopHouseNumber?: string, shopLocation?: string, onClickProduct?: () => void }) {
+export default function ProductCard({ product, shopName, villageName, isClosed, shopHouseNumber, shopLocation, onClickProduct, onEnterMarket }: { product: any, shopName?: string, villageName?: string, isClosed?: boolean, shopHouseNumber?: string, shopLocation?: string, onClickProduct?: () => void, onEnterMarket?: (e: React.MouseEvent) => void }) {
   const { data: session } = useSession();
   const t = useTranslations("HomePage");
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
@@ -116,12 +116,11 @@ export default function ProductCard({ product, shopName, villageName, isClosed, 
             ฿{product.price}
           </span>
         </div>
-        {(shopName || villageName) && (
-          <p className="text-xs text-brand-600 font-medium mb-1 line-clamp-1">
-            {shopName && <span>From: {shopName}</span>}
-            {shopName && villageName && <span className="mx-1">•</span>}
-            {villageName && <span>{villageName}</span>}
-          </p>
+        {shopName && (
+          <p className="text-xs text-brand-600 font-medium mb-1 line-clamp-1">From: {shopName}</p>
+        )}
+        {villageName && (
+          <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2 line-clamp-1">{villageName}</p>
         )}
         
         {(shopHouseNumber || shopLocation) && (
@@ -142,6 +141,15 @@ export default function ProductCard({ product, shopName, villageName, isClosed, 
               </span>
             ))}
           </div>
+        )}
+        
+        {onEnterMarket && (
+          <button 
+            onClick={onEnterMarket}
+            className="mt-2 block w-full text-center bg-green-50 text-green-700 font-medium py-1.5 rounded-md hover:bg-green-100 transition text-sm"
+          >
+            {t("enterMarket") || "Enter Market"}
+          </button>
         )}
         
         {isClosed ? (

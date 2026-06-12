@@ -58,8 +58,8 @@ export default async function ShoppingPage() {
   }
   
   // Shuffle arrays
-  whatsUpTodayProducts = whatsUpTodayProducts.sort(() => 0.5 - Math.random()).slice(0, 10);
-  const nearbyProducts = allProducts.sort(() => 0.5 - Math.random()).slice(0, 15);
+  whatsUpTodayProducts = whatsUpTodayProducts.sort(() => 0.5 - Math.random()).slice(0, 4);
+  const nearbyProducts = allProducts.sort(() => 0.5 - Math.random()).slice(0, 8);
 
   // 5. Fetch Ads
   const settingsDoc = await adminDb.collection("settings").doc("ads").get();

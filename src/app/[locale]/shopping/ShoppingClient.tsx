@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import ProductCard from "@/components/ProductCard";
 
 import HomePageMarketsClient from "../HomePageMarketsClient";
-import AdsSection from "@/components/AdsSection";
+import AdsCarousel from "@/components/AdsCarousel";
 
 export default function ShoppingClient({ 
   markets, 
@@ -53,13 +53,14 @@ export default function ShoppingClient({
             whatsUpTodayProducts.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {whatsUpTodayProducts.map(product => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    shopName={product.shopName}
-                    villageName={product.villageName}
-                    onClickProduct={() => navigateToProduct(product.marketId, product.shopId)}
-                  />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  shopName={product.shopName}
+                  villageName={product.villageName}
+                  onClickProduct={() => navigateToProduct(product.marketId, product.shopId)}
+                  onEnterMarket={(e) => handleEnterMarket(e, product.marketId)}
+                />
                 ))}
               </div>
             ) : (
@@ -112,7 +113,7 @@ export default function ShoppingClient({
       {/* Sponsored Section */}
       {activeAds.length > 0 && (
         <div className="mt-16">
-          <AdsSection ads={activeAds} />
+          <AdsCarousel ads={activeAds} speed={5} />
         </div>
       )}
 
