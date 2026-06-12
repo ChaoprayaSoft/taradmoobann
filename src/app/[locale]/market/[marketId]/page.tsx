@@ -9,11 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function MarketShoppingPage({ params, searchParams }: { params: { marketId: string }, searchParams?: { [key: string]: string | string[] | undefined } }) {
   const session = await getServerSession(authOptions);
   
-  if (!session) {
-    redirect("/");
-  }
-
-  const userEmail = session.user?.email || "";
+  const userEmail = session?.user?.email || "";
   const { marketId } = params;
 
   let isMember = false;

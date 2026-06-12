@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession, signIn } from "next-auth/react";
 import { collection, query, where, onSnapshot, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import ProductCard from "@/components/ProductCard";
@@ -36,6 +37,8 @@ export default function MarketShoppingClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState(t("allCategories"));
   const [shopFilterStatus, setShopFilterStatus] = useState("all");
+  const { data: session } = useSession();
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   const [localMarket, setLocalMarket] = useState(market);
   const [localShops, setLocalShops] = useState(shops);
@@ -493,7 +496,13 @@ export default function MarketShoppingClient({
                     {selectedShop.category}
                   </span>
                   <button
-                    onClick={() => setShowChatModal(true)}
+                    onClick={() => {
+                      if (!session) {
+                        setShowSignInModal(true);
+                      } else {
+                        setShowChatModal(true);
+                      }
+                    }}
                     className="flex items-center gap-1 bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -603,6 +612,30 @@ export default function MarketShoppingClient({
       {activeAds && activeAds.length > 0 && (
         <div className="mt-8 border-t border-gray-200 pt-4">
           <AdsCarousel ads={activeAds} speed={carouselSpeed} />
+        </div>
+      )}
+
+      {/* SIGN IN PROMPT MODAL */}
+      {showSignInModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-2">{t("signInRequired")}</h3>
+            <p className="text-sm text-gray-500 mb-6">{t("signInPromptDesc")}</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setShowSignInModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-sm"
+              >
+                {t("cancel")}
+              </button>
+              <button
+                onClick={() => signIn("google")}
+                className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-md hover:bg-brand-700 transition font-medium text-sm"
+              >
+                {t("signIn")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
