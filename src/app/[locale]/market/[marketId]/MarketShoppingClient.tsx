@@ -148,11 +148,12 @@ export default function MarketShoppingClient({
         const matchesQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                              p.description?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesTag = selectedTag === t("allCategories") || (p.tags && p.tags.includes(selectedTag));
-        return matchesQuery && matchesTag;
+        const available = p.isAvailable === undefined || p.isAvailable;
+        return matchesQuery && matchesTag && available;
       })
     : selectedShopId === "spotlight"
-      ? localProducts.filter((p: any) => p.isSpotlight && p.spotlightExpiry && new Date(p.spotlightExpiry) > new Date())
-      : localProducts.filter((p: any) => p.shopId === selectedShopId);
+      ? localProducts.filter((p: any) => p.isSpotlight && p.spotlightExpiry && new Date(p.spotlightExpiry) > new Date() && (p.isAvailable === undefined || p.isAvailable))
+      : localProducts.filter((p: any) => p.shopId === selectedShopId && (p.isAvailable === undefined || p.isAvailable));
 
   const displayedShops = localShops.filter(s => {
     if (shopFilterStatus === "all") return true;

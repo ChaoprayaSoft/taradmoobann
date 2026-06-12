@@ -13,11 +13,9 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
   const [error, setError] = useState("");
 
   const packages = [
-    { coins: 50, price: 50 },
-    { coins: 100, price: 100 },
-    { coins: 300, price: 300 },
-    { coins: 500, price: 500 },
-    { coins: 1000, price: 1000 },
+    { coins: 10, price: 5 },
+    { coins: 25, price: 10 },
+    { coins: 60, price: 20 },
   ];
 
   const handleTopUp = async () => {
@@ -79,7 +77,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
               <span className="text-5xl font-extrabold">{currentCoins}</span>
               <span className="text-xl text-brand-200">Coins</span>
             </div>
-            <button 
+            <button
               onClick={handleRefresh}
               className="mt-6 flex items-center gap-2 text-sm bg-white/20 hover:bg-white/30 transition px-4 py-2 rounded-full"
             >
@@ -92,10 +90,10 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold text-gray-900 mb-4">{t("topUpCoins")}</h2>
             <p className="text-gray-500 mb-6 text-sm">{t("topUpDesc")}</p>
-            
+
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {packages.map((pkg) => (
-                <div 
+                <div
                   key={pkg.coins}
                   onClick={() => {
                     setSelectedPackage(pkg.price);
@@ -103,8 +101,8 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                   }}
                   className={`
                     cursor-pointer border-2 rounded-xl p-4 text-center transition-all duration-200
-                    ${selectedPackage === pkg.price 
-                      ? 'border-brand-500 bg-brand-50 ring-4 ring-brand-500/10' 
+                    ${selectedPackage === pkg.price
+                      ? 'border-brand-500 bg-brand-50 ring-4 ring-brand-500/10'
                       : 'border-gray-100 hover:border-brand-300 hover:bg-gray-50'}
                   `}
                 >
@@ -129,7 +127,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-8">
             <h3 className="font-bold text-gray-900 text-lg mb-4">{t("paymentDetails")}</h3>
-            
+
             {!selectedPackage ? (
               <div className="text-center py-8 text-gray-400">
                 <Coins className="w-12 h-12 mx-auto mb-3 opacity-20" />
@@ -149,7 +147,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                   <span className="font-bold text-gray-900">Total</span>
                   <span className="text-2xl font-bold text-brand-600">฿{selectedPackage}</span>
                 </div>
-                
+
                 <button
                   onClick={handleTopUp}
                   disabled={isLoading}
@@ -164,11 +162,11 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                   <CheckCircle2 className="w-5 h-5" />
                   {t("qrGenerated")}
                 </div>
-                
+
                 <div className="bg-white p-4 border-2 border-gray-100 rounded-xl inline-block mx-auto shadow-sm">
                   <img src={qrCodeUrl} alt="PromptPay QR Code" className="w-48 h-48 mx-auto" />
                 </div>
-                
+
                 <div className="space-y-1">
                   <p className="font-medium text-gray-900">{t("scanToPay", { amount: selectedPackage })}</p>
                   <p className="text-sm text-gray-500">{t("useApp")}</p>
@@ -178,7 +176,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                   <p className="text-xs text-gray-400 mb-3">
                     {t("afterPayment")}
                   </p>
-                  <button 
+                  <button
                     onClick={handleRefresh}
                     className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition"
                   >

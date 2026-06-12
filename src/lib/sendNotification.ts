@@ -34,8 +34,8 @@ export async function sendNotificationToUser(email: string, title: string, body:
     if (userData?.emailNotificationsEnabled !== false) {
       if (process.env.RESEND_API_KEY) {
         try {
-          await resend.emails.send({
-            from: 'TaradMooBann <noreply@taradmoobann.com>',
+          const { data: resendData, error } = await resend.emails.send({
+            from: 'TaradMooBann <onboarding@resend.dev>',
             to: email,
             subject: title,
             html: `
@@ -48,7 +48,12 @@ export async function sendNotificationToUser(email: string, title: string, body:
               </div>
             `
           });
-          console.log(`Successfully sent email notification to ${email}`);
+          
+          if (error) {
+            console.error(`Resend API error for ${email}:`, error);
+          } else {
+            console.log(`Successfully sent email notification to ${email}`, resendData);
+          }
         } catch (emailErr) {
           console.error(`Error sending email to ${email}:`, emailErr);
         }

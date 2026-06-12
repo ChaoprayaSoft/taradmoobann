@@ -338,7 +338,9 @@
     "success": "สำเร็จ!",
     "changesSaved": "การเปลี่ยนแปลงของคุณถูกบันทึกแล้ว",
     "okay": "ตกลง",
-    "updating": "กำลังอัปเดต..."
+    "updating": "กำลังอัปเดต...",
+    "available": "มีสินค้า",
+    "unavailable": "หมดชั่วคราว"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "แดชบอร์ดเจ้าของตลาด",

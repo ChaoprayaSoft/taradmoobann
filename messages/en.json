@@ -338,7 +338,9 @@
     "success": "Success!",
     "changesSaved": "Your changes have been saved.",
     "okay": "Okay",
-    "updating": "Updating..."
+    "updating": "Updating...",
+    "available": "Available",
+    "unavailable": "Unavailable"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "Market Owner Dashboard",

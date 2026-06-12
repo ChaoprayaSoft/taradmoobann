@@ -38,15 +38,15 @@ export default async function RootLayout({
             <div className="min-h-screen bg-gray-50 flex flex-col">
               <nav className="bg-white shadow-sm sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                  <div className="flex-shrink-0 font-bold text-2xl text-brand-600">
-                    <Link href="/" className="flex items-center gap-2 group">
-                      <div className="bg-brand-50 p-1.5 rounded-xl group-hover:scale-105 transition-transform duration-300">
+                  <div className="flex-shrink-0 font-bold text-xl sm:text-2xl text-brand-600 min-w-0 mr-2">
+                    <Link href="/" className="flex items-center gap-1.5 sm:gap-2 group">
+                      <div className="bg-brand-50 p-1 sm:p-1.5 rounded-xl group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
                         <Logo />
                       </div>
-                      <span className="tracking-tight">TaradMooBann</span>
+                      <span className="tracking-tight truncate hidden xs:inline-block md:inline-block max-w-[120px] sm:max-w-none">TaradMooBann</span>
                     </Link>
                   </div>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
                     <LanguageSwitcher />
                     <LoginButton />
                   </div>

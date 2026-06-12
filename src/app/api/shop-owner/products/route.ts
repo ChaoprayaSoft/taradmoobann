@@ -138,7 +138,30 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { productId, name, description, price, imageUrls, tags, shopId, options } = await req.json();
+    const { productId, name, description, price, imageUrls, tags, shopId, options, isAvailable, action } = await req.json();
+    
+    // If it's just a toggle availability action
+    if (action === "toggleAvailability") {
+      if (!productId || !shopId || typeof isAvailable !== "boolean") {
+        return NextResponse.json({ error: "Missing required fields for availability toggle" }, { status: 400 });
+      }
+
+      const verification = await verifyShopOwnership(shopId, userEmail, roles);
+      if (verification.error) return NextResponse.json({ error: verification.error }, { status: verification.status });
+
+      const productRef = adminDb.collection("products").doc(productId);
+      const productDoc = await productRef.get();
+      if (!productDoc.exists || productDoc.data()?.shopId !== shopId) {
+         return NextResponse.json({ error: "Product not found or access denied" }, { status: 404 });
+      }
+
+      await productRef.update({
+        isAvailable,
+        updatedAt: new Date().toISOString()
+      });
+      return NextResponse.json({ success: true, isAvailable });
+    }
+
     const parsedPrice = parseFloat(price);
     if (!productId || !name || isNaN(parsedPrice) || parsedPrice < 0 || !shopId) {
       return NextResponse.json({ error: "Missing required fields or invalid price" }, { status: 400 });
