@@ -90,6 +90,10 @@ export default function AdminDashboardClient({
   const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
 
   useEffect(() => {
+    setMarkets(initialMarkets);
+  }, [initialMarkets]);
+
+  useEffect(() => {
     // Fetch immediately
     fetchChats();
     // Poll every 5 seconds globally so the notification banner can update
@@ -249,16 +253,21 @@ export default function AdminDashboardClient({
   const executeDeleteMarket = async () => {
     if (!marketToDelete) return;
     
+    const idToDelete = marketToDelete.id;
+    setMarkets(prev => prev.filter(m => m.id !== idToDelete));
+    setMarketToDelete(null);
+
     try {
-      const res = await fetch(`/api/admin/markets?id=${marketToDelete.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/markets?id=${idToDelete}`, { method: "DELETE" });
       if (res.ok) {
         router.refresh();
-        setMarketToDelete(null);
       } else {
+        setMarkets(initialMarkets);
         const data = await res.json();
         alert(data.error || "Failed to delete market");
       }
     } catch (err) {
+      setMarkets(initialMarkets);
       alert("Something went wrong");
     }
   };
@@ -595,17 +604,17 @@ export default function AdminDashboardClient({
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg font-medium">{t("existingMarkets")}</h3>
           <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-            {t("totalCount", { count: initialMarkets.length })}
+            {t("totalCount", { count: markets.length })}
           </span>
         </div>
         
-        {initialMarkets.length === 0 ? (
+        {markets.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             {t("noMarketsCreated")}
           </div>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {initialMarkets.map((market) => (
+            {markets.map((market) => (
               <li key={market.id} className="p-6 hover:bg-gray-50 transition">
                 <div className="flex items-center space-x-4">
                   {market.coverImage ? (
