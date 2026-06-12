@@ -35,7 +35,7 @@ export async function sendNotificationToUser(email: string, title: string, body:
       if (process.env.RESEND_API_KEY) {
         try {
           const { data: resendData, error } = await resend.emails.send({
-            from: 'TaradMooBann <onboarding@resend.dev>',
+            from: 'TaradMooBann <noreply@taradmoobann.com>',
             to: email,
             subject: title,
             html: `

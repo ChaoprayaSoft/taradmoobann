@@ -296,7 +296,6 @@
     "startPreparing": "Start Preparing",
     "markOutForDelivery": "Mark as Out for Delivery",
     "choice1GenerateQr": "Choice 1: Generate QR Code",
-    "choice2RequestCompletion": "Choice 2: Request Completion",
     "waitingForShopperToAccept": "Waiting for Shopper to Accept Delivery",
     "transactionHistorySummary": "Transaction History & Summary",
     "totalEarnings": "Total Earnings",
@@ -340,7 +339,8 @@
     "okay": "Okay",
     "updating": "Updating...",
     "available": "Available",
-    "unavailable": "Unavailable"
+    "unavailable": "Unavailable",
+    "requestCompletion": "Request Completion"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "Market Owner Dashboard",

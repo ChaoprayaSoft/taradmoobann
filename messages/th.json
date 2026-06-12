@@ -296,7 +296,6 @@
     "startPreparing": "เริ่มเตรียมสินค้า",
     "markOutForDelivery": "ทำเครื่องหมายว่าจัดส่งแล้ว",
     "choice1GenerateQr": "ตัวเลือก 1: สร้างคิวอาร์โค้ด",
-    "choice2RequestCompletion": "ตัวเลือก 2: ขอการเสร็จสิ้น",
     "waitingForShopperToAccept": "รอให้ลูกค้ากดยอมรับการจัดส่ง",
     "transactionHistorySummary": "ประวัติและสรุปการทำธุรกรรม",
     "totalEarnings": "รายได้รวม",
@@ -340,7 +339,8 @@
     "okay": "ตกลง",
     "updating": "กำลังอัปเดต...",
     "available": "มีสินค้า",
-    "unavailable": "หมดชั่วคราว"
+    "unavailable": "หมดชั่วคราว",
+    "requestCompletion": "ขอการยืนยันรับสินค้า"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "แดชบอร์ดเจ้าของตลาด",

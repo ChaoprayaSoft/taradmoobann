@@ -1194,7 +1194,7 @@ export default function ShopOwnerDashboardClient({
                             onClick={() => handleUpdateOrderStatus(order.id, "Pending Completion")}
                             className="w-full bg-gray-800 text-white font-medium py-2 rounded text-xs hover:bg-gray-900 transition disabled:opacity-50"
                           >
-                            {t("choice2RequestCompletion")}
+                            {t("requestCompletion")}
                           </button>
                         )}
                         {order.status === "Pending Completion" && (
