@@ -108,7 +108,17 @@ export default function ShoppingClient({
 
       {/* What's up today Section */}
       <div className="mt-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">{t("whatsUpToday")}</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">{t("whatsUpToday")}</h2>
+          {userEmail && userVillageName && whatsUpTodayProducts.length > 0 && (
+            <button
+              onClick={(e) => handleEnterMarket(e, whatsUpTodayProducts[0].marketId)}
+              className="text-sm bg-brand-100 hover:bg-brand-200 text-brand-800 font-bold py-1.5 px-4 rounded transition whitespace-nowrap"
+            >
+              {t("enterMarket") || "Enter Market"}
+            </button>
+          )}
+        </div>
         {userEmail ? (
           userVillageName ? (
             whatsUpTodayProducts.length > 0 ? (
@@ -120,7 +130,6 @@ export default function ShoppingClient({
                   shopName={product.shopName}
                   villageName={product.villageName}
                   onClickProduct={() => navigateToProduct(product.marketId, product.shopId)}
-                  onEnterMarket={(e) => handleEnterMarket(e, product.marketId)}
                 />
                 ))}
               </div>
