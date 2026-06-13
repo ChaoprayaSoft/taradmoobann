@@ -1288,7 +1288,7 @@ export default function ShopperDashboardClient({
                         </span>
                         <span className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleString()}</span>
                       </div>
-                      <p className="font-bold text-gray-900">Total: ฿{order.totalAmount.toFixed(2)}</p>
+                      <p className="font-bold text-gray-900">Total: ฿{Number(order.totalAmount || 0).toFixed(2)}</p>
                       <p className="text-xs text-gray-500 mt-1 line-clamp-1">
                         {order.items.map((item: any) => `${item.quantity}x ${item.productName}`).join(", ")}
                       </p>
@@ -1363,7 +1363,7 @@ export default function ShopperDashboardClient({
                     </span>
                     <span className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-900 mt-1">{t("total", { amount: order.totalAmount.toFixed(2) })}</p>
+                  <p className="text-sm font-medium text-gray-900 mt-1">{t("total", { amount: Number(order.totalAmount || 0).toFixed(2) })}</p>
                 </div>
                 <div className="text-right flex flex-col items-end gap-2">
                   <p className="text-xs text-gray-500">
@@ -1486,15 +1486,15 @@ export default function ShopperDashboardClient({
                           <p className="text-[11px] text-gray-500 mt-1 italic line-clamp-2">Note: {item.note}</p>
                         )}
 
-                        <p className="text-xs text-gray-500 mt-1">฿{item.price.toFixed(2)} x {item.quantity}</p>
+                        <p className="text-xs text-gray-500 mt-1">฿{Number(item.price || 0).toFixed(2)} x {item.quantity}</p>
                       </div>
-                      <p className="text-sm font-semibold text-gray-900 ml-4">฿{(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="text-sm font-semibold text-gray-900 ml-4">฿{(Number(item.price || 0) * Number(item.quantity || 1)).toFixed(2)}</p>
                     </li>
                   ))}
                 </ul>
                 <div className="bg-brand-50 px-4 py-3 border-t border-brand-100 flex justify-between items-center">
                   <p className="font-bold text-brand-900">Total Amount</p>
-                  <p className="font-bold text-lg text-brand-900">฿{selectedOrderDetails.totalAmount.toFixed(2)}</p>
+                  <p className="font-bold text-lg text-brand-900">฿{Number(selectedOrderDetails.totalAmount || 0).toFixed(2)}</p>
                 </div>
               </div>
 

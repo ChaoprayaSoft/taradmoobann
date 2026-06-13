@@ -57,7 +57,7 @@ export default function ShopOwnerDashboardClient({
     }
   });
   const completedOrders = selectedShopOrders.filter(o => o.status === "Completed");
-  const totalEarnings = completedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+  const totalEarnings = completedOrders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0);
 
   // Product State
   const [isAddingProduct, setIsAddingProduct] = useState(false);
@@ -1252,7 +1252,7 @@ export default function ShopOwnerDashboardClient({
                           <div className="flex justify-between items-center mb-3 bg-white p-2.5 rounded border border-gray-100 shadow-sm">
                             <div className="flex flex-col gap-1.5">
                               <span className="font-semibold text-gray-700 text-xs">{t("houseNo") || "House No"}: <span className="font-bold text-brand-700">{houseNo}</span></span>
-                              <span className="font-bold text-gray-900 text-sm">฿{(order.totalAmount || 0).toFixed(2)}</span>
+                              <span className="font-bold text-gray-900 text-sm">฿{Number(order.totalAmount || 0).toFixed(2)}</span>
                             </div>
                             <button
                               onClick={() => setSelectedPastOrder(order)}
@@ -1405,7 +1405,7 @@ export default function ShopOwnerDashboardClient({
                             {houseNo}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
-                            ฿{(order.totalAmount || 0).toFixed(2)}
+                            ฿{Number(order.totalAmount || 0).toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                             <button
@@ -1994,7 +1994,7 @@ export default function ShopOwnerDashboardClient({
 
               <h4 className="text-sm font-bold text-gray-900 mb-3 border-b pb-2">{t("items")}</h4>
               <div className="space-y-4 mb-6">
-                {(selectedPastOrder.items || []).map((item: any, i: number) => (
+                {(Array.isArray(selectedPastOrder.items) ? selectedPastOrder.items : []).map((item: any, i: number) => (
                   <div key={i} className="flex flex-col text-gray-700">
                     <div className="flex justify-between">
                       <span className="font-medium text-sm">{item.quantity}x {item.productName}</span>
@@ -2019,7 +2019,7 @@ export default function ShopOwnerDashboardClient({
 
               <div className="flex justify-between font-bold text-lg text-gray-900 pt-4 border-t border-gray-200">
                 <span>{t("total")}</span>
-                <span>฿{(selectedPastOrder.totalAmount || 0).toFixed(2)}</span>
+                <span>฿{Number(selectedPastOrder.totalAmount || 0).toFixed(2)}</span>
               </div>
             </div>
             
