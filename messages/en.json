@@ -329,7 +329,8 @@
     "noProductsYet": "You haven't added any products yet.",
     "clickAddProduct": "Click \"+ Add Product\" to get started.",
     "noImg": "No Img",
-    "spotlightHoursLeft": "Spotlight ({hours}h left)",
+    "spotlightBadge": "Spotlight",
+    "hoursLeft": "{hours}h left",
     "promote": "Promote",
     "topUpSpotlight": "Top Up Spotlight",
     "edit": "Edit",
@@ -549,7 +550,8 @@
     "cancel": "Cancel",
     "signIn": "Sign In",
     "spotlight": "Spotlight",
-    "viewInMarket": "View in Market"
+    "viewInMarket": "View in Market",
+    "spotlightProducts": "Spotlight Products"
   },
   "NotificationPrompt": {
     "enableTitle": "Enable Notifications?",

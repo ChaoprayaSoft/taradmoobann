@@ -68,6 +68,8 @@ export default async function ShoppingPage() {
 
   if (userVillageName) {
     spotlightProducts = spotlightProducts.filter((p: any) => p.villageName === userVillageName);
+  } else {
+    spotlightProducts = [];
   }
 
   // 5. Fetch Ads

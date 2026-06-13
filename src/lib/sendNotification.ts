@@ -60,10 +60,11 @@ export async function sendNotificationToUser(
 
     // 1. Firebase Cloud Messaging Push Notification
     if (userData?.fcmToken && userData?.pushNotificationsEnabled !== false) {
+      const fcmBody = finalBody.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>?/gm, '');
       const message: admin.messaging.Message = {
         notification: {
           title: finalTitle,
-          body: finalBody, // FCM bodies shouldn't really have HTML, but we'll leave it as is for simplicity, or strip tags later if needed
+          body: fcmBody,
         },
         token: userData.fcmToken,
         data: data || {},
