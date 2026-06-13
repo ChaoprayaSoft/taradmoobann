@@ -1242,38 +1242,27 @@ export default function ShopOwnerDashboardClient({
                         </span>
                       </div>
 
-                      <div className="space-y-1 mb-3">
-                        {(order.items || []).map((item: any, i: number) => (
-                          <div key={i} className="flex flex-col text-gray-700 mb-2 border-b border-brand-100 pb-2 last:border-0 last:pb-0">
-                            <div className="flex justify-between">
-                              <span className="font-medium">{item.quantity}x {item.productName}</span>
-                              <span>฿{((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
+                      {(() => {
+                        const deliveryAddressStr = typeof order.deliveryAddress === 'string' ? order.deliveryAddress : "";
+                        const houseNoMatch = deliveryAddressStr.match(/House No(?:[.:\s]*)([^\n,]+)/i) || 
+                                             deliveryAddressStr.match(/บ้านเลขที่(?:[.:\s]*)([^\n,]+)/i);
+                        const houseNo = houseNoMatch ? houseNoMatch[1].trim() : "-";
+                        
+                        return (
+                          <div className="flex justify-between items-center mb-3 bg-white p-2.5 rounded border border-gray-100 shadow-sm">
+                            <div className="flex flex-col gap-1.5">
+                              <span className="font-semibold text-gray-700 text-xs">{t("houseNo") || "House No"}: <span className="font-bold text-brand-700">{houseNo}</span></span>
+                              <span className="font-bold text-gray-900 text-sm">฿{(order.totalAmount || 0).toFixed(2)}</span>
                             </div>
-
-                            {item.selectedOptions && typeof item.selectedOptions === 'object' && Object.keys(item.selectedOptions).length > 0 && (
-                              <div className="mt-0.5 flex flex-wrap gap-1">
-                                {item.selectedOptions && typeof item.selectedOptions === 'object' && Object.entries(item.selectedOptions).map(([key, value]) => (
-                                  <span key={key} className="text-[10px] bg-white text-gray-600 px-1.5 py-0.5 rounded border border-gray-200">
-                                    {key}: {Array.isArray(value) ? value.join(', ') : (value as string)}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                            {item.note && (
-                              <p className="text-[11px] text-gray-500 mt-1 italic bg-white p-1.5 rounded border border-gray-100 line-clamp-2">{t("note")} {item.note}</p>
-                            )}
+                            <button
+                              onClick={() => setSelectedPastOrder(order)}
+                              className="text-brand-600 hover:text-brand-800 font-medium text-xs bg-brand-50 hover:bg-brand-100 px-3 py-2 rounded transition shadow-sm border border-brand-100"
+                            >
+                              {t("viewDetails") || "View Details"}
+                            </button>
                           </div>
-                        ))}
-                        <div className="flex justify-between font-bold text-gray-900 pt-1 border-t border-brand-200 mt-2">
-                          <span>{t("total")}</span>
-                          <span>฿{(order.totalAmount || 0).toFixed(2)}</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-white p-2 rounded border border-gray-100 mb-3 text-xs shadow-sm">
-                        <span className="font-semibold block text-gray-700 mb-1">{t("deliveryAddress")}</span>
-                        <p className="text-gray-600 whitespace-pre-wrap">{order.deliveryAddress}</p>
-                      </div>
+                        );
+                      })()}
 
                       <div className="flex flex-col gap-2 mt-3">
                         {order.status === "Pending" && (
