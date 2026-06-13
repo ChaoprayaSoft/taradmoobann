@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition, TouchEvent } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
@@ -32,6 +32,40 @@ export default function ShoppingClient({
   const displayMarkets = markets;
   const [showSignInModal, setShowSignInModal] = useState(false);
 
+  // Pull to Refresh State
+  const [isPending, startTransition] = useTransition();
+  const [pullStartY, setPullStartY] = useState(0);
+  const [pullMoveY, setPullMoveY] = useState(0);
+
+  const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+    if (window.scrollY === 0) {
+      setPullStartY(e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+    if (pullStartY > 0 && window.scrollY === 0) {
+      const y = e.touches[0].clientY;
+      if (y > pullStartY) {
+        setPullMoveY(y - pullStartY);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullMoveY > 100 && !isPending) {
+      handleRefresh();
+    }
+    setPullStartY(0);
+    setPullMoveY(0);
+  };
+
+  const handleRefresh = () => {
+    startTransition(() => {
+      router.refresh();
+    });
+  };
+
   const handleEnterMarket = (e: React.MouseEvent, marketId: string) => {
     e.preventDefault();
     router.push(`/market/${marketId}`);
@@ -42,9 +76,38 @@ export default function ShoppingClient({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div 
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Pull down indicator */}
+      <div 
+        className="w-full flex justify-center items-center overflow-hidden transition-all duration-200"
+        style={{ height: pullMoveY > 0 ? Math.min(pullMoveY, 80) : 0 }}
+      >
+        {pullMoveY > 100 ? (
+          <span className="text-sm font-bold text-gray-500">Release to refresh...</span>
+        ) : (
+          <span className="text-sm text-gray-400">Pull down to refresh</span>
+        )}
+      </div>
+
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <h1 className="text-3xl font-bold text-gray-900">{t("yourLocalMarkets")}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900">{t("yourLocalMarkets")}</h1>
+          <button 
+            onClick={handleRefresh}
+            disabled={isPending}
+            className="p-2 text-gray-400 hover:text-brand-600 bg-gray-50 hover:bg-brand-50 rounded-full transition-colors focus:outline-none"
+            title="Refresh Market Data"
+          >
+            <svg className={`w-5 h-5 ${isPending ? 'animate-spin text-brand-600' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Spotlight Products Section */}

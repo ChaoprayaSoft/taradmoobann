@@ -530,7 +530,9 @@
     "signInRequired": "Sign in Required",
     "signInPromptDesc": "You must be signed in to enter a market. Would you like to sign in now?",
     "cancel": "Cancel",
-    "signIn": "Sign In"
+    "signIn": "Sign In",
+    "spotlight": "Spotlight",
+    "viewInMarket": "View in Market"
   },
   "NotificationPrompt": {
     "enableTitle": "Enable Notifications?",
