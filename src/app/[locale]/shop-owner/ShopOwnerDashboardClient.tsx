@@ -46,10 +46,15 @@ export default function ShopOwnerDashboardClient({
   const pastOrdersRaw = selectedShopOrders.filter(o => o.status === "Completed" || o.status === "Cancelled");
   const pastOrders = pastOrdersRaw.filter(o => {
     if (!dateRange.start && !dateRange.end) return true;
-    const orderDateStr = new Date(o.createdAt).toISOString().split('T')[0];
-    if (dateRange.start && orderDateStr < dateRange.start) return false;
-    if (dateRange.end && orderDateStr > dateRange.end) return false;
-    return true;
+    if (!o.createdAt) return true;
+    try {
+      const orderDateStr = new Date(o.createdAt).toISOString().split('T')[0];
+      if (dateRange.start && orderDateStr < dateRange.start) return false;
+      if (dateRange.end && orderDateStr > dateRange.end) return false;
+      return true;
+    } catch (e) {
+      return true;
+    }
   });
   const completedOrders = selectedShopOrders.filter(o => o.status === "Completed");
   const totalEarnings = completedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -1238,11 +1243,11 @@ export default function ShopOwnerDashboardClient({
                       </div>
 
                       <div className="space-y-1 mb-3">
-                        {order.items.map((item: any, i: number) => (
+                        {(order.items || []).map((item: any, i: number) => (
                           <div key={i} className="flex flex-col text-gray-700 mb-2 border-b border-brand-100 pb-2 last:border-0 last:pb-0">
                             <div className="flex justify-between">
                               <span className="font-medium">{item.quantity}x {item.productName}</span>
-                              <span>฿{(item.price * item.quantity).toFixed(2)}</span>
+                              <span>฿{((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
                             </div>
 
                             {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
@@ -1261,7 +1266,7 @@ export default function ShopOwnerDashboardClient({
                         ))}
                         <div className="flex justify-between font-bold text-gray-900 pt-1 border-t border-brand-200 mt-2">
                           <span>{t("total")}</span>
-                          <span>฿{order.totalAmount.toFixed(2)}</span>
+                          <span>฿{(order.totalAmount || 0).toFixed(2)}</span>
                         </div>
                       </div>
 
@@ -1410,7 +1415,7 @@ export default function ShopOwnerDashboardClient({
                             {houseNo}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
-                            ฿{order.totalAmount.toFixed(2)}
+                            ฿{(order.totalAmount || 0).toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                             <button
@@ -1999,11 +2004,11 @@ export default function ShopOwnerDashboardClient({
 
               <h4 className="text-sm font-bold text-gray-900 mb-3 border-b pb-2">{t("items")}</h4>
               <div className="space-y-4 mb-6">
-                {selectedPastOrder.items.map((item: any, i: number) => (
+                {(selectedPastOrder.items || []).map((item: any, i: number) => (
                   <div key={i} className="flex flex-col text-gray-700">
                     <div className="flex justify-between">
                       <span className="font-medium text-sm">{item.quantity}x {item.productName}</span>
-                      <span className="text-sm font-medium">฿{(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="text-sm font-medium">฿{((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
                     </div>
 
                     {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
@@ -2024,7 +2029,7 @@ export default function ShopOwnerDashboardClient({
 
               <div className="flex justify-between font-bold text-lg text-gray-900 pt-4 border-t border-gray-200">
                 <span>{t("total")}</span>
-                <span>฿{selectedPastOrder.totalAmount.toFixed(2)}</span>
+                <span>฿{(selectedPastOrder.totalAmount || 0).toFixed(2)}</span>
               </div>
             </div>
             
