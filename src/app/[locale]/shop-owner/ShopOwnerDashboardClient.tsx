@@ -597,7 +597,7 @@ export default function ShopOwnerDashboardClient({
     );
   }
 
-  const actualMaxProductSlots = selectedShop?.maxProductSlots || 1;
+  const actualMaxProductSlots = Math.max(selectedShop?.maxProductSlots || 1, selectedShopProducts.length);
 
   return (
     <div className="space-y-6">

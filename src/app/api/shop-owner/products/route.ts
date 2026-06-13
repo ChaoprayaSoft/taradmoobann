@@ -113,7 +113,7 @@ export async function POST(req: Request) {
       // Increment shop product slots
       if (verification.shopDoc) {
         batch.update(verification.shopDoc.ref, {
-          maxProductSlots: maxProductSlots + 1
+          maxProductSlots: Math.max(maxProductSlots, productCount) + 1
         });
       }
       
