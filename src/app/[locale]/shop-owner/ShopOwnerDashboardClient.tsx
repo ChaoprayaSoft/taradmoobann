@@ -1171,7 +1171,7 @@ export default function ShopOwnerDashboardClient({
                         </div>
                         <p className="text-xs text-gray-500 line-clamp-1 mt-1">{product.description}</p>
 
-                        {product.tags && product.tags.length > 0 && (
+                        {Array.isArray(product.tags) && product.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {product.tags.map((tag: string, i: number) => (
                               <span key={i} className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-[10px] rounded">
@@ -1230,7 +1230,7 @@ export default function ShopOwnerDashboardClient({
                       <div className="flex justify-between items-start border-b border-brand-200 pb-2 mb-2">
                         <div>
                           <p className="font-bold text-gray-900">{order.shopperName}</p>
-                          <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString()}</p>
+                          <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(order.createdAt).toLocaleString()}</p>
                         </div>
                         <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
                             order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
@@ -1250,9 +1250,9 @@ export default function ShopOwnerDashboardClient({
                               <span>฿{((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
                             </div>
 
-                            {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
+                            {item.selectedOptions && typeof item.selectedOptions === 'object' && Object.keys(item.selectedOptions).length > 0 && (
                               <div className="mt-0.5 flex flex-wrap gap-1">
-                                {Object.entries(item.selectedOptions).map(([key, value]) => (
+                                {item.selectedOptions && typeof item.selectedOptions === 'object' && Object.entries(item.selectedOptions).map(([key, value]) => (
                                   <span key={key} className="text-[10px] bg-white text-gray-600 px-1.5 py-0.5 rounded border border-gray-200">
                                     {key}: {Array.isArray(value) ? value.join(', ') : (value as string)}
                                   </span>
@@ -1391,22 +1391,23 @@ export default function ShopOwnerDashboardClient({
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {pastOrders.map((order) => {
-                      const houseNoMatch = order.deliveryAddress?.match(/House No(?:[.:\s]*)([^\n,]+)/i) || 
-                                           order.deliveryAddress?.match(/บ้านเลขที่(?:[.:\s]*)([^\n,]+)/i);
+                      const deliveryAddressStr = typeof order.deliveryAddress === 'string' ? order.deliveryAddress : "";
+                      const houseNoMatch = deliveryAddressStr.match(/House No(?:[.:\s]*)([^\n,]+)/i) || 
+                                           deliveryAddressStr.match(/บ้านเลขที่(?:[.:\s]*)([^\n,]+)/i);
                       const houseNo = houseNoMatch ? houseNoMatch[1].trim() : "-";
                       
                       return (
                         <tr key={order.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <div className="flex flex-col">
-                              <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                              <span suppressHydrationWarning>{new Date(order.createdAt).toLocaleDateString()}</span>
                               {order.status === "Cancelled" && (
                                 <span className="text-[10px] bg-red-100 text-red-800 px-1.5 rounded w-fit mt-1">Cancelled</span>
                               )}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                            {order.id.slice(-8)}
+                            {(order.id || "").slice(-8)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {order.shopperName}
@@ -1496,13 +1497,13 @@ export default function ShopOwnerDashboardClient({
                     </div>
 
                     <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col space-y-3">
-                      {selectedChat.messages.map((msg: any, i: number) => (
+                      {(selectedChat.messages || []).map((msg: any, i: number) => (
                         <div key={i} className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.sender === "shop_owner"
                             ? "bg-brand-600 text-white self-end rounded-br-none"
                             : "bg-gray-200 text-gray-800 self-start rounded-bl-none"
                           }`}>
                           <p className="whitespace-pre-wrap">{msg.text}</p>
-                          <span className={`text-[10px] mt-1 block ${msg.sender === "shop_owner" ? "text-brand-200" : "text-gray-500"}`}>
+                          <span suppressHydrationWarning className={`text-[10px] mt-1 block ${msg.sender === "shop_owner" ? "text-brand-200" : "text-gray-500"}`}>
                             {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
@@ -1567,7 +1568,7 @@ export default function ShopOwnerDashboardClient({
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <p className="font-medium text-sm text-gray-900">{review.shopperEmail}</p>
-                        <p className="text-xs text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
+                        <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(review.createdAt).toLocaleDateString()}</p>
                       </div>
                       <div className="flex text-yellow-400">
                         {[1, 2, 3, 4, 5].map(star => (
@@ -1985,7 +1986,7 @@ export default function ShopOwnerDashboardClient({
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h3 className="font-bold text-lg text-gray-900">{selectedPastOrder.shopperName}</h3>
-                  <p className="text-sm text-gray-500">{new Date(selectedPastOrder.createdAt).toLocaleString()}</p>
+                  <p className="text-sm text-gray-500" suppressHydrationWarning>{new Date(selectedPastOrder.createdAt).toLocaleString()}</p>
                 </div>
                 <div className="text-right">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${
@@ -1993,7 +1994,7 @@ export default function ShopOwnerDashboardClient({
                   }`}>
                     {selectedPastOrder.status}
                   </span>
-                  <p className="text-xs text-gray-500 font-mono mt-2">ID: {selectedPastOrder.id.slice(-8)}</p>
+                  <p className="text-xs text-gray-500 font-mono mt-2">ID: {(selectedPastOrder.id || "").slice(-8)}</p>
                 </div>
               </div>
 
@@ -2011,9 +2012,9 @@ export default function ShopOwnerDashboardClient({
                       <span className="text-sm font-medium">฿{((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
                     </div>
 
-                    {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
+                    {item.selectedOptions && typeof item.selectedOptions === 'object' && Object.keys(item.selectedOptions).length > 0 && (
                       <div className="mt-1 flex flex-wrap gap-1">
-                        {Object.entries(item.selectedOptions).map(([key, value]) => (
+                        {item.selectedOptions && typeof item.selectedOptions === 'object' && Object.entries(item.selectedOptions).map(([key, value]) => (
                           <span key={key} className="text-[10px] bg-white text-gray-600 px-1.5 py-0.5 rounded border border-gray-200">
                             {key}: {Array.isArray(value) ? value.join(', ') : (value as string)}
                           </span>
