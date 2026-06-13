@@ -38,7 +38,18 @@ export default async function Home() {
     // Sort by newest
     markets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
+    let userVillageName = "";
+
     if (userEmail) {
+      const userDoc = await adminDb.collection("users").doc(userEmail).get();
+      if (userDoc.exists) {
+        const addresses = userDoc.data()?.addresses || [];
+        if (addresses.length > 0) {
+          const defaultAddr = addresses.find((a: any) => a.isDefault);
+          userVillageName = defaultAddr ? (defaultAddr.villageName || "") : (addresses[0].villageName || "");
+        }
+      }
+
       // Fetch all memberships for user
       const memSnapshot = await adminDb
         .collection("market_memberships")
@@ -96,9 +107,6 @@ export default async function Home() {
       .map(doc => ({ id: doc.id, ...doc.data() } as any))
       .filter(p => p.spotlightExpiry && new Date(p.spotlightExpiry) > new Date());
 
-    // Sort spotlight products randomly
-    spotlightProducts = spotlightProducts.sort(() => 0.5 - Math.random()).slice(0, 8);
-
     if (spotlightProducts.length > 0) {
       const shopIds = Array.from(new Set(spotlightProducts.map(p => p.shopId)));
       if (shopIds.length > 0) {
@@ -112,9 +120,6 @@ export default async function Home() {
 
         spotlightProducts = spotlightProducts.map(p => {
           const shop = shopMap.get(p.shopId);
-          // markets was mapped as doc.data(), assuming id was included if it's there. 
-          // Wait, if 'id' wasn't natively in the document, we should find by doc id.
-          // Let's just find where id matches marketId or name.
           const market = markets.find(m => m.id === shop?.marketId);
           return {
             ...p,
@@ -123,6 +128,14 @@ export default async function Home() {
             villageName: market?.villageName || ""
           };
         });
+
+        // Filter by user's village name if available
+        if (userVillageName) {
+          spotlightProducts = spotlightProducts.filter(p => p.villageName === userVillageName);
+        }
+
+        // Sort spotlight products randomly and take top 8
+        spotlightProducts = spotlightProducts.sort(() => 0.5 - Math.random()).slice(0, 8);
       }
     }
 
