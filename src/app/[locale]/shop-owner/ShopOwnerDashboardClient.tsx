@@ -456,7 +456,7 @@ export default function ShopOwnerDashboardClient({
 
   const [spotlightConfirmData, setSpotlightConfirmData] = useState<any | null>(null);
   const [promotingProductId, setPromotingProductId] = useState<string | null>(null);
-  const [spotlightTier, setSpotlightTier] = useState<1 | 3 | 5>(1);
+  const [spotlightTier, setSpotlightTier] = useState<2 | 3 | 5>(2);
 
   const confirmSpotlightPromotion = async () => {
     if (!spotlightConfirmData || !selectedShopId) return;
@@ -597,9 +597,7 @@ export default function ShopOwnerDashboardClient({
     );
   }
 
-  const actualMaxProductSlots = selectedShop?.maxProductSlots && selectedShop.maxProductSlots < 3 
-    ? selectedShop.maxProductSlots + 3 
-    : (selectedShop?.maxProductSlots || 3);
+  const actualMaxProductSlots = selectedShop?.maxProductSlots || 1;
 
   return (
     <div className="space-y-6">
@@ -1109,9 +1107,9 @@ export default function ShopOwnerDashboardClient({
 
                         <div className="mt-3 flex gap-3 justify-end border-t border-gray-100 pt-2">
                           {(!product.isSpotlight || new Date(product.spotlightExpiry) < new Date()) ? (
-                            <button onClick={() => { setSpotlightConfirmData(product); setSpotlightTier(1); }} className="text-xs text-yellow-600 hover:text-yellow-800 font-medium px-2 py-1 bg-yellow-50 rounded">{t("promote")}</button>
+                            <button onClick={() => { setSpotlightConfirmData(product); setSpotlightTier(2); }} className="text-xs text-yellow-600 hover:text-yellow-800 font-medium px-2 py-1 bg-yellow-50 rounded">{t("promote")}</button>
                           ) : (
-                            <button onClick={() => { setSpotlightConfirmData(product); setSpotlightTier(1); }} className="text-xs text-yellow-600 hover:text-yellow-800 font-medium px-2 py-1 bg-yellow-50 rounded">{t("topUpSpotlight")}</button>
+                            <button onClick={() => { setSpotlightConfirmData(product); setSpotlightTier(2); }} className="text-xs text-yellow-600 hover:text-yellow-800 font-medium px-2 py-1 bg-yellow-50 rounded">{t("topUpSpotlight")}</button>
                           )}
                           <button onClick={() => openEditProduct(product)} className="text-xs text-brand-600 hover:text-brand-800 font-medium px-2 py-1 bg-brand-50 rounded">{t("edit")}</button>
                           <button onClick={() => setProductToDelete(product.id)} className="text-xs text-red-600 hover:text-red-800 font-medium px-2 py-1 bg-red-50 rounded">{t("delete")}</button>
@@ -1577,13 +1575,13 @@ export default function ShopOwnerDashboardClient({
                 </p>
                 <div className="flex flex-col gap-2 mb-6">
                   {[
-                    { coins: 1, hours: 24, label: t("oneCoinOneHour") },
-                    { coins: 3, hours: 75, label: t("threeCoinsThreeHours") },
-                    { coins: 5, hours: 145, label: t("fiveCoinsFiveHours") }
+                    { coins: 2, hours: 24, label: t("twoCoins24Hours") },
+                    { coins: 3, hours: 40, label: t("threeCoins40Hours") },
+                    { coins: 5, hours: 72, label: t("fiveCoins72Hours") }
                   ].map(tier => (
                     <button
                       key={tier.coins}
-                      onClick={() => setSpotlightTier(tier.coins as 1 | 3 | 5)}
+                      onClick={() => setSpotlightTier(tier.coins as 2 | 3 | 5)}
                       className={`flex items-center justify-between p-3 border rounded-lg transition-all ${spotlightTier === tier.coins ? "border-brand-500 bg-brand-50 ring-1 ring-brand-500" : "border-gray-200 hover:border-brand-300 hover:bg-gray-50"}`}
                     >
                       <span className="font-medium text-gray-900">{tier.label}</span>

@@ -26,7 +26,7 @@ export default function ShopperDashboardClient({
   initialAddresses = [],
   initialOrders = [],
   userCoins = 0,
-  userMaxShopSlots = 1,
+  userMaxShopSlots = 0,
   initialEmailNotificationsEnabled = true,
   initialPushNotificationsEnabled = true
 }: {
@@ -58,7 +58,7 @@ export default function ShopperDashboardClient({
   // Address State
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  
+
   // App Feedback State
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackRating, setFeedbackRating] = useState(5);
@@ -147,14 +147,14 @@ export default function ShopperDashboardClient({
   const [ownedShopsCount, setOwnedShopsCount] = useState(
     initialShops.filter(s => s.ownerEmail === session?.user?.email).length
   );
-  
+
   const [editAddress, setEditAddress] = useState({
     villageName: "",
     houseNo: "",
     address: "",
     telephone: ""
   });
-  
+
   const [isSavingAddress, setIsSavingAddress] = useState(false);
   const [addressSaved, setAddressSaved] = useState(false);
 
@@ -164,7 +164,7 @@ export default function ShopperDashboardClient({
       if (parsed.villageName !== undefined) {
         return `${t("villageName")}: ${parsed.villageName}\n${t("houseNo")}: ${parsed.houseNo}\n${t("addressLine")}: ${parsed.address}\n${t("telephone")}: ${parsed.telephone}`;
       }
-    } catch(e) {}
+    } catch (e) { }
     return addrStr;
   };
 
@@ -174,7 +174,7 @@ export default function ShopperDashboardClient({
       if (parsed.villageName !== undefined) {
         return parsed;
       }
-    } catch(e) {}
+    } catch (e) { }
     return { villageName: "", houseNo: "", address: addrStr, telephone: "" };
   };
 
@@ -657,7 +657,7 @@ export default function ShopperDashboardClient({
                       <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.323.152-.691.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .305-.152.671-.579.991a2.534 2.534 0 01-.921.42z" />
                       <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.35-1.112 2.178 0 .829.4 1.612 1.113 2.178.502.4 1.102.647 1.719.756v2.978a2.536 2.536 0 01-.921-.421l-.879-.66a.75.75 0 00-.9 1.2l.879.66c.533.4 1.169.645 1.821.75V18a.75.75 0 001.5 0v-.81a4.124 4.124 0 001.821-.749c.745-.559 1.179-1.344 1.179-2.191 0-.847-.434-1.632-1.179-2.191a4.122 4.122 0 00-1.821-.75V8.354c.29.082.559.213.786.393l.415.33a.75.75 0 00.933-1.175l-.415-.33a3.836 3.836 0 00-1.719-.755V6z" clipRule="evenodd" />
                     </svg>
-                    10 Coins
+                    20 Coins
                   </span>
                 )}
               </button>
@@ -1171,8 +1171,8 @@ export default function ShopperDashboardClient({
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col space-y-3">
                   {selectedChat.messages.map((msg: any, i: number) => (
                     <div key={i} className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.sender === "shopper"
-                        ? "bg-brand-600 text-white self-end rounded-br-none"
-                        : "bg-gray-200 text-gray-800 self-start rounded-bl-none"
+                      ? "bg-brand-600 text-white self-end rounded-br-none"
+                      : "bg-gray-200 text-gray-800 self-start rounded-bl-none"
                       }`}>
                       <p className="whitespace-pre-wrap">{msg.text}</p>
                       <span className={`text-[10px] mt-1 block ${msg.sender === "shopper" ? "text-brand-200" : "text-gray-500"}`}>
@@ -1229,9 +1229,9 @@ export default function ShopperDashboardClient({
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
-                          order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
-                            order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-200 text-gray-800'
+                        order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
+                          order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-200 text-gray-800'
                         }`}>
                         {order.status}
                       </span>
@@ -1321,7 +1321,7 @@ export default function ShopperDashboardClient({
                   <h3 className="font-bold text-gray-900">{market.name}</h3>
                   <p className="text-xs text-brand-600 font-medium mb-1">{market.villageName || ""}</p>
                   <p className="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{market.description}</p>
-                  
+
                   <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
                     <div className="flex items-center gap-1.5" title="Approved Shops">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -1451,7 +1451,7 @@ export default function ShopperDashboardClient({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1">Comment (optional)</label>
+                      <label className="block text-sm text-gray-700 mb-1">Comment/Request Features (optional)</label>
                       <textarea
                         className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
                         rows={3}
@@ -1626,7 +1626,7 @@ export default function ShopperDashboardClient({
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            
+
             <div className="p-6">
               {feedbackSuccess ? (
                 <div className="text-center py-8">
@@ -1650,9 +1650,9 @@ export default function ShopperDashboardClient({
                           onClick={() => setFeedbackRating(star)}
                           className="focus:outline-none"
                         >
-                          <svg 
-                            className={`w-8 h-8 ${feedbackRating >= star ? "text-yellow-400" : "text-gray-300"}`} 
-                            fill="currentColor" 
+                          <svg
+                            className={`w-8 h-8 ${feedbackRating >= star ? "text-yellow-400" : "text-gray-300"}`}
+                            fill="currentColor"
                             viewBox="0 0 20 20"
                           >
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />

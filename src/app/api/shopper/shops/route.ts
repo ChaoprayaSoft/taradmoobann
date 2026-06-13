@@ -42,17 +42,15 @@ export async function POST(req: Request) {
     const shopsQuery = await adminDb.collection("shops").where("ownerEmail", "==", email).get();
     const shopsCount = shopsQuery.size;
     
-    const maxShopSlots = userData?.maxShopSlots !== undefined && userData.maxShopSlots < 2 
-      ? userData.maxShopSlots + 1 
-      : (userData?.maxShopSlots || 1);
+    const maxShopSlots = userData?.maxShopSlots || 0;
     let cost = 0;
     
     if (shopsCount >= maxShopSlots) {
-      cost = 10;
+      cost = 20;
       const currentCoins = userData?.coins || 0;
       if (currentCoins < cost) {
         return NextResponse.json({ 
-          error: `You have reached the maximum of ${maxShopSlots} shop slots. It costs 10 coins to unlock another shop slot. Insufficient coins.`, 
+          error: `You have reached the maximum of ${maxShopSlots} shop slots. It costs 20 coins to unlock another shop slot. Insufficient coins.`, 
           code: "INSUFFICIENT_COINS" 
         }, { status: 400 });
       }
@@ -75,7 +73,8 @@ export async function POST(req: Request) {
       houseNumber,
       location,
       ownerEmail: email,
-      status: "pending",
+      status: "approved",
+      maxProductSlots: 1, // New shops start with 1 free product slot
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -122,7 +121,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ success: true, shopId, status: "pending" });
+    return NextResponse.json({ success: true, shopId, status: "approved" });
   } catch (error: any) {
     console.error("Failed to create self-service shop:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

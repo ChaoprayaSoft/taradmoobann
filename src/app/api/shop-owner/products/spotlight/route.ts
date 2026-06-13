@@ -49,15 +49,15 @@ export async function POST(req: Request) {
     const userData = userDoc.data();
     const currentCoins = userData.coins || 0;
     
-    let COST = 1;
+    let COST = 2;
     let hours = 24;
 
     if (coins === 3) {
       COST = 3;
-      hours = 75;
+      hours = 40;
     } else if (coins === 5) {
       COST = 5;
-      hours = 145;
+      hours = 72;
     }
 
     if (currentCoins < COST) {

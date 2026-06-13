@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     let userDoc: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData> | null = null;
 
 
-    const maxProductSlots = verification.shopData?.maxProductSlots || 3;
+    const maxProductSlots = verification.shopData?.maxProductSlots || 1;
 
     if (productCount >= maxProductSlots) {
       cost = 5;
