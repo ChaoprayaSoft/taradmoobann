@@ -131,6 +131,7 @@
     "feedbackSuccessDesc": "We appreciate your input and will use it to improve the app.",
     "rating": "Rating",
     "comment": "Comment",
+    "comment/request features": "Comment / Request features",
     "commentPlaceholder": "Any features you'd like to see?",
     "submit": "Submit"
   },
@@ -263,6 +264,7 @@
     "feedbackSuccessDesc": "We appreciate your input and will use it to improve the app.",
     "rating": "Rating",
     "comment": "Comment",
+    "comment/request features": "Comment / Request features",
     "commentPlaceholder": "Any features you'd like to see?",
     "submit": "Submit",
     "submitting": "Submitting...",
