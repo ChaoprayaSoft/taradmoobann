@@ -1129,27 +1129,27 @@ export default function ShopOwnerDashboardClient({
                         </div>
                       ))}
                       <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-start justify-between w-full">
-                            <h3 className="text-md font-medium text-gray-900 truncate pr-2">{product.name}</h3>
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="text-md font-medium text-gray-900 truncate flex-1">{product.name}</h3>
+                          <div className="flex items-start gap-2 flex-shrink-0">
                             {product.isSpotlight && new Date(product.spotlightExpiry) > new Date() && (() => {
                               const hrs = Math.max(0, Math.ceil((new Date(product.spotlightExpiry).getTime() - new Date().getTime()) / (1000 * 60 * 60)));
                               return (
-                                <div className="flex flex-col items-end flex-shrink-0">
-                                  <span className="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 mb-0.5">
+                                <div className="flex flex-col items-end">
+                                  <span className="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 mb-0.5 whitespace-nowrap">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                                       <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
                                     </svg>
                                     {t("spotlightBadge")}
                                   </span>
-                                  <span className="text-[9px] text-gray-500 font-medium">
+                                  <span className="text-[9px] text-gray-500 font-medium whitespace-nowrap">
                                     {t("hoursLeft", { hours: hrs })}
                                   </span>
                                 </div>
                               );
                             })()}
+                            <span className="text-brand-700 font-bold whitespace-nowrap">฿{product.price}</span>
                           </div>
-                          <span className="text-brand-700 font-bold ml-2">฿{product.price}</span>
                         </div>
                         <p className="text-xs text-gray-500 line-clamp-1 mt-1">{product.description}</p>
 
