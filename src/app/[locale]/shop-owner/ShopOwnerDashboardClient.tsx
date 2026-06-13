@@ -1111,7 +1111,7 @@ export default function ShopOwnerDashboardClient({
                   <p className="text-sm mt-1" dangerouslySetInnerHTML={{ __html: t("clickAddProduct") }}></p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {selectedShopProducts.map(product => (
                     <div key={product.id} className="flex space-x-3 border border-gray-100 p-3 rounded-lg hover:shadow-md transition">
                       {product.imageUrls && product.imageUrls.length > 0 ? (
