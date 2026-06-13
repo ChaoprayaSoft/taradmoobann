@@ -41,7 +41,16 @@ export default function ShopOwnerDashboardClient({
 
   const [orders, setOrders] = useState<any[]>(initialOrders || []);
   const selectedShopOrders = orders.filter(o => o.shopId === selectedShopId);
-  const activeOrders = selectedShopOrders.filter(o => o.status !== "Completed");
+  const activeOrders = selectedShopOrders.filter(o => o.status !== "Completed" && o.status !== "Cancelled");
+  
+  const pastOrdersRaw = selectedShopOrders.filter(o => o.status === "Completed" || o.status === "Cancelled");
+  const pastOrders = pastOrdersRaw.filter(o => {
+    if (!dateRange.start && !dateRange.end) return true;
+    const orderDateStr = new Date(o.createdAt).toISOString().split('T')[0];
+    if (dateRange.start && orderDateStr < dateRange.start) return false;
+    if (dateRange.end && orderDateStr > dateRange.end) return false;
+    return true;
+  });
   const completedOrders = selectedShopOrders.filter(o => o.status === "Completed");
   const totalEarnings = completedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
 
@@ -603,6 +612,10 @@ export default function ShopOwnerDashboardClient({
   const [declineCancelOrderId, setDeclineCancelOrderId] = useState("");
   const [declineCancelReason, setDeclineCancelReason] = useState("");
   const [isDecliningCancel, setIsDecliningCancel] = useState(false);
+
+  // Order history
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [selectedPastOrder, setSelectedPastOrder] = useState<any | null>(null);
 
   const handleDeclineCancel = async () => {
     setIsDecliningCancel(true);
@@ -1325,15 +1338,38 @@ export default function ShopOwnerDashboardClient({
 
           {/* SHOP OWNER REPORTING / TRANSACTION HISTORY */}
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">{t("transactionHistorySummary")}</h2>
-              <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-200">
-                <p className="text-xs text-green-700 font-medium uppercase tracking-wider">{t("totalEarnings")}</p>
-                <p className="text-2xl font-bold text-green-800">฿{totalEarnings.toFixed(2)}</p>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+              <h2 className="text-xl font-semibold">{t("orderHistory") || t("transactionHistorySummary")}</h2>
+              <div className="flex flex-col sm:flex-row gap-4 items-center w-full md:w-auto">
+                <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-200 w-full sm:w-auto">
+                  <span className="text-xs text-gray-500 font-medium whitespace-nowrap">{t("filterByDate")}:</span>
+                  <input 
+                    type="date" 
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                    className="text-sm border border-gray-300 rounded px-2 py-1 w-full sm:w-auto"
+                  />
+                  <span className="text-gray-400 hidden sm:inline">-</span>
+                  <input 
+                    type="date" 
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                    className="text-sm border border-gray-300 rounded px-2 py-1 w-full sm:w-auto"
+                  />
+                  {(dateRange.start || dateRange.end) && (
+                    <button onClick={() => setDateRange({start: '', end: ''})} className="text-xs text-red-500 hover:text-red-700 ml-1 whitespace-nowrap">
+                      {t("clearDates")}
+                    </button>
+                  )}
+                </div>
+                <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-200 flex flex-col items-center sm:items-end w-full sm:w-auto">
+                  <p className="text-xs text-green-700 font-medium uppercase tracking-wider">{t("totalEarnings")}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-800">฿{totalEarnings.toFixed(2)}</p>
+                </div>
               </div>
             </div>
 
-            {completedOrders.length === 0 ? (
+            {pastOrders.length === 0 ? (
               <p className="text-gray-500 text-sm">{t("noCompletedTransactions")}</p>
             ) : (
               <div className="overflow-x-auto">
@@ -1343,30 +1379,50 @@ export default function ShopOwnerDashboardClient({
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("date")}</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("orderId")}</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("shopper")}</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("items")}</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("houseNo")}</th>
                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("amount")}</th>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {completedOrders.map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                          {order.id.slice(-8)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {order.shopperName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {order.items.length} {t("items").toLowerCase()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
-                          ฿{order.totalAmount.toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
+                    {pastOrders.map((order) => {
+                      const houseNoMatch = order.deliveryAddress?.match(/House No(?:[.:\s]*)([^\n,]+)/i) || 
+                                           order.deliveryAddress?.match(/บ้านเลขที่(?:[.:\s]*)([^\n,]+)/i);
+                      const houseNo = houseNoMatch ? houseNoMatch[1].trim() : "-";
+                      
+                      return (
+                        <tr key={order.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div className="flex flex-col">
+                              <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                              {order.status === "Cancelled" && (
+                                <span className="text-[10px] bg-red-100 text-red-800 px-1.5 rounded w-fit mt-1">Cancelled</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                            {order.id.slice(-8)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {order.shopperName}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {houseNo}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
+                            ฿{order.totalAmount.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <button
+                              onClick={() => setSelectedPastOrder(order)}
+                              className="text-brand-600 hover:text-brand-800 font-medium bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded transition"
+                            >
+                              {t("viewDetails")}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1909,6 +1965,78 @@ export default function ShopOwnerDashboardClient({
       )}
 
       {/* APP FEEDBACK MODAL */}
+      {/* Order Details Modal */}
+      {selectedPastOrder && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-bold text-gray-900">{t("orderDetails") || "Order Details"}</h2>
+              <button onClick={() => setSelectedPastOrder(null)} className="text-gray-400 hover:text-gray-600 transition">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="font-bold text-lg text-gray-900">{selectedPastOrder.shopperName}</h3>
+                  <p className="text-sm text-gray-500">{new Date(selectedPastOrder.createdAt).toLocaleString()}</p>
+                </div>
+                <div className="text-right">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    selectedPastOrder.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {selectedPastOrder.status}
+                  </span>
+                  <p className="text-xs text-gray-500 font-mono mt-2">ID: {selectedPastOrder.id.slice(-8)}</p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6">
+                <h4 className="text-sm font-bold text-gray-900 mb-2">{t("deliveryAddress")}</h4>
+                <p className="text-sm text-gray-600 whitespace-pre-wrap">{selectedPastOrder.deliveryAddress}</p>
+              </div>
+
+              <h4 className="text-sm font-bold text-gray-900 mb-3 border-b pb-2">{t("items")}</h4>
+              <div className="space-y-4 mb-6">
+                {selectedPastOrder.items.map((item: any, i: number) => (
+                  <div key={i} className="flex flex-col text-gray-700">
+                    <div className="flex justify-between">
+                      <span className="font-medium text-sm">{item.quantity}x {item.productName}</span>
+                      <span className="text-sm font-medium">฿{(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+
+                    {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {Object.entries(item.selectedOptions).map(([key, value]) => (
+                          <span key={key} className="text-[10px] bg-white text-gray-600 px-1.5 py-0.5 rounded border border-gray-200">
+                            {key}: {Array.isArray(value) ? value.join(', ') : (value as string)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {item.note && (
+                      <p className="text-xs text-gray-500 mt-1 italic bg-white p-2 rounded border border-gray-100">{t("note")} {item.note}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-between font-bold text-lg text-gray-900 pt-4 border-t border-gray-200">
+                <span>{t("total")}</span>
+                <span>฿{selectedPastOrder.totalAmount.toFixed(2)}</span>
+              </div>
+            </div>
+            
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+              <button type="button" onClick={() => setSelectedPastOrder(null)} className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                {t("cancel") || "Close"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showFeedbackModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
