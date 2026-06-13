@@ -280,6 +280,14 @@
     "noFeedbackYet": "ยังไม่มีข้อเสนอแนะ"
   },
   "ShopOwnerDashboard": {
+    "leaveComment": "แสดงความคิดเห็น",
+    "feedbackSuccess": "ขอบคุณสำหรับความคิดเห็นของคุณ!",
+    "feedbackSuccessDesc": "เราซาบซึ้งในความคิดเห็นของคุณและจะนำไปปรับปรุงแอปให้ดียิ่งขึ้น",
+    "rating": "คะแนน",
+    "comment": "ความคิดเห็น",
+    "commentPlaceholder": "มีฟีเจอร์อะไรที่คุณอยากเห็นบ้างไหม?",
+    "submit": "ส่ง",
+    "submitting": "กำลังส่ง...",
     "shopDashboard": "แดชบอร์ดร้านค้า",
     "manageProducts": "จัดการสินค้าและคำสั่งซื้อ",
     "statusOpen": "สถานะ: เปิด",

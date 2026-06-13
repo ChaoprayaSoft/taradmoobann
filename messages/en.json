@@ -258,6 +258,14 @@
     "noFeedbackYet": "No feedback received yet."
   },
   "ShopOwnerDashboard": {
+    "leaveComment": "Leave a Comment",
+    "feedbackSuccess": "Thank you for your feedback!",
+    "feedbackSuccessDesc": "We appreciate your input and will use it to improve the app.",
+    "rating": "Rating",
+    "comment": "Comment",
+    "commentPlaceholder": "Any features you'd like to see?",
+    "submit": "Submit",
+    "submitting": "Submitting...",
     "shopDashboard": "Shop Dashboard",
     "manageProducts": "Manage your products and active orders.",
     "statusOpen": "Status: OPEN",
