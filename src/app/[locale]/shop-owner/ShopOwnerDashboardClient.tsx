@@ -8,15 +8,15 @@ import { Coins, Coffee } from "lucide-react";
 import BuyCoffeeModal from "@/components/BuyCoffeeModal";
 import { useTranslations } from "next-intl";
 
-export default function ShopOwnerDashboardClient({ 
+export default function ShopOwnerDashboardClient({
   userEmail,
-  initialShops, 
+  initialShops,
   initialProducts,
   initialMarkets,
   initialOrders = [],
   initialCoins,
   userMaxShopSlots = 1
-}: { 
+}: {
   userEmail: string,
   initialShops: any[],
   initialProducts: any[],
@@ -27,7 +27,7 @@ export default function ShopOwnerDashboardClient({
 }) {
   const router = useRouter();
   const t = useTranslations("ShopOwnerDashboard");
-  
+
   // State for selecting which shop to manage if they have multiple
   const [shops, setShops] = useState<any[]>(initialShops || []);
   const [selectedShopId, setSelectedShopId] = useState<string | null>(
@@ -38,7 +38,7 @@ export default function ShopOwnerDashboardClient({
   const selectedShop = shops.find(s => s.id === selectedShopId);
   const [products, setProducts] = useState<any[]>(initialProducts || []);
   const selectedShopProducts = products.filter(p => p.shopId === selectedShopId);
-  
+
   const [orders, setOrders] = useState<any[]>(initialOrders || []);
   const selectedShopOrders = orders.filter(o => o.shopId === selectedShopId);
   const activeOrders = selectedShopOrders.filter(o => o.status !== "Completed");
@@ -54,7 +54,7 @@ export default function ShopOwnerDashboardClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [files, setFiles] = useState<File[]>([]);
-  
+
   // Order Management State
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
@@ -116,8 +116,8 @@ export default function ShopOwnerDashboardClient({
   const [replyInput, setReplyInput] = useState<{ [key: string]: string }>({});
   const [replyLoading, setReplyLoading] = useState<string | null>(null);
 
-  const liveAverageRating = shopReviews.length > 0 
-    ? (shopReviews.reduce((acc, r) => acc + r.rating, 0) / shopReviews.length).toFixed(1) 
+  const liveAverageRating = shopReviews.length > 0
+    ? (shopReviews.reduce((acc, r) => acc + r.rating, 0) / shopReviews.length).toFixed(1)
     : null;
 
   // Chat State
@@ -186,16 +186,16 @@ export default function ShopOwnerDashboardClient({
 
     // Real-time Chats Listener
     const chatsQ = query(
-      collection(db, "shop_chats"), 
+      collection(db, "shop_chats"),
       where("shopId", "==", selectedShopId)
     );
     const unsubChats = onSnapshot(chatsQ, (snap) => {
       let freshChats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       freshChats = freshChats.filter((c: any) => !c.deletedByShopOwner);
       freshChats.sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
-      
+
       setCustomerChats(freshChats);
-      
+
       if (selectedChat) {
         const updated = freshChats.find((c: any) => c.id === selectedChat.id);
         if (updated) setSelectedChat(updated);
@@ -233,10 +233,10 @@ export default function ShopOwnerDashboardClient({
       await fetch("/api/shop-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          shopId: selectedShopId, 
+        body: JSON.stringify({
+          shopId: selectedShopId,
           shopperEmail: selectedChat.shopperEmail,
-          text: textToSend 
+          text: textToSend
         }),
       });
       // The onSnapshot listener will automatically update the chat
@@ -292,7 +292,7 @@ export default function ShopOwnerDashboardClient({
         })
       });
       if (res.ok) {
-        setShopReviews(prev => prev.map(r => 
+        setShopReviews(prev => prev.map(r =>
           r.id === reviewId ? { ...r, ownerReply: replyInput[reviewId] } : r
         ));
         setReplyInput(prev => {
@@ -341,7 +341,7 @@ export default function ShopOwnerDashboardClient({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedShopId) return;
-    
+
     setLoading(true);
     setError("");
 
@@ -368,9 +368,9 @@ export default function ShopOwnerDashboardClient({
       }
 
       const method = editingProduct ? "PUT" : "POST";
-      const payload: any = { 
-        ...formData, 
-        shopId: selectedShopId 
+      const payload: any = {
+        ...formData,
+        shopId: selectedShopId
       };
 
       if (editingProduct) {
@@ -429,10 +429,10 @@ export default function ShopOwnerDashboardClient({
   const toggleProductAvailability = async (product: any) => {
     try {
       const newStatus = product.isAvailable === undefined ? false : !product.isAvailable;
-      
+
       // Optimistic UI Update
       setProducts(prev => prev.map(p => p.id === product.id ? { ...p, isAvailable: newStatus } : p));
-      
+
       const res = await fetch("/api/shop-owner/products", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -447,7 +447,7 @@ export default function ShopOwnerDashboardClient({
       if (!res.ok) {
         throw new Error("Failed to update availability");
       }
-    } catch(e) {
+    } catch (e) {
       // Revert on error
       setProducts(initialProducts);
       alert("Error updating product availability");
@@ -530,7 +530,7 @@ export default function ShopOwnerDashboardClient({
       });
       if (!res.ok) throw new Error("Failed to delete product");
       setProductToDelete(null);
-    } catch(e) {
+    } catch (e) {
       alert("Error deleting product");
     }
   };
@@ -544,7 +544,7 @@ export default function ShopOwnerDashboardClient({
       if (!res.ok) throw new Error("Failed to delete shop");
       // Since shop is deleted, we should redirect to dashboard home or refresh
       window.location.reload();
-    } catch(e) {
+    } catch (e) {
       alert("Error deleting shop");
       setShopToDelete(null);
     }
@@ -553,7 +553,7 @@ export default function ShopOwnerDashboardClient({
   const handleReviseShopSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedShopId) return;
-    
+
     setLoading(true);
     setError("");
 
@@ -572,7 +572,7 @@ export default function ShopOwnerDashboardClient({
       const res = await fetch("/api/shop-owner/shops/revise", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           shopId: selectedShopId,
           name: shopReviseData.name,
           description: shopReviseData.description,
@@ -588,7 +588,7 @@ export default function ShopOwnerDashboardClient({
 
       router.refresh();
       setIsRevisingShop(false);
-      
+
       if (selectedShop.status === "approved") {
         setShowSuccessModal(true);
       }
@@ -642,7 +642,7 @@ export default function ShopOwnerDashboardClient({
           </div>
           <p className="text-gray-500 mt-1">{t("manageProducts")}</p>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-4">
           <button
             onClick={() => setShowFeedbackModal(true)}
@@ -658,11 +658,10 @@ export default function ShopOwnerDashboardClient({
               <button
                 onClick={handleToggleShopStatus}
                 disabled={isTogglingStatus}
-                className={`text-sm font-semibold px-4 py-2 rounded-full transition shadow-sm ${
-                  selectedShop.operatingStatus === 'closed' 
-                    ? 'bg-red-100 text-red-800 hover:bg-red-200' 
+                className={`text-sm font-semibold px-4 py-2 rounded-full transition shadow-sm ${selectedShop.operatingStatus === 'closed'
+                    ? 'bg-red-100 text-red-800 hover:bg-red-200'
                     : 'bg-green-100 text-green-800 hover:bg-green-200'
-                }`}
+                  }`}
               >
                 {isTogglingStatus ? t("updating") : (selectedShop.operatingStatus === 'closed' ? t("statusClosed") : t("statusOpen"))}
               </button>
@@ -671,10 +670,10 @@ export default function ShopOwnerDashboardClient({
               </span>
             </div>
           )}
-          <button 
+          <button
             onClick={() => {
-              setShopReviseData({ 
-                name: selectedShop.name, 
+              setShopReviseData({
+                name: selectedShop.name,
                 description: selectedShop.description || "",
                 category: selectedShop.category || CATEGORIES[0],
                 locationType: selectedShop.houseNumber ? "house" : "area",
@@ -688,38 +687,37 @@ export default function ShopOwnerDashboardClient({
           >
             {t("editShop")}
           </button>
-          <button 
+          <button
             onClick={() => setShopToDelete(selectedShopId)}
             className="text-red-600 hover:text-red-800 text-sm font-semibold border border-red-200 rounded-lg px-4 py-2 transition hover:bg-red-50 bg-white shadow-sm"
           >
             {t("deleteShop")}
           </button>
-          
+
           {/* Shop Selector and Slots */}
           <div className="flex flex-col items-end gap-1.5">
             {shops.length > 1 && (
               <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-gray-500 mr-1 uppercase tracking-wider">{t("managing")}</span>
-            {shops.map(shop => {
-              const marketName = (initialMarkets || []).find(m => m.id === shop.marketId)?.name || shop.marketId;
-              const isSelected = selectedShopId === shop.id;
-              return (
-                <button
-                  key={shop.id}
-                  onClick={() => setSelectedShopId(shop.id)}
-                  className={`flex flex-col items-start px-4 py-2 rounded-xl transition shadow-sm border ${
-                    isSelected
-                      ? "bg-brand-600 text-white border-brand-600 ring-2 ring-brand-200 ring-offset-1"
-                      : "bg-white text-gray-700 border-gray-200 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300"
-                  }`}
-                >
-                  <span className="font-bold text-sm leading-none">{shop.name} {shop.status === "pending" && "⏳"}</span>
-                  <span className={`text-[10px] mt-0.5 leading-none ${isSelected ? "text-brand-100" : "text-gray-500"}`}>
-                    {t("inMarket", { marketName })}
-                  </span>
-                </button>
-              );
-            })}
+                <span className="text-sm font-medium text-gray-500 mr-1 uppercase tracking-wider">{t("managing")}</span>
+                {shops.map(shop => {
+                  const marketName = (initialMarkets || []).find(m => m.id === shop.marketId)?.name || shop.marketId;
+                  const isSelected = selectedShopId === shop.id;
+                  return (
+                    <button
+                      key={shop.id}
+                      onClick={() => setSelectedShopId(shop.id)}
+                      className={`flex flex-col items-start px-4 py-2 rounded-xl transition shadow-sm border ${isSelected
+                          ? "bg-brand-600 text-white border-brand-600 ring-2 ring-brand-200 ring-offset-1"
+                          : "bg-white text-gray-700 border-gray-200 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300"
+                        }`}
+                    >
+                      <span className="font-bold text-sm leading-none">{shop.name} {shop.status === "pending" && "⏳"}</span>
+                      <span className={`text-[10px] mt-0.5 leading-none ${isSelected ? "text-brand-100" : "text-gray-500"}`}>
+                        {t("inMarket", { marketName })}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             )}
             <span className="text-[10px] text-gray-500 font-medium tracking-wide">
@@ -751,10 +749,10 @@ export default function ShopOwnerDashboardClient({
               </p>
             </div>
             {!isRevisingShop && (
-              <button 
+              <button
                 onClick={() => {
-                  setShopReviseData({ 
-                    name: selectedShop.name, 
+                  setShopReviseData({
+                    name: selectedShop.name,
                     description: selectedShop.description || "",
                     category: selectedShop.category || CATEGORIES[0],
                     locationType: selectedShop.houseNumber ? "house" : "area",
@@ -777,7 +775,7 @@ export default function ShopOwnerDashboardClient({
         <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
             <div className="flex flex-wrap items-center gap-3">
-              <button 
+              <button
                 onClick={() => router.push('/shopper/wallet')}
                 className="flex items-center bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-2 rounded-full border border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition shadow-sm cursor-pointer group relative"
               >
@@ -787,8 +785,8 @@ export default function ShopOwnerDashboardClient({
                 </svg>
                 {coins} Coins
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setShowCoffeeModal(true)}
                 className="flex items-center gap-1 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-2 rounded-full border border-orange-200 hover:bg-orange-200 hover:border-orange-300 transition shadow-sm cursor-pointer"
               >
@@ -798,7 +796,7 @@ export default function ShopOwnerDashboardClient({
             </div>
 
             <div className="flex flex-col items-start sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
-              <button 
+              <button
                 onClick={() => {
                   if (isAddingProduct) {
                     cancelProductForm();
@@ -840,229 +838,229 @@ export default function ShopOwnerDashboardClient({
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
-              {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">{t("productName")}</label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="e.g. Spicy Papaya Salad"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">{t("priceTHB")}</label>
-                  <input
-                    required
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="e.g. 50"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">{t("description")}</label>
-                  <textarea
-                    rows={2}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">{t("customTags")}</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Spicy, Vegan, Best Seller (comma separated)"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
-                    value={formData.tags}
-                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">{t("separateTags")}</p>
-                </div>
-                
-                {/* Options Section */}
-                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <div className="flex justify-between items-center mb-3">
-                    <label className="block text-sm font-medium text-gray-700">{t("productOptions")}</label>
-                    <button 
+                {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">{t("productName")}</label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="e.g. Spicy Papaya Salad"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">{t("priceTHB")}</label>
+                    <input
+                      required
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g. 50"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">{t("description")}</label>
+                    <textarea
+                      rows={2}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">{t("customTags")}</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Spicy, Vegan, Best Seller (comma separated)"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={formData.tags}
+                      onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">{t("separateTags")}</p>
+                  </div>
+
+                  {/* Options Section */}
+                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div className="flex justify-between items-center mb-3">
+                      <label className="block text-sm font-medium text-gray-700">{t("productOptions")}</label>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, options: [...prev.options, { name: "", choices: [], required: true, allowMultiple: false }] }))}
+                        className="text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded hover:bg-brand-200 font-medium"
+                      >
+                        {t("addOption")}
+                      </button>
+                    </div>
+
+                    {formData.options.length === 0 ? (
+                      <p className="text-xs text-gray-500">{t("noOptionsAdded")}</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {formData.options.map((opt, idx) => (
+                          <div key={idx} className="bg-white p-3 rounded border border-gray-200 relative">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newOpts = [...formData.options];
+                                newOpts.splice(idx, 1);
+                                setFormData(prev => ({ ...prev, options: newOpts }));
+                              }}
+                              className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2 pr-6">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700">{t("optionName")}</label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Size"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-1.5 text-sm focus:ring-brand-500 focus:border-brand-500"
+                                  value={opt.name}
+                                  onChange={(e) => {
+                                    const newOpts = [...formData.options];
+                                    newOpts[idx].name = e.target.value;
+                                    setFormData(prev => ({ ...prev, options: newOpts }));
+                                  }}
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">{t("choices")}</label>
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                  {opt.choices.map((choice, cIdx) => (
+                                    <span key={cIdx} className="bg-brand-100 text-brand-800 text-[11px] font-medium px-2 py-1 rounded flex items-center gap-1">
+                                      {choice}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const newOpts = [...formData.options];
+                                          newOpts[idx].choices.splice(cIdx, 1);
+                                          setFormData(prev => ({ ...prev, options: newOpts }));
+                                        }}
+                                        className="hover:text-brand-900 text-sm font-bold leading-none"
+                                      >
+                                        &times;
+                                      </button>
+                                    </span>
+                                  ))}
+                                </div>
+                                <input
+                                  type="text"
+                                  placeholder={t("typeChoiceEnter")}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm border p-1.5 text-sm focus:ring-brand-500 focus:border-brand-500"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ',') {
+                                      e.preventDefault();
+                                      const val = e.currentTarget.value.trim();
+                                      if (val) {
+                                        const newOpts = [...formData.options];
+                                        if (!newOpts[idx].choices.includes(val)) {
+                                          newOpts[idx].choices.push(val);
+                                        }
+                                        setFormData(prev => ({ ...prev, options: newOpts }));
+                                        e.currentTarget.value = "";
+                                      }
+                                    }
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center mt-2 gap-4">
+                              <div className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  id={`req-${idx}`}
+                                  checked={opt.required}
+                                  onChange={(e) => {
+                                    const newOpts = [...formData.options];
+                                    newOpts[idx].required = e.target.checked;
+                                    setFormData(prev => ({ ...prev, options: newOpts }));
+                                  }}
+                                  className="h-3.5 w-3.5 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+                                />
+                                <label htmlFor={`req-${idx}`} className="ml-1.5 block text-xs text-gray-700">
+                                  {t("required")}
+                                </label>
+                              </div>
+                              <div className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  id={`mult-${idx}`}
+                                  checked={opt.allowMultiple}
+                                  onChange={(e) => {
+                                    const newOpts = [...formData.options];
+                                    newOpts[idx].allowMultiple = e.target.checked;
+                                    setFormData(prev => ({ ...prev, options: newOpts }));
+                                  }}
+                                  className="h-3.5 w-3.5 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+                                />
+                                <label htmlFor={`mult-${idx}`} className="ml-1.5 block text-xs text-gray-700">
+                                  {t("allowMultipleChoices")}
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">{t("productImagesMax3")}</label>
+                    {files.length < 3 && (
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+                        onChange={handleFileChange}
+                      />
+                    )}
+                    {files.length > 0 && (
+                      <ul className="mt-3 space-y-2">
+                        {files.map((f, idx) => (
+                          <li key={idx} className="flex justify-between items-center bg-gray-50 p-2 rounded-md border border-gray-100">
+                            <span className="text-xs text-gray-600 truncate max-w-[200px]">{f.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(idx)}
+                              className="text-red-500 hover:text-red-700 text-xs font-semibold px-2"
+                            >
+                              {t("remove")}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <div className="pt-4 flex gap-3 justify-end border-t border-gray-100">
+                    <button
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, options: [...prev.options, { name: "", choices: [], required: true, allowMultiple: false }] }))}
-                      className="text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded hover:bg-brand-200 font-medium"
+                      onClick={cancelProductForm}
+                      className="px-6 py-2 rounded-md font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
                     >
-                      {t("addOption")}
+                      {t("cancel")}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
+                    >
+                      {loading ? t("saving") : (editingProduct ? t("saveChanges") : t("saveProduct"))}
                     </button>
                   </div>
-                  
-                  {formData.options.length === 0 ? (
-                    <p className="text-xs text-gray-500">{t("noOptionsAdded")}</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {formData.options.map((opt, idx) => (
-                        <div key={idx} className="bg-white p-3 rounded border border-gray-200 relative">
-                          <button 
-                            type="button"
-                            onClick={() => {
-                              const newOpts = [...formData.options];
-                              newOpts.splice(idx, 1);
-                              setFormData(prev => ({ ...prev, options: newOpts }));
-                            }}
-                            className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2 pr-6">
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700">{t("optionName")}</label>
-                              <input 
-                                type="text"
-                                placeholder="e.g. Size"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-1.5 text-sm focus:ring-brand-500 focus:border-brand-500"
-                                value={opt.name}
-                                onChange={(e) => {
-                                  const newOpts = [...formData.options];
-                                  newOpts[idx].name = e.target.value;
-                                  setFormData(prev => ({ ...prev, options: newOpts }));
-                                }}
-                                required
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-1">{t("choices")}</label>
-                              <div className="flex flex-wrap gap-2 mb-2">
-                                {opt.choices.map((choice, cIdx) => (
-                                  <span key={cIdx} className="bg-brand-100 text-brand-800 text-[11px] font-medium px-2 py-1 rounded flex items-center gap-1">
-                                    {choice}
-                                    <button 
-                                      type="button" 
-                                      onClick={() => {
-                                        const newOpts = [...formData.options];
-                                        newOpts[idx].choices.splice(cIdx, 1);
-                                        setFormData(prev => ({ ...prev, options: newOpts }));
-                                      }}
-                                      className="hover:text-brand-900 text-sm font-bold leading-none"
-                                    >
-                                      &times;
-                                    </button>
-                                  </span>
-                                ))}
-                              </div>
-                              <input 
-                                type="text"
-                                placeholder={t("typeChoiceEnter")}
-                                className="block w-full rounded-md border-gray-300 shadow-sm border p-1.5 text-sm focus:ring-brand-500 focus:border-brand-500"
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ',') {
-                                    e.preventDefault();
-                                    const val = e.currentTarget.value.trim();
-                                    if (val) {
-                                      const newOpts = [...formData.options];
-                                      if (!newOpts[idx].choices.includes(val)) {
-                                        newOpts[idx].choices.push(val);
-                                      }
-                                      setFormData(prev => ({ ...prev, options: newOpts }));
-                                      e.currentTarget.value = "";
-                                    }
-                                  }
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className="flex items-center mt-2 gap-4">
-                            <div className="flex items-center">
-                              <input 
-                                type="checkbox" 
-                                id={`req-${idx}`}
-                                checked={opt.required}
-                                onChange={(e) => {
-                                  const newOpts = [...formData.options];
-                                  newOpts[idx].required = e.target.checked;
-                                  setFormData(prev => ({ ...prev, options: newOpts }));
-                                }}
-                                className="h-3.5 w-3.5 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
-                              />
-                              <label htmlFor={`req-${idx}`} className="ml-1.5 block text-xs text-gray-700">
-                                {t("required")}
-                              </label>
-                            </div>
-                            <div className="flex items-center">
-                              <input 
-                                type="checkbox" 
-                                id={`mult-${idx}`}
-                                checked={opt.allowMultiple}
-                                onChange={(e) => {
-                                  const newOpts = [...formData.options];
-                                  newOpts[idx].allowMultiple = e.target.checked;
-                                  setFormData(prev => ({ ...prev, options: newOpts }));
-                                }}
-                                className="h-3.5 w-3.5 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
-                              />
-                              <label htmlFor={`mult-${idx}`} className="ml-1.5 block text-xs text-gray-700">
-                                {t("allowMultipleChoices")}
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">{t("productImagesMax3")}</label>
-                  {files.length < 3 && (
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
-                      onChange={handleFileChange}
-                    />
-                  )}
-                  {files.length > 0 && (
-                    <ul className="mt-3 space-y-2">
-                      {files.map((f, idx) => (
-                        <li key={idx} className="flex justify-between items-center bg-gray-50 p-2 rounded-md border border-gray-100">
-                          <span className="text-xs text-gray-600 truncate max-w-[200px]">{f.name}</span>
-                          <button 
-                            type="button" 
-                            onClick={() => removeFile(idx)}
-                            className="text-red-500 hover:text-red-700 text-xs font-semibold px-2"
-                          >
-                            {t("remove")}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                <div className="pt-4 flex gap-3 justify-end border-t border-gray-100">
-                  <button 
-                    type="button" 
-                    onClick={cancelProductForm}
-                    className="px-6 py-2 rounded-md font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
-                  >
-                    {t("cancel")}
-                  </button>
-                  <button 
-                    type="submit" 
-                    disabled={loading}
-                    className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
-                  >
-                    {loading ? t("saving") : (editingProduct ? t("saveChanges") : t("saveProduct"))}
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
-          </div>
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1073,7 +1071,7 @@ export default function ShopOwnerDashboardClient({
               <p className="text-xs text-gray-500 mb-4 font-medium uppercase tracking-wider">
                 {t("market")} {(initialMarkets || []).find(m => m.id === selectedShop?.marketId)?.name || "Unknown Market"}
               </p>
-              
+
               {selectedShopProducts.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                   <p>{t("noProductsYet")}</p>
@@ -1116,7 +1114,7 @@ export default function ShopOwnerDashboardClient({
                           <span className="text-brand-700 font-bold ml-2">฿{product.price}</span>
                         </div>
                         <p className="text-xs text-gray-500 line-clamp-1 mt-1">{product.description}</p>
-                        
+
                         {product.tags && product.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {product.tags.map((tag: string, i: number) => (
@@ -1134,14 +1132,12 @@ export default function ShopOwnerDashboardClient({
                             </span>
                             <button
                               onClick={() => toggleProductAvailability(product)}
-                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                                (product.isAvailable === undefined || product.isAvailable) ? 'bg-brand-500' : 'bg-gray-300'
-                              }`}
+                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${(product.isAvailable === undefined || product.isAvailable) ? 'bg-brand-500' : 'bg-gray-300'
+                                }`}
                             >
                               <span
-                                className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                                  (product.isAvailable === undefined || product.isAvailable) ? 'translate-x-5' : 'translate-x-1'
-                                }`}
+                                className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${(product.isAvailable === undefined || product.isAvailable) ? 'translate-x-5' : 'translate-x-1'
+                                  }`}
                               />
                             </button>
                           </div>
@@ -1165,7 +1161,7 @@ export default function ShopOwnerDashboardClient({
 
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col">
               <h2 className="text-xl font-semibold mb-4">{t("incomingActiveOrders")}</h2>
-              
+
               <div className="flex-1 overflow-y-auto space-y-4 max-h-[600px]">
                 {activeOrders.length === 0 ? (
                   <div className="text-gray-500 text-sm text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
@@ -1180,16 +1176,15 @@ export default function ShopOwnerDashboardClient({
                           <p className="font-bold text-gray-900">{order.shopperName}</p>
                           <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString()}</p>
                         </div>
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${
-                          order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
-                          order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
-                          order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-200 text-gray-800'
-                        }`}>
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
+                            order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
+                              order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-200 text-gray-800'
+                          }`}>
                           {order.status}
                         </span>
                       </div>
-                      
+
                       <div className="space-y-1 mb-3">
                         {order.items.map((item: any, i: number) => (
                           <div key={i} className="flex flex-col text-gray-700 mb-2 border-b border-brand-100 pb-2 last:border-0 last:pb-0">
@@ -1197,7 +1192,7 @@ export default function ShopOwnerDashboardClient({
                               <span className="font-medium">{item.quantity}x {item.productName}</span>
                               <span>฿{(item.price * item.quantity).toFixed(2)}</span>
                             </div>
-                            
+
                             {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
                               <div className="mt-0.5 flex flex-wrap gap-1">
                                 {Object.entries(item.selectedOptions).map(([key, value]) => (
@@ -1225,7 +1220,7 @@ export default function ShopOwnerDashboardClient({
 
                       <div className="flex flex-col gap-2 mt-3">
                         {order.status === "Pending" && (
-                          <button 
+                          <button
                             disabled={updatingOrderId === order.id}
                             onClick={() => handleUpdateOrderStatus(order.id, "Preparing")}
                             className="w-full bg-brand-600 text-white font-medium py-2 rounded text-xs hover:bg-brand-700 transition disabled:opacity-50"
@@ -1234,7 +1229,7 @@ export default function ShopOwnerDashboardClient({
                           </button>
                         )}
                         {order.status === "Preparing" && (
-                          <button 
+                          <button
                             disabled={updatingOrderId === order.id}
                             onClick={() => handleUpdateOrderStatus(order.id, "Out for Delivery")}
                             className="w-full bg-purple-600 text-white font-medium py-2 rounded text-xs hover:bg-purple-700 transition disabled:opacity-50"
@@ -1243,7 +1238,7 @@ export default function ShopOwnerDashboardClient({
                           </button>
                         )}
                         {order.status === "Out for Delivery" && (
-                          <button 
+                          <button
                             disabled={updatingOrderId === order.id}
                             onClick={() => handleUpdateOrderStatus(order.id, "Pending Completion")}
                             className="w-full bg-gray-800 text-white font-medium py-2 rounded text-xs hover:bg-gray-900 transition disabled:opacity-50"
@@ -1322,7 +1317,7 @@ export default function ShopOwnerDashboardClient({
                 <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">NEW</span>
               )}
             </h2>
-            
+
             <div className="flex flex-col md:flex-row gap-6 border border-gray-200 rounded-lg overflow-hidden h-[600px] md:h-[500px]">
               {/* Chat List */}
               <div className={`w-full md:w-1/3 border-r border-gray-200 bg-gray-50 flex-col overflow-y-auto ${selectedChat ? 'hidden md:flex' : 'flex'}`}>
@@ -1345,7 +1340,7 @@ export default function ShopOwnerDashboardClient({
                           {chat.messages.length > 0 ? chat.messages[chat.messages.length - 1].text : t("newChat")}
                         </p>
                       </button>
-                      <button 
+                      <button
                         onClick={(e) => triggerDeleteChat(e, chat.id)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
                         title="Delete conversation"
@@ -1364,7 +1359,7 @@ export default function ShopOwnerDashboardClient({
                 {selectedChat ? (
                   <>
                     <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10 flex items-center">
-                      <button 
+                      <button
                         onClick={() => setSelectedChat(null)}
                         className="md:hidden mr-3 text-gray-500 hover:text-gray-700"
                       >
@@ -1374,17 +1369,16 @@ export default function ShopOwnerDashboardClient({
                       </button>
                       <h3 className="font-bold text-gray-900">{selectedChat.shopperEmail}</h3>
                     </div>
-                    
+
                     <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col space-y-3">
                       {selectedChat.messages.map((msg: any, i: number) => (
-                        <div key={i} className={`max-w-[80%] rounded-lg p-3 text-sm ${
-                          msg.sender === "shop_owner" 
-                            ? "bg-brand-600 text-white self-end rounded-br-none" 
+                        <div key={i} className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.sender === "shop_owner"
+                            ? "bg-brand-600 text-white self-end rounded-br-none"
                             : "bg-gray-200 text-gray-800 self-start rounded-bl-none"
-                        }`}>
+                          }`}>
                           <p className="whitespace-pre-wrap">{msg.text}</p>
                           <span className={`text-[10px] mt-1 block ${msg.sender === "shop_owner" ? "text-brand-200" : "text-gray-500"}`}>
-                            {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                       ))}
@@ -1461,7 +1455,7 @@ export default function ShopOwnerDashboardClient({
                     {review.comment && (
                       <p className="text-sm text-gray-700 whitespace-pre-wrap mb-4">{review.comment}</p>
                     )}
-                    
+
                     {review.ownerReply ? (
                       <div className="mt-2 bg-white p-3 rounded border border-gray-200 text-sm">
                         <p className="font-bold text-gray-900 text-xs mb-1">{t("yourReply")}</p>
@@ -1524,62 +1518,62 @@ export default function ShopOwnerDashboardClient({
           </div>
         </div>
       )}
-        {/* Delete Product Confirmation Modal */}
-        {productToDelete && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("deleteProduct")}</h3>
-              <p className="text-sm text-gray-600 mb-6">{t("sureDeleteProduct")}</p>
-              <div className="flex gap-3 justify-end">
-                <button 
-                  onClick={() => setProductToDelete(null)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                  {t("cancel")}
-                </button>
-                <button 
-                  onClick={confirmDeleteProduct}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                >
-                  {t("delete")}
-                </button>
-              </div>
+      {/* Delete Product Confirmation Modal */}
+      {productToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{t("deleteProduct")}</h3>
+            <p className="text-sm text-gray-600 mb-6">{t("sureDeleteProduct")}</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setProductToDelete(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                {t("cancel")}
+              </button>
+              <button
+                onClick={confirmDeleteProduct}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+              >
+                {t("delete")}
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Delete Shop Confirmation Modal */}
-        {shopToDelete && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("deleteEntireShop")}</h3>
-              <p className="text-sm text-gray-600 mb-6">
-                {t("sureDeleteShop")}
-              </p>
-              <div className="flex gap-3 justify-center">
-                <button 
-                  onClick={() => setShopToDelete(null)}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={confirmDeleteShop}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                >
-                  Delete Shop
-                </button>
-              </div>
+      {/* Delete Shop Confirmation Modal */}
+      {shopToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{t("deleteEntireShop")}</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              {t("sureDeleteShop")}
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setShopToDelete(null)}
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteShop}
+                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+              >
+                Delete Shop
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* SPOTLIGHT CONFIRMATION MODAL */}
+      {/* SPOTLIGHT CONFIRMATION MODAL */}
       {spotlightConfirmData && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
@@ -1667,7 +1661,7 @@ export default function ShopOwnerDashboardClient({
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg mb-4 text-gray-900">Edit Shop Details</h3>
             {error && <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{error}</div>}
-            
+
             <form onSubmit={handleReviseShopSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Shop Name *</label>
@@ -1701,34 +1695,34 @@ export default function ShopOwnerDashboardClient({
                   onChange={(e) => setShopReviseData({ ...shopReviseData, description: e.target.value })}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Location Type *</label>
                 <div className="flex gap-6 mb-3">
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input 
-                      type="radio" 
-                      name="reviseLocationType" 
-                      value="house" 
-                      checked={shopReviseData.locationType === "house"} 
-                      onChange={() => setShopReviseData({...shopReviseData, locationType: "house"})}
+                    <input
+                      type="radio"
+                      name="reviseLocationType"
+                      value="house"
+                      checked={shopReviseData.locationType === "house"}
+                      onChange={() => setShopReviseData({ ...shopReviseData, locationType: "house" })}
                       className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
                     />
                     House Number
                   </label>
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input 
-                      type="radio" 
-                      name="reviseLocationType" 
-                      value="area" 
-                      checked={shopReviseData.locationType === "area"} 
-                      onChange={() => setShopReviseData({...shopReviseData, locationType: "area"})}
+                    <input
+                      type="radio"
+                      name="reviseLocationType"
+                      value="area"
+                      checked={shopReviseData.locationType === "area"}
+                      onChange={() => setShopReviseData({ ...shopReviseData, locationType: "area" })}
                       className="text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
                     />
                     Nearby Area
                   </label>
                 </div>
-                
+
                 {shopReviseData.locationType === "house" ? (
                   <div>
                     <input
@@ -1766,15 +1760,15 @@ export default function ShopOwnerDashboardClient({
               </div>
 
               <div className="flex gap-2 pt-4 justify-end">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setIsRevisingShop(false)}
                   className="px-4 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition"
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={loading}
                   className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
                 >
@@ -1800,7 +1794,7 @@ export default function ShopOwnerDashboardClient({
               {t("changesSaved")}
             </p>
             <div className="flex justify-center">
-              <button 
+              <button
                 onClick={() => setShowSuccessModal(false)}
                 className="px-6 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 transition"
               >
@@ -1811,7 +1805,7 @@ export default function ShopOwnerDashboardClient({
         </div>
       )}
 
-        <BuyCoffeeModal isOpen={showCoffeeModal} onClose={() => setShowCoffeeModal(false)} />
+      <BuyCoffeeModal isOpen={showCoffeeModal} onClose={() => setShowCoffeeModal(false)} />
 
       {/* APP FEEDBACK MODAL */}
       {showFeedbackModal && (
@@ -1859,7 +1853,7 @@ export default function ShopOwnerDashboardClient({
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("comment")}</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("comment/request features")}</label>
                     <textarea
                       required
                       rows={4}

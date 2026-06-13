@@ -1165,7 +1165,7 @@ export default function ShopperDashboardClient({
             {selectedChat ? (
               <>
                 <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10 flex items-center">
-                  <button 
+                  <button
                     onClick={() => setSelectedChat(null)}
                     className="md:hidden mr-3 text-gray-500 hover:text-gray-700"
                   >
@@ -1459,7 +1459,7 @@ export default function ShopperDashboardClient({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1">Comment/Request Features (optional)</label>
+                      <label className="block text-sm text-gray-700 mb-1">Comment (optional)</label>
                       <textarea
                         className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
                         rows={3}
@@ -1670,7 +1670,7 @@ export default function ShopperDashboardClient({
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("comment")}</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("comment/request features")}</label>
                     <textarea
                       required
                       rows={4}
