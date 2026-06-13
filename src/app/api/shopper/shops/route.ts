@@ -88,7 +88,7 @@ export async function POST(req: Request) {
     }
     if (cost > 0) {
       updates.coins = admin.firestore.FieldValue.increment(-cost);
-      updates.maxShopSlots = maxShopSlots + 1;
+      updates.maxShopSlots = Math.max(maxShopSlots, shopsCount) + 1;
     }
     
     if (Object.keys(updates).length > 0) {

@@ -76,9 +76,7 @@ export default async function ShopOwnerDashboard() {
       if (!userSnap.empty) {
         const userData = userSnap.docs[0].data();
         initialCoins = userData.coins || 0;
-        userMaxShopSlots = userData.maxShopSlots !== undefined && userData.maxShopSlots < 2 
-          ? userData.maxShopSlots + 1 
-          : (userData?.maxShopSlots || 1);
+        userMaxShopSlots = Math.max(userData?.maxShopSlots || 0, ownedShops.length);
       }
     }
 

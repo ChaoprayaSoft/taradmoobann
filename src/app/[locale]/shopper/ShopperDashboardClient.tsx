@@ -1124,9 +1124,9 @@ export default function ShopperDashboardClient({
           )}
         </h2>
 
-        <div className="flex flex-col md:flex-row gap-6 border border-gray-200 rounded-lg overflow-hidden h-[500px]">
+        <div className="flex flex-col md:flex-row gap-6 border border-gray-200 rounded-lg overflow-hidden h-[600px] md:h-[500px]">
           {/* Chat List */}
-          <div className="w-full md:w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col overflow-y-auto">
+          <div className={`w-full md:w-1/3 border-r border-gray-200 bg-gray-50 flex-col overflow-y-auto ${selectedChat ? 'hidden md:flex' : 'flex'}`}>
             {myChats.length === 0 ? (
               <p className="p-4 text-sm text-gray-500 text-center mt-10">{t("noMessages")}</p>
             ) : (
@@ -1161,10 +1161,18 @@ export default function ShopperDashboardClient({
           </div>
 
           {/* Chat View */}
-          <div className="w-full md:w-2/3 bg-white flex flex-col relative">
+          <div className={`w-full md:w-2/3 bg-white flex-col relative ${!selectedChat ? 'hidden md:flex' : 'flex'}`}>
             {selectedChat ? (
               <>
-                <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+                <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10 flex items-center">
+                  <button 
+                    onClick={() => setSelectedChat(null)}
+                    className="md:hidden mr-3 text-gray-500 hover:text-gray-700"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                  </button>
                   <h3 className="font-bold text-gray-900">{selectedChat.shopName}</h3>
                 </div>
 

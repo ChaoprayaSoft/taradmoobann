@@ -48,9 +48,7 @@ export default async function ShopperDashboard() {
         userAddresses = [data.address]; // Fallback for old single address format
       }
       userCoins = data?.coins || 0;
-      userMaxShopSlots = data?.maxShopSlots !== undefined && data.maxShopSlots < 2 
-        ? data.maxShopSlots + 1 
-        : (data?.maxShopSlots || 1);
+      userMaxShopSlots = Math.max(data?.maxShopSlots || 0, ownedShops.length);
       emailNotificationsEnabled = data?.emailNotificationsEnabled !== false;
       pushNotificationsEnabled = data?.pushNotificationsEnabled !== false;
     }
