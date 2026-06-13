@@ -599,6 +599,39 @@ export default function ShopOwnerDashboardClient({
     }
   };
 
+  const [declineCancelModalOpen, setDeclineCancelModalOpen] = useState(false);
+  const [declineCancelOrderId, setDeclineCancelOrderId] = useState("");
+  const [declineCancelReason, setDeclineCancelReason] = useState("");
+  const [isDecliningCancel, setIsDecliningCancel] = useState(false);
+
+  const handleDeclineCancel = async () => {
+    setIsDecliningCancel(true);
+    try {
+      const res = await fetch("/api/shop-owner/orders", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          orderId: declineCancelOrderId, 
+          declineCancel: true, 
+          declineReason: declineCancelReason 
+        }),
+      });
+      if (res.ok) {
+        setDeclineCancelModalOpen(false);
+        setDeclineCancelReason("");
+        setDeclineCancelOrderId("");
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to decline cancellation");
+      }
+    } catch (err) {
+      alert("Something went wrong");
+    } finally {
+      setIsDecliningCancel(false);
+    }
+  };
+
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
     setUpdatingOrderId(orderId);
     try {
@@ -1179,7 +1212,8 @@ export default function ShopOwnerDashboardClient({
                         <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
                             order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
                               order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-200 text-gray-800'
+                                order.status === 'Cancel Requested' ? 'bg-orange-100 text-orange-800' :
+                                  'bg-gray-200 text-gray-800'
                           }`}>
                           {order.status}
                         </span>
@@ -1236,6 +1270,31 @@ export default function ShopOwnerDashboardClient({
                           >
                             {t("markOutForDelivery")}
                           </button>
+                        )}
+                        {order.status === "Cancel Requested" && (
+                          <div className="bg-orange-50 border border-orange-200 rounded p-3 flex flex-col gap-2">
+                            <p className="text-orange-800 text-xs font-semibold">{t("shopperRequestedCancel") || "Shopper requested cancellation:"}</p>
+                            {order.cancelReason && <p className="text-orange-700 text-xs italic border-l-2 border-orange-300 pl-2">"{order.cancelReason}"</p>}
+                            <div className="flex gap-2 mt-1">
+                              <button
+                                disabled={updatingOrderId === order.id}
+                                onClick={() => handleUpdateOrderStatus(order.id, "Cancelled")}
+                                className="flex-1 bg-red-600 text-white font-medium py-1.5 rounded text-xs hover:bg-red-700 transition disabled:opacity-50 shadow-sm"
+                              >
+                                {t("acceptCancel") || "Accept"}
+                              </button>
+                              <button
+                                disabled={updatingOrderId === order.id}
+                                onClick={() => {
+                                  setDeclineCancelOrderId(order.id);
+                                  setDeclineCancelModalOpen(true);
+                                }}
+                                className="flex-1 bg-white text-gray-700 border border-gray-300 font-medium py-1.5 rounded text-xs hover:bg-gray-50 transition disabled:opacity-50 shadow-sm"
+                              >
+                                {t("declineCancel") || "Decline"}
+                              </button>
+                            </div>
+                          </div>
                         )}
                         {order.status === "Out for Delivery" && (
                           <button
@@ -1806,6 +1865,43 @@ export default function ShopOwnerDashboardClient({
       )}
 
       <BuyCoffeeModal isOpen={showCoffeeModal} onClose={() => setShowCoffeeModal(false)} />
+
+      {/* DECLINE CANCEL MODAL */}
+      {declineCancelModalOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-bold text-gray-900">{t("declineCancelTitle") || "Decline Cancellation"}</h2>
+              <button onClick={() => setDeclineCancelModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-gray-600 mb-4">{t("declineCancelDesc") || "Let the shopper know why you cannot accept the cancellation request."}</p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t("reasonOptional") || "Reason (Optional)"}</label>
+              <textarea
+                rows={3}
+                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 p-2"
+                placeholder={t("declineReasonPlaceholder") || "e.g., The food is already cooked."}
+                value={declineCancelReason}
+                onChange={(e) => setDeclineCancelReason(e.target.value)}
+              ></textarea>
+              <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 mt-6">
+                <button type="button" onClick={() => setDeclineCancelModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition">
+                  {t("cancel") || "Close"}
+                </button>
+                <button 
+                  onClick={handleDeclineCancel}
+                  disabled={isDecliningCancel} 
+                  className="bg-brand-600 text-white px-6 py-2 rounded-md font-medium hover:bg-brand-700 disabled:opacity-50 transition"
+                >
+                  {isDecliningCancel ? t("submitting") || "Submitting..." : t("submit")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* APP FEEDBACK MODAL */}
       {showFeedbackModal && (

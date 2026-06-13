@@ -393,8 +393,38 @@ export default function ShopperDashboardClient({
     }
   };
 
-  const activeOrders = orders.filter(o => o.status !== "Completed");
-  const pastOrders = orders.filter(o => o.status === "Completed");
+  const activeOrders = orders.filter(o => o.status !== "Completed" && o.status !== "Cancelled");
+  const pastOrders = orders.filter(o => o.status === "Completed" || o.status === "Cancelled");
+
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelOrderId, setCancelOrderId] = useState("");
+  const [cancelReason, setCancelReason] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const handleCancelOrder = async (orderId: string, reason?: string) => {
+    setIsCancelling(true);
+    try {
+      const res = await fetch("/api/shopper/orders/cancel", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, reason })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCancelModalOpen(false);
+        setCancelReason("");
+        setCancelOrderId("");
+        router.refresh();
+      } else {
+        alert(data.error || "Failed to cancel order");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error cancelling order");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   const handleAcceptDelivery = async (orderId: string) => {
     setCompletingOrderId(orderId);
@@ -646,7 +676,17 @@ export default function ShopperDashboardClient({
           <div className="relative group h-full flex items-center">
             <div className="flex flex-col items-center">
               <button
-                onClick={() => setIsOpeningShop(true)}
+                onClick={() => {
+                  if (addresses.length === 0) {
+                    alert(t("addressRequiredFirst") || "You must set your delivery address before opening a shop.");
+                    const el = document.getElementById("address-section");
+                    if (el) {
+                      window.scrollTo({ top: el.offsetTop - 100, behavior: "smooth" });
+                    }
+                  } else {
+                    setIsOpeningShop(true);
+                  }
+                }}
                 disabled={allMarkets.length === 0}
                 className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50 h-full flex items-center gap-2 shadow-sm disabled:cursor-not-allowed"
               >
@@ -781,8 +821,10 @@ export default function ShopperDashboardClient({
       )}
 
       {/* DELIVERY ADDRESS */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex justify-between items-center mb-4">
+      <div id="address-section" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8 mt-12 relative overflow-hidden group">
+        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-400 to-brand-600 rounded-l-2xl"></div>
+        
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-50">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{t("myAddresses")}</h2>
             <p className="text-gray-500 text-sm mt-1">Set up to 3 delivery addresses for faster checkout within your markets.</p>
@@ -1233,35 +1275,68 @@ export default function ShopperDashboardClient({
               const shop = initialShops.find(s => s.id === order.shopId);
 
               return (
-                <div key={order.id} className="border border-brand-200 rounded-lg p-4 bg-brand-50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
-                        order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
-                          order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-200 text-gray-800'
-                        }`}>
-                        {order.status}
-                      </span>
-                      <span className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleString()}</span>
+                <div key={order.id} className="mb-4">
+                  <div className="border border-brand-200 rounded-lg p-4 bg-brand-50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
+                            order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-200 text-gray-800'
+                          }`}>
+                          {order.status}
+                        </span>
+                        <span className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleString()}</span>
+                      </div>
+                      <p className="font-bold text-gray-900">Total: ฿{order.totalAmount.toFixed(2)}</p>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                        {order.items.map((item: any) => `${item.quantity}x ${item.productName}`).join(", ")}
+                      </p>
                     </div>
-                    <p className="font-bold text-gray-900">Total: ฿{order.totalAmount.toFixed(2)}</p>
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                      {order.items.map((item: any) => `${item.quantity}x ${item.productName}`).join(", ")}
-                    </p>
-                  </div>
 
-                  <div className="flex flex-col gap-2 min-w-[140px]">
-                    {(order.status === "Pending Completion" || order.status === "Out for Delivery") && (
-                      <button
-                        disabled={completingOrderId === order.id}
-                        onClick={() => handleAcceptDelivery(order.id)}
-                        className="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition disabled:opacity-50"
-                      >
-                        Accept Delivery
-                      </button>
-                    )}
+                    <div className="flex flex-col gap-2 min-w-[140px]">
+                      {(order.status === "Pending Completion" || order.status === "Out for Delivery") && (
+                        <button
+                          disabled={completingOrderId === order.id}
+                          onClick={() => handleAcceptDelivery(order.id)}
+                          className="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition disabled:opacity-50"
+                        >
+                          Accept Delivery
+                        </button>
+                      )}
+                      {order.status === "Pending" && (
+                        <button
+                          disabled={isCancelling}
+                          onClick={() => handleCancelOrder(order.id)}
+                          className="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-md text-sm font-medium hover:bg-red-100 transition disabled:opacity-50"
+                        >
+                          {t("cancelOrder") || "Cancel Order"}
+                        </button>
+                      )}
+                      {order.status === "Preparing" && (
+                        <button
+                          onClick={() => {
+                            setCancelOrderId(order.id);
+                            setCancelModalOpen(true);
+                          }}
+                          className="bg-orange-50 text-orange-600 border border-orange-200 px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-100 transition disabled:opacity-50"
+                        >
+                          {t("requestCancel") || "Request Cancel"}
+                        </button>
+                      )}
+                      {order.status === "Cancel Requested" && (
+                        <span className="text-orange-600 font-medium text-sm text-center px-2 py-1 bg-orange-50 rounded border border-orange-100">
+                          {t("cancelPending") || "Cancel Pending..."}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {order.cancelDeclineReason && order.status === "Preparing" && (
+                    <div className="bg-red-50 text-red-700 text-xs mt-2 p-2 rounded-lg border border-red-100">
+                      <span className="font-semibold">{t("cancelDeclined") || "Cancel Declined"}: </span>
+                      {order.cancelDeclineReason}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -1620,6 +1695,43 @@ export default function ShopperDashboardClient({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* CANCEL REQUEST MODAL */}
+      {cancelModalOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-bold text-gray-900">{t("requestCancelTitle") || "Request Cancellation"}</h2>
+              <button onClick={() => setCancelModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-gray-600 mb-4">{t("requestCancelDesc") || "The shop is already preparing your order. You can request a cancellation, but it's up to the shop owner to accept it."}</p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t("reasonOptional") || "Reason (Optional)"}</label>
+              <textarea
+                rows={3}
+                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 p-2"
+                placeholder={t("reasonPlaceholder") || "Why do you want to cancel?"}
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+              ></textarea>
+              <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 mt-6">
+                <button type="button" onClick={() => setCancelModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition">
+                  {t("cancel") || "Close"}
+                </button>
+                <button 
+                  onClick={() => handleCancelOrder(cancelOrderId, cancelReason)}
+                  disabled={isCancelling} 
+                  className="bg-orange-600 text-white px-6 py-2 rounded-md font-medium hover:bg-orange-700 disabled:opacity-50 transition"
+                >
+                  {isCancelling ? t("submitting") || "Submitting..." : t("submitRequest") || "Submit Request"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

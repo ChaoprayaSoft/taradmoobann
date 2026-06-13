@@ -12,9 +12,9 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { orderId, status } = await req.json();
+    const { orderId, status, declineCancel, declineReason } = await req.json();
 
-    if (!orderId || !status) {
+    if (!orderId || (!status && !declineCancel)) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -35,32 +35,47 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Allowed statuses from Shop Owner: "Preparing", "Out for Delivery", "Pending Completion"
-    const allowedStatuses = ["Preparing", "Out for Delivery", "Pending Completion"];
-    if (!allowedStatuses.includes(status)) {
+    // Allowed statuses from Shop Owner
+    const allowedStatuses = ["Preparing", "Out for Delivery", "Pending Completion", "Cancelled"];
+    if (!declineCancel && !allowedStatuses.includes(status)) {
       return NextResponse.json({ error: "Invalid status update from shop owner" }, { status: 400 });
     }
 
     const updateData: any = {
-      status,
       updatedAt: new Date().toISOString()
     };
 
-    // If moving to Out for Delivery, we could optionally generate a QR code token here, 
-    // or just use the orderId itself as the payload to be scanned.
-    if (status === "Out for Delivery") {
-      updateData.deliveryToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    let notificationKey = "Notifications.orderUpdateTitle";
+    let notificationBodyKey = "Notifications.orderUpdateBody";
+    let notifParams: any = { shopName: shopDoc.data()?.name || "Your Shop", status };
+
+    if (declineCancel) {
+      if (orderData?.status !== "Cancel Requested") {
+        return NextResponse.json({ error: "Order is not pending cancellation" }, { status: 400 });
+      }
+      updateData.status = "Preparing";
+      updateData.cancelDeclineReason = declineReason || "";
+      notificationKey = "Notifications.cancelDeclinedTitle";
+      notificationBodyKey = "Notifications.cancelDeclinedBody";
+      notifParams.status = "Preparing";
+    } else {
+      updateData.status = status;
+      if (status === "Cancelled") {
+        notificationKey = "Notifications.cancelAcceptedTitle";
+        notificationBodyKey = "Notifications.cancelAcceptedBody";
+      } else if (status === "Out for Delivery") {
+        updateData.deliveryToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      }
     }
 
     await orderRef.update(updateData);
 
     // Notify shopper
     if (orderData?.shopperEmail) {
-      const shopName = shopDoc.data()?.name || "Your Shop";
       await sendNotificationToUser(
         orderData.shopperEmail,
-        { key: "Notifications.orderUpdateTitle" },
-        { key: "Notifications.orderUpdateBody", params: { shopName, status } },
+        { key: notificationKey },
+        { key: notificationBodyKey, params: notifParams },
         { url: "/shopper" }
       );
     }
