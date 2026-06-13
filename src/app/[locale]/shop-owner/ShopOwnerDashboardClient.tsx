@@ -1812,7 +1812,6 @@ export default function ShopOwnerDashboardClient({
       )}
 
         <BuyCoffeeModal isOpen={showCoffeeModal} onClose={() => setShowCoffeeModal(false)} />
-      </div>
 
       {/* APP FEEDBACK MODAL */}
       {showFeedbackModal && (
