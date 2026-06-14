@@ -955,34 +955,34 @@ export default function AdminDashboardClient({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("market")}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("villageName")}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("houseNo") || "House No."}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("username") || "Username"}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("email") || "Email"}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("createdDate") || "Created Date"}</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("address") || "Address"}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("houseNo") || "House No."}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("villageName")}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("market")}</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t("address") || "Address"}</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("createdDate") || "Created Date"}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredUsers.length > 0 ? (
                     filteredUsers.map((user) => (
                       <tr key={user.id} className="hover:bg-gray-50 transition">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.marketName || "-"}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.villageName || "-"}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.houseNo || "-"}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name || "-"}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email || "-"}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.houseNo || "-"}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.villageName || "-"}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.marketName || "-"}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                           <button
                             onClick={() => setSelectedUserAddresses(user.addresses || [])}
                             className="text-brand-600 hover:text-brand-900 bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded-md transition"
                           >
                             {t("viewAddresses") || "View Addresses"}
                           </button>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
                         </td>
                       </tr>
                     ))

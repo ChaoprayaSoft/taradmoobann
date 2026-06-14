@@ -278,7 +278,8 @@
     "viewAddresses": "View Addresses",
     "noUsersFound": "No users found.",
     "deliveryAddresses": "Delivery Addresses",
-    "noAddressesFound": "No addresses found for this user."
+    "noAddressesFound": "No addresses found for this user.",
+    "houseNo": "House No."
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "Shopper requested cancellation:",

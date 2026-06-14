@@ -306,7 +306,8 @@
     "viewAddresses": "ดูที่อยู่",
     "noUsersFound": "ไม่พบผู้ใช้",
     "deliveryAddresses": "ที่อยู่สำหรับจัดส่ง",
-    "noAddressesFound": "ไม่พบที่อยู่สำหรับผู้ใช้นี้"
+    "noAddressesFound": "ไม่พบที่อยู่สำหรับผู้ใช้นี้",
+    "houseNo": "บ้านเลขที่"
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "ลูกค้าขอยกเลิกออเดอร์:",
