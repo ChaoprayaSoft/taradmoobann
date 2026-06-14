@@ -982,7 +982,12 @@ export default function AdminDashboardClient({
                           </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
+                          {user.createdAt ? (
+                            (() => {
+                              const d = new Date(user.createdAt);
+                              return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                            })()
+                          ) : "-"}
                         </td>
                       </tr>
                     ))
