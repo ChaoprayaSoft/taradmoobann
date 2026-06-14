@@ -467,7 +467,12 @@
     "acceptOrder": "Accept Order",
     "deliveryAcceptedDesc": "Shopper has accepted delivery.",
     "completeOrder": "Complete Order",
-    "waitingShopperAccept": "Waiting for Shopper to Accept"
+    "waitingShopperAccept": "Waiting for Shopper to Accept",
+    "statusActive": "เปิดให้บริการ",
+    "statusInactiveZeroCoins": "ระงับการให้บริการ (เหรียญหมด)",
+    "monthlyMaintenanceFee": "ค่าบำรุงรักษารายเดือน: {fee} เหรียญ",
+    "completedOrdersPeriod": "คำสั่งซื้อที่เสร็จสิ้น",
+    "filteredTotalEarnings": "รายได้รวม"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "แดชบอร์ดเจ้าของตลาด",

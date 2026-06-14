@@ -97,6 +97,11 @@ export default async function Home() {
 
     activeAds = fetchedAds;
 
+    // Fetch user coins map to filter inactive shops
+    const usersSnapshot = await adminDb.collection("users").get();
+    const userCoinsMap = new Map<string, number>();
+    usersSnapshot.docs.forEach(doc => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
+
     // Fetch Spotlight Products
     const spotlightSnapshot = await adminDb
       .collection("products")
@@ -123,11 +128,12 @@ export default async function Home() {
           const market = markets.find(m => m.id === shop?.marketId);
           return {
             ...p,
+            ownerEmail: shop?.ownerEmail,
             marketId: market?.id || "",
             marketName: market?.name || "Local Market",
             villageName: market?.villageName || ""
           };
-        });
+        }).filter(p => (userCoinsMap.get(p.ownerEmail) ?? 0) > 0);
 
         // Filter by user's village name if available
         if (userVillageName) {
@@ -160,11 +166,12 @@ export default async function Home() {
         const market = markets.find(m => m.id === shop?.marketId);
         return {
           ...p,
+          ownerEmail: shop?.ownerEmail,
           shopName: shop?.name || "Unknown Shop",
           marketId: market?.id || null,
           villageName: market?.villageName || ""
         };
-      }).filter(p => p.marketId);
+      }).filter(p => p.marketId && (userCoinsMap.get(p.ownerEmail) ?? 0) > 0);
 
       globalActiveProducts = globalActiveProducts.sort(() => 0.5 - Math.random()).slice(0, 10);
     }

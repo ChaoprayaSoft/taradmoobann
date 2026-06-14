@@ -47,7 +47,13 @@ export default async function MarketShoppingPage({ params, searchParams }: { par
       .where("status", "==", "approved")
       .get();
       
-    shops = shopsSnapshot.docs.map(doc => doc.data());
+    let fetchedShops = shopsSnapshot.docs.map(doc => doc.data());
+
+    const usersSnapshot = await adminDb.collection("users").get();
+    const userCoinsMap = new Map<string, number>();
+    usersSnapshot.docs.forEach(doc => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
+
+    shops = fetchedShops.filter(shop => (userCoinsMap.get(shop.ownerEmail) ?? 0) > 0);
 
     // 4. Fetch Products for those shops
     if (shops.length > 0) {

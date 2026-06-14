@@ -439,7 +439,12 @@
     "acceptOrder": "Accept Order",
     "deliveryAcceptedDesc": "Shopper has accepted delivery.",
     "completeOrder": "Complete Order",
-    "waitingShopperAccept": "Waiting for Shopper to Accept"
+    "waitingShopperAccept": "Waiting for Shopper to Accept",
+    "statusActive": "Active",
+    "statusInactiveZeroCoins": "Inactive (Zero Coins)",
+    "monthlyMaintenanceFee": "Monthly Maintenance: {fee} coins",
+    "completedOrdersPeriod": "Completed Orders",
+    "filteredTotalEarnings": "Total Earnings"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "Market Owner Dashboard",

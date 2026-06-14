@@ -61,7 +61,21 @@ export default function ShopOwnerDashboardClient({
     }
   });
   const completedOrders = selectedShopOrders.filter(o => o.status === "Completed");
-  const totalEarnings = completedOrders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0);
+  
+  // Maintenance calculations
+  const currentMonthStart = new Date();
+  currentMonthStart.setDate(1);
+  currentMonthStart.setHours(0, 0, 0, 0);
+  const monthlyCompletedOrders = completedOrders.filter(o => {
+    if (!o.createdAt) return false;
+    return new Date(o.createdAt) >= currentMonthStart;
+  });
+  const maintenanceFee = monthlyCompletedOrders.length >= 5 ? 2 : 5;
+  const isShopInactiveDueToZeroCoins = coins <= 0;
+
+  // Filtered metrics for Order History
+  const filteredCompletedOrders = pastOrders.filter(o => o.status === "Completed");
+  const filteredTotalEarnings = filteredCompletedOrders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0);
 
   // Product State
   const [isAddingProduct, setIsAddingProduct] = useState(false);
@@ -839,6 +853,18 @@ export default function ShopOwnerDashboardClient({
         <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
             <div className="flex flex-wrap items-center gap-3">
+              <span className={`px-3 py-2 rounded-full text-xs font-bold border shadow-sm flex items-center gap-1 ${isShopInactiveDueToZeroCoins ? "bg-red-100 text-red-800 border-red-200" : "bg-green-100 text-green-800 border-green-200"}`}>
+                <span className={`w-2 h-2 rounded-full ${isShopInactiveDueToZeroCoins ? "bg-red-500" : "bg-green-500"}`}></span>
+                {isShopInactiveDueToZeroCoins ? t("statusInactiveZeroCoins") || "Inactive (Zero Coins)" : t("statusActive") || "Active"}
+              </span>
+
+              <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-2 rounded-full border border-blue-200 shadow-sm flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-blue-500">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {t("monthlyMaintenanceFee", { fee: maintenanceFee }) || `Monthly Maintenance: ${maintenanceFee} coins`}
+              </span>
+
               <button
                 onClick={() => router.push('/shopper/wallet')}
                 className="flex items-center bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-2 rounded-full border border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition shadow-sm cursor-pointer group relative"
@@ -1376,9 +1402,15 @@ export default function ShopOwnerDashboardClient({
                     </button>
                   )}
                 </div>
-                <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-200 flex flex-col items-center sm:items-end w-full sm:w-auto">
-                  <p className="text-xs text-green-700 font-medium uppercase tracking-wider">{t("totalEarnings")}</p>
-                  <p className="text-xl sm:text-2xl font-bold text-green-800">฿{totalEarnings.toFixed(2)}</p>
+                <div className="flex gap-2">
+                  <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 flex flex-col items-center sm:items-end w-full sm:w-auto">
+                    <p className="text-xs text-blue-700 font-medium uppercase tracking-wider">{t("completedOrdersPeriod") || "Monthly Orders"}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-blue-800">{filteredCompletedOrders.length}</p>
+                  </div>
+                  <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-200 flex flex-col items-center sm:items-end w-full sm:w-auto">
+                    <p className="text-xs text-green-700 font-medium uppercase tracking-wider">{t("filteredTotalEarnings") || "Total Earnings"}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-green-800">฿{filteredTotalEarnings.toFixed(2)}</p>
+                  </div>
                 </div>
               </div>
             </div>

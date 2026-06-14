@@ -31,9 +31,15 @@ export default async function ShoppingPage() {
     }
   }
 
-  // 3. Fetch all approved shops
+  // 3. Fetch all approved shops and their owners' coins
   const shopsSnapshot = await adminDb.collection("shops").where("status", "==", "approved").get();
-  const allShops = shopsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+  let allShops = shopsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+
+  const usersSnapshot = await adminDb.collection("users").get();
+  const userCoinsMap = new Map<string, number>();
+  usersSnapshot.docs.forEach(doc => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
+
+  allShops = allShops.filter(shop => (userCoinsMap.get(shop.ownerEmail) ?? 0) > 0);
 
   // 4. Fetch all available products
   const productsSnapshot = await adminDb.collection("products").get();
