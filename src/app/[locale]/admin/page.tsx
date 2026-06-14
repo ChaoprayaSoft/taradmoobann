@@ -21,7 +21,7 @@ export default async function AdminDashboard() {
   let adsSettings: any = { maxAds: 3 };
   let totalUsers: number = 0;
   let feedbacks: any[] = [];
-  let initialTermsOfUse: string = "";
+  let initialTermsOfUse: any = null;
   
   try {
     const snapshot = await adminDb.collection("markets").orderBy("createdAt", "desc").get();
@@ -49,7 +49,7 @@ export default async function AdminDashboard() {
 
     const termsDoc = await adminDb.collection("settings").doc("terms_of_use").get();
     if (termsDoc.exists) {
-      initialTermsOfUse = termsDoc.data()?.content || "";
+      initialTermsOfUse = termsDoc.data() || null;
     }
   } catch (error) {
     console.error("Error fetching data for Admin Dashboard:", error);

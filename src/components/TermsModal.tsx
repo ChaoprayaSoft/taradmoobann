@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface TermsModalProps {
   isOpen: boolean;
@@ -14,6 +14,7 @@ export default function TermsModal({ isOpen, onClose }: TermsModalProps) {
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const t = useTranslations("Navigation");
+  const locale = useLocale();
 
   useEffect(() => {
     if (isOpen) {
@@ -23,7 +24,12 @@ export default function TermsModal({ isOpen, onClose }: TermsModalProps) {
           const docRef = doc(db, "settings", "terms_of_use");
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
-            setContent(docSnap.data().content || "");
+            const data = docSnap.data();
+            if (locale === 'th' && data.content_th) {
+              setContent(data.content_th);
+            } else {
+              setContent(data.content || "");
+            }
           } else {
             setContent("<p>Terms of Use have not been set yet.</p>");
           }

@@ -11,14 +11,18 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { content } = await req.json();
+    const { content, content_th } = await req.json();
 
-    if (typeof content !== "string") {
+    if (typeof content !== "string" || (content_th !== undefined && typeof content_th !== "string")) {
       return NextResponse.json({ error: "Invalid content" }, { status: 400 });
     }
 
     await adminDb.collection("settings").doc("terms_of_use").set(
-      { content, updatedAt: new Date().toISOString() },
+      { 
+        content, 
+        ...(content_th !== undefined && { content_th }),
+        updatedAt: new Date().toISOString() 
+      },
       { merge: true }
     );
 

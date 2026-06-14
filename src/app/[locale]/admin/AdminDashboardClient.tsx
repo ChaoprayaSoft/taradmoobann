@@ -26,7 +26,7 @@ export default function AdminDashboardClient({
   initialAdsSettings?: any,
   totalUsers?: number,
   initialFeedbacks?: any[],
-  initialTermsOfUse?: string
+  initialTermsOfUse?: any
 }) {
   const t = useTranslations("AdminDashboard");
   const router = useRouter();
@@ -103,7 +103,8 @@ export default function AdminDashboardClient({
   const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
 
   // Terms of Use State
-  const [termsContent, setTermsContent] = useState(initialTermsOfUse || "");
+  const [termsContent, setTermsContent] = useState(initialTermsOfUse?.content || "");
+  const [termsContentTh, setTermsContentTh] = useState(initialTermsOfUse?.content_th || "");
   const [termsSaving, setTermsSaving] = useState(false);
 
   useEffect(() => {
@@ -372,7 +373,7 @@ export default function AdminDashboardClient({
       const res = await fetch("/api/admin/terms", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: termsContent })
+        body: JSON.stringify({ content: termsContent, content_th: termsContentTh })
       });
       if (!res.ok) throw new Error("Failed to save terms");
       alert("Terms of Use saved successfully!");
@@ -1391,13 +1392,31 @@ export default function AdminDashboardClient({
             <div className="mb-4 text-sm text-gray-500">
               Edit the global Terms of Use. This content is visible to Shoppers and Shop Owners.
             </div>
-            <div className="border border-gray-300 rounded-md bg-white">
-              <ReactQuill 
-                theme="snow" 
-                value={termsContent} 
-                onChange={setTermsContent} 
-                className="h-[400px] mb-12"
-              />
+            
+            <div className="space-y-8">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">English Terms</label>
+                <div className="border border-gray-300 rounded-md bg-white">
+                  <ReactQuill 
+                    theme="snow" 
+                    value={termsContent} 
+                    onChange={setTermsContent} 
+                    className="h-[300px] mb-12"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Thai Terms (ข้อกำหนดการใช้งาน)</label>
+                <div className="border border-gray-300 rounded-md bg-white">
+                  <ReactQuill 
+                    theme="snow" 
+                    value={termsContentTh} 
+                    onChange={setTermsContentTh} 
+                    className="h-[300px] mb-12"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
