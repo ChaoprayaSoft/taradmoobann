@@ -658,6 +658,10 @@
     "membershipApprovedTitle": "Market Membership Approved",
     "membershipApprovedBody": "Your request to join {marketName} has been approved!",
     "membershipReviseTitle": "Membership Revision Needed",
-    "membershipReviseBody": "The market owner has requested a revision to your membership request for {marketName}."
+    "membershipReviseBody": "The market owner has requested a revision to your membership request for {marketName}.",
+    "maintenanceFeeReminderTitle": "Maintenance Fee Reminder",
+    "maintenanceFeeReminderBody": "Your monthly maintenance fee will be deducted in 7 days (on {date}).",
+    "maintenanceFeeDeductedTitle": "Maintenance Fee Deducted",
+    "maintenanceFeeDeductedBody": "Your monthly maintenance fee of {fee} coins has been deducted."
   }
 }

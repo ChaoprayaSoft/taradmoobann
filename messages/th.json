@@ -659,6 +659,10 @@
     "membershipApprovedTitle": "อนุมัติการเป็นสมาชิกตลาดแล้ว",
     "membershipApprovedBody": "คำขอเข้าร่วมตลาด {marketName} ของคุณได้รับการอนุมัติแล้ว!",
     "membershipReviseTitle": "ต้องแก้ไขข้อมูลสมาชิก",
-    "membershipReviseBody": "เจ้าของตลาดได้ขอให้คุณแก้ไขคำขอการเป็นสมาชิกสำหรับตลาด {marketName}"
+    "membershipReviseBody": "เจ้าของตลาดได้ขอให้คุณแก้ไขคำขอการเป็นสมาชิกสำหรับตลาด {marketName}",
+    "maintenanceFeeReminderTitle": "แจ้งเตือนค่าบำรุงรักษารายเดือน",
+    "maintenanceFeeReminderBody": "ค่าบำรุงรักษารายเดือนของคุณจะถูกหักภายใน 7 วัน (ในวันที่ {date})",
+    "maintenanceFeeDeductedTitle": "หักค่าบำรุงรักษารายเดือนแล้ว",
+    "maintenanceFeeDeductedBody": "ค่าบำรุงรักษารายเดือนของคุณจำนวน {fee} เหรียญถูกหักเรียบร้อยแล้ว"
   }
 }
