@@ -7,6 +7,7 @@ import { db } from "@/lib/firebase";
 import { Coins, Coffee } from "lucide-react";
 import BuyCoffeeModal from "@/components/BuyCoffeeModal";
 import { useTranslations } from "next-intl";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function ShopOwnerDashboardClient({
   userEmail,
@@ -684,7 +685,8 @@ export default function ShopOwnerDashboardClient({
   const actualMaxProductSlots = Math.max(selectedShop?.maxProductSlots || 1, selectedShopProducts.length);
 
   return (
-    <div className="space-y-6">
+    <ErrorBoundary>
+      <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center gap-3 relative group">
@@ -2114,5 +2116,6 @@ export default function ShopOwnerDashboardClient({
         </div>
       )}
     </div>
+    </ErrorBoundary>
   );
 }
