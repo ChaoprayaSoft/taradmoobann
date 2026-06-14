@@ -444,7 +444,8 @@
     "statusInactiveZeroCoins": "Inactive (Zero Coins)",
     "monthlyMaintenanceFee": "Monthly Maintenance: {fee} coins",
     "completedOrdersPeriod": "Completed Orders",
-    "filteredTotalEarnings": "Total Earnings"
+    "filteredTotalEarnings": "Total Earnings",
+    "feeDeductionNotice": "Monthly fee will be deducted from your coin balance within {days} days."
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "Market Owner Dashboard",

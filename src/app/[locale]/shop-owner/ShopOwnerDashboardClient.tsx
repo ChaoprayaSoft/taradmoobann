@@ -62,13 +62,31 @@ export default function ShopOwnerDashboardClient({
   });
   const completedOrders = selectedShopOrders.filter(o => o.status === "Completed");
   
-  // Maintenance calculations
-  const currentMonthStart = new Date();
-  currentMonthStart.setDate(1);
-  currentMonthStart.setHours(0, 0, 0, 0);
+  // Maintenance calculations based on 30-day rolling periods from shop creation
+  let daysUntilNextFee = 30;
+  let currentCycleStart = new Date();
+  currentCycleStart.setDate(currentCycleStart.getDate() - 30); // fallback
+
+  if (selectedShop && selectedShop.createdAt) {
+    const shopCreatedDate = new Date(selectedShop.createdAt);
+    const now = new Date();
+    
+    // Calculate difference in time
+    const diffTime = now.getTime() - shopCreatedDate.getTime();
+    if (diffTime >= 0) {
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const completedCycles = Math.floor(diffDays / 30);
+      const daysIntoCurrentCycle = diffDays % 30;
+      daysUntilNextFee = 30 - daysIntoCurrentCycle;
+      
+      currentCycleStart = new Date(shopCreatedDate.getTime());
+      currentCycleStart.setDate(shopCreatedDate.getDate() + (completedCycles * 30));
+    }
+  }
+
   const monthlyCompletedOrders = completedOrders.filter(o => {
     if (!o.createdAt) return false;
-    return new Date(o.createdAt) >= currentMonthStart;
+    return new Date(o.createdAt) >= currentCycleStart;
   });
   const maintenanceFee = monthlyCompletedOrders.length >= 5 ? 2 : 5;
   const isShopInactiveDueToZeroCoins = coins <= 0;
@@ -852,37 +870,42 @@ export default function ShopOwnerDashboardClient({
       {selectedShop?.status === "approved" && (
         <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className={`px-3 py-2 rounded-full text-xs font-bold border shadow-sm flex items-center gap-1 ${isShopInactiveDueToZeroCoins ? "bg-red-100 text-red-800 border-red-200" : "bg-green-100 text-green-800 border-green-200"}`}>
-                <span className={`w-2 h-2 rounded-full ${isShopInactiveDueToZeroCoins ? "bg-red-500" : "bg-green-500"}`}></span>
-                {isShopInactiveDueToZeroCoins ? t("statusInactiveZeroCoins") || "Inactive (Zero Coins)" : t("statusActive") || "Active"}
-              </span>
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className={`px-3 py-2 rounded-full text-xs font-bold border shadow-sm flex items-center gap-1 ${isShopInactiveDueToZeroCoins ? "bg-red-100 text-red-800 border-red-200" : "bg-green-100 text-green-800 border-green-200"}`}>
+                  <span className={`w-2 h-2 rounded-full ${isShopInactiveDueToZeroCoins ? "bg-red-500" : "bg-green-500"}`}></span>
+                  {isShopInactiveDueToZeroCoins ? t("statusInactiveZeroCoins") || "Inactive (Zero Coins)" : t("statusActive") || "Active"}
+                </span>
 
-              <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-2 rounded-full border border-blue-200 shadow-sm flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-blue-500">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {t("monthlyMaintenanceFee", { fee: maintenanceFee }) || `Monthly Maintenance: ${maintenanceFee} coins`}
-              </span>
+                <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-2 rounded-full border border-blue-200 shadow-sm flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-blue-500">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {t("monthlyMaintenanceFee", { fee: maintenanceFee }) || `Monthly Maintenance: ${maintenanceFee} coins`}
+                </span>
 
-              <button
-                onClick={() => router.push('/shopper/wallet')}
-                className="flex items-center bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-2 rounded-full border border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition shadow-sm cursor-pointer group relative"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-1 text-yellow-500">
-                  <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.313.152-.68.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .302-.152.668-.579.991a2.534 2.534 0 01-.921.42z" />
-                  <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.464-1.112 2.428 0 .964.4 1.862 1.112 2.428.42.333.864.55 1.346.68V15.54a2.54 2.54 0 01-1.346-.68.75.75 0 00-1.06 1.06c.712.566 1.57.864 2.446.963V18a.75.75 0 001.5 0v-.816a3.836 3.836 0 001.72-.756c.712-.566 1.112-1.464 1.112-2.428 0-.964-.4-1.862-1.112-2.428a3.836 3.836 0 00-1.346-.68V7.46c.482.13.926.347 1.346.68a.75.75 0 001.06-1.06c-.712-.566-1.57-.864-2.446-.963V6z" clipRule="evenodd" />
-                </svg>
-                {coins} Coins
-              </button>
+                <button
+                  onClick={() => router.push('/shopper/wallet')}
+                  className="flex items-center bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-2 rounded-full border border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition shadow-sm cursor-pointer group relative"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-1 text-yellow-500">
+                    <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.313.152-.68.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .302-.152.668-.579.991a2.534 2.534 0 01-.921.42z" />
+                    <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.464-1.112 2.428 0 .964.4 1.862 1.112 2.428.42.333.864.55 1.346.68V15.54a2.54 2.54 0 01-1.346-.68.75.75 0 00-1.06 1.06c.712.566 1.57.864 2.446.963V18a.75.75 0 001.5 0v-.816a3.836 3.836 0 001.72-.756c.712-.566 1.112-1.464 1.112-2.428 0-.964-.4-1.862-1.112-2.428a3.836 3.836 0 00-1.346-.68V7.46c.482.13.926.347 1.346.68a.75.75 0 001.06-1.06c-.712-.566-1.57-.864-2.446-.963V6z" clipRule="evenodd" />
+                  </svg>
+                  {coins} Coins
+                </button>
 
-              <button
-                onClick={() => setShowCoffeeModal(true)}
-                className="flex items-center gap-1 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-2 rounded-full border border-orange-200 hover:bg-orange-200 hover:border-orange-300 transition shadow-sm cursor-pointer"
-              >
-                <Coffee className="w-4 h-4 text-orange-500" />
-                Buy developer a coffee
-              </button>
+                <button
+                  onClick={() => setShowCoffeeModal(true)}
+                  className="flex items-center gap-1 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-2 rounded-full border border-orange-200 hover:bg-orange-200 hover:border-orange-300 transition shadow-sm cursor-pointer"
+                >
+                  <Coffee className="w-4 h-4 text-orange-500" />
+                  Buy developer a coffee
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 ml-1">
+                {t("feeDeductionNotice", { days: daysUntilNextFee }) || `Monthly fee will be deducted from your coin balance within ${daysUntilNextFee} days.`}
+              </p>
             </div>
 
             <div className="flex flex-col items-start sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
