@@ -913,7 +913,12 @@ export default function AdminDashboardClient({
       {activeTab === "users" && (
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">{t("manageUsers") || "Manage Users"}</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-900">{t("manageUsers") || "Manage Users"}</h3>
+              <div className="bg-brand-50 text-brand-700 px-4 py-1.5 rounded-full text-sm font-semibold border border-brand-200">
+                {t("totalUsers", { total: totalUsers })}
+              </div>
+            </div>
             
             <div className="flex flex-col md:flex-row gap-4 mb-6">
               <div className="flex-1">

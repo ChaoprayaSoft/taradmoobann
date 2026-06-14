@@ -234,7 +234,7 @@
     "completedOrdersCount": "จากออเดอร์ที่สำเร็จ {count} รายการ",
     "activeMarkets": "ตลาดที่เปิดใช้งาน",
     "outOfTotalMarkets": "จากทั้งหมด {total} ตลาด",
-    "approvedShops": "ร้านค้าที่อนุมัติแล้ว",
+    "approvedShops": "ร้านค้าที่เปิดใช้งาน",
     "acrossAllMarkets": "จากตลาดทั้งหมด",
     "totalUsers": "ผู้ใช้งานทั้งหมด",
     "registeredPlatformUsers": "ผู้ใช้งานที่ลงทะเบียนในระบบ",
