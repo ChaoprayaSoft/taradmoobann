@@ -34,7 +34,8 @@
     "signIn": "Sign In",
     "signOut": "Sign Out",
     "goShopping": "Go Shopping",
-    "termsOfUse": "Terms of Use"
+    "termsOfUse": "Terms of Use",
+    "close": "Close"
   },
   "ShopperDashboard": {
     "addressRequiredFirst": "You must set your delivery address before opening a shop.",

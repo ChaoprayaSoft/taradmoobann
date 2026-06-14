@@ -77,7 +77,7 @@ export default function TermsModal({ isOpen, onClose }: TermsModalProps) {
             onClick={onClose}
             className="px-6 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition"
           >
-            Close
+            {t("close") || "Close"}
           </button>
         </div>
 

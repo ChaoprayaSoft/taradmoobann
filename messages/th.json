@@ -63,7 +63,8 @@
     "signIn": "เข้าสู่ระบบ",
     "signOut": "ออกจากระบบ",
     "goShopping": "ไปช้อปปิ้ง",
-    "termsOfUse": "ข้อกำหนดการใช้งาน"
+    "termsOfUse": "ข้อกำหนดการใช้งาน",
+    "close": "ปิด"
   },
   "ShopperDashboard": {
     "addressRequiredFirst": "คุณต้องตั้งค่าที่อยู่สำหรับจัดส่งก่อนเปิดร้านค้า",
