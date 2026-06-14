@@ -93,7 +93,7 @@ export default function LoginButton() {
       <>
         <div className="flex items-center space-x-4">
           {/* Render Dashboard Links based on roles */}
-          <div className="hidden md:flex items-center space-x-2 mr-4 border-r border-gray-200 pr-4">
+          <div className="hidden lg:flex items-center space-x-2 mr-4 border-r border-gray-200 pr-4">
             {navLinks}
           </div>
 
@@ -138,7 +138,7 @@ export default function LoginButton() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-gray-600 hover:text-brand-600 p-1 transition focus:outline-none"
+            className="lg:hidden text-gray-600 hover:text-brand-600 p-1 transition focus:outline-none"
             title="Menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -153,7 +153,7 @@ export default function LoginButton() {
 
         {/* Mobile Dropdown Menu */}
         {isMobileMenuOpen && (
-          <div className="absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg md:hidden z-40">
+          <div className="absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg lg:hidden z-40">
             <div className="px-4 py-3 flex flex-col space-y-3">
               <div className="text-sm font-medium text-gray-700 border-b border-gray-100 pb-3 mb-1 sm:hidden">
                 Hi, {session.user?.name?.split(" ")[0]}
@@ -222,7 +222,7 @@ export default function LoginButton() {
 
   return (
     <div className="flex items-center space-x-4">
-      <div className="hidden md:flex items-center space-x-2 mr-4 border-r border-gray-200 pr-4">
+      <div className="hidden lg:flex items-center space-x-2 mr-4 border-r border-gray-200 pr-4">
         <Link href={`/shopping`} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-900 border border-green-100 transition">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
@@ -255,7 +255,7 @@ export default function LoginButton() {
       {/* Mobile Menu Toggle for Guests */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="md:hidden text-gray-600 hover:text-brand-600 p-1 transition focus:outline-none"
+        className="lg:hidden text-gray-600 hover:text-brand-600 p-1 transition focus:outline-none"
         title="Menu"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -269,7 +269,7 @@ export default function LoginButton() {
 
       {/* Mobile Dropdown Menu for Guests */}
       {isMobileMenuOpen && (
-        <div className="absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg md:hidden z-40">
+        <div className="absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg lg:hidden z-40">
           <div className="px-4 py-3 flex flex-col space-y-3">
             <Link href={`/shopping`} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-900 border border-green-100 transition">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1.5">

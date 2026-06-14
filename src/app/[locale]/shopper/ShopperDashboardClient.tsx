@@ -1297,7 +1297,7 @@ export default function ShopperDashboardClient({
                     <div className="flex flex-col gap-2 min-w-[140px]">
                       <button
                         onClick={() => handleViewOrderDetails(order)}
-                        className="bg-brand-50 text-brand-700 border border-brand-200 px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-100 transition"
+                        className="bg-brand-50 text-brand-700 border border-brand-200 px-3 py-1.5 rounded-md text-xs font-medium hover:bg-brand-100 transition whitespace-nowrap"
                       >
                         {t("viewDetails") || "View Details"}
                       </button>
@@ -1371,7 +1371,7 @@ export default function ShopperDashboardClient({
                   </p>
                   <button
                     onClick={() => handleViewOrderDetails(order)}
-                    className="mt-4 w-full bg-gray-100 text-gray-700 font-medium py-2 rounded hover:bg-gray-200 transition"
+                    className="mt-2 bg-gray-100 text-gray-700 font-medium px-3 py-1 text-xs rounded hover:bg-gray-200 transition whitespace-nowrap"
                   >
                     {t("viewDetails")}
                   </button>
