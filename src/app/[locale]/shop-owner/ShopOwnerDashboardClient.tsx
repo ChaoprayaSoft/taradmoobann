@@ -1234,7 +1234,7 @@ export default function ShopOwnerDashboardClient({
                           <div className="flex justify-between items-start border-b border-brand-200 pb-2 mb-2">
                             <div>
                               <p className="font-bold text-gray-900">{order.shopperName}</p>
-                              <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(order.createdAt).toLocaleString()}</p>
+                              <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(order.createdAt).toLocaleString('en-GB')}</p>
                             </div>
                             <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
                                 order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
@@ -1399,7 +1399,7 @@ export default function ShopOwnerDashboardClient({
                           <tr key={order.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               <div className="flex flex-col">
-                                <span suppressHydrationWarning>{new Date(order.createdAt).toLocaleDateString()}</span>
+                                <span suppressHydrationWarning>{new Date(order.createdAt).toLocaleDateString('en-GB')}</span>
                                 {order.status === "Cancelled" && (
                                   <span className="text-[10px] bg-red-100 text-red-800 px-1.5 rounded w-fit mt-1">Cancelled</span>
                                 )}
@@ -1507,7 +1507,7 @@ export default function ShopOwnerDashboardClient({
                           }`}>
                           <p className="whitespace-pre-wrap">{msg.text}</p>
                           <span suppressHydrationWarning className={`text-[10px] mt-1 block ${msg.sender === "shop_owner" ? "text-brand-200" : "text-gray-500"}`}>
-                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(msg.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                       ))}
@@ -1571,7 +1571,7 @@ export default function ShopOwnerDashboardClient({
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <p className="font-medium text-sm text-gray-900">{review.shopperEmail}</p>
-                        <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(review.createdAt).toLocaleDateString()}</p>
+                        <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(review.createdAt).toLocaleDateString('en-GB')}</p>
                       </div>
                       <div className="flex text-yellow-400">
                         {[1, 2, 3, 4, 5].map(star => (
@@ -1989,7 +1989,7 @@ export default function ShopOwnerDashboardClient({
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h3 className="font-bold text-lg text-gray-900">{selectedPastOrder.shopperName}</h3>
-                  <p className="text-sm text-gray-500" suppressHydrationWarning>{new Date(selectedPastOrder.createdAt).toLocaleString()}</p>
+                  <p className="text-sm text-gray-500" suppressHydrationWarning>{new Date(selectedPastOrder.createdAt).toLocaleString('en-GB')}</p>
                 </div>
                 <div className="text-right">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${
