@@ -1243,7 +1243,7 @@ export default function ShopOwnerDashboardClient({
                           </div>
                         )}
 
-                        {selectedShop?.status === 'approved' && selectedShop?.operatingStatus !== 'closed' && (
+                        {selectedShop?.status === 'approved' && (
                           <div className="mt-3 flex items-center justify-between">
                             <span className="text-xs font-medium text-gray-700">
                               {(product.isAvailable === undefined || product.isAvailable) ? t("available") : t("unavailable")}
