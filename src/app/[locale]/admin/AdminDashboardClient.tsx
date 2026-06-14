@@ -448,7 +448,6 @@ export default function AdminDashboardClient({
         body: JSON.stringify({ content: termsContent, content_th: termsContentTh })
       });
       if (!res.ok) throw new Error("Failed to save terms");
-      alert("Terms of Use saved successfully!");
       setIsEditingTerms(false);
     } catch (err) {
       alert("Failed to save Terms of Use");
@@ -526,49 +525,49 @@ export default function AdminDashboardClient({
         </div>
 
         {/* Navigation Menu (Horizontal) */}
-        <nav className="flex flex-row overflow-x-auto scrollbar-hide pb-2 border-b border-gray-100 gap-2 md:gap-4 w-full">
+        <nav className="flex flex-row overflow-x-auto scrollbar-hide p-2 bg-slate-50 rounded-2xl border border-slate-200 gap-2 w-full shadow-inner">
           <button
             onClick={() => setActiveTab("markets")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "markets" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "markets" ? "bg-white text-brand-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent"}`}
           >
             {t("marketsAndReports")}
           </button>
           <button
             onClick={() => setActiveTab("users")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "users" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "users" ? "bg-white text-brand-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent"}`}
           >
             {t("manageUsers") || "Manage Users"}
           </button>
           <button
             onClick={() => setActiveTab("shops")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "shops" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "shops" ? "bg-white text-brand-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent"}`}
           >
             {t("manageShops")}
           </button>
           <button
             onClick={() => setActiveTab("chats")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap flex items-center gap-2 ${activeTab === "chats" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === "chats" ? "bg-white text-brand-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent"}`}
           >
             <span>{t("supportInbox")}</span>
             {chats.some(c => c.unreadByAdmin) && (
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 shadow-sm"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 shadow-sm ring-2 ring-white"></span>
             )}
           </button>
           <button
             onClick={() => setActiveTab("ads")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "ads" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "ads" ? "bg-white text-brand-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent"}`}
           >
             {t("manageAds")}
           </button>
           <button
             onClick={() => setActiveTab("feedback")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "feedback" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "feedback" ? "bg-white text-brand-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent"}`}
           >
             {t("appFeedback")}
           </button>
           <button
             onClick={() => setActiveTab("terms")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "terms" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "terms" ? "bg-white text-brand-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent"}`}
           >
             {t("termsOfUse") || "Terms of Use"}
           </button>
