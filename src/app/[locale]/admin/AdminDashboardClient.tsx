@@ -113,6 +113,7 @@ export default function AdminDashboardClient({
   // Terms of Use State
   const [termsContent, setTermsContent] = useState(initialTermsOfUse?.content || "");
   const [termsContentTh, setTermsContentTh] = useState(initialTermsOfUse?.content_th || "");
+  const [isEditingTerms, setIsEditingTerms] = useState(false);
   const [termsSaving, setTermsSaving] = useState(false);
   const [isTermsConfirmModalOpen, setIsTermsConfirmModalOpen] = useState(false);
 
@@ -448,6 +449,7 @@ export default function AdminDashboardClient({
       });
       if (!res.ok) throw new Error("Failed to save terms");
       alert("Terms of Use saved successfully!");
+      setIsEditingTerms(false);
     } catch (err) {
       alert("Failed to save Terms of Use");
     } finally {
@@ -1558,44 +1560,84 @@ export default function AdminDashboardClient({
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="text-lg font-medium">{t("termsOfUse") || "Terms of Use"}</h3>
-            <button 
-              onClick={() => setIsTermsConfirmModalOpen(true)}
-              disabled={termsSaving}
-              className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
-            >
-              {termsSaving ? t("saving") || "Saving..." : t("save") || "Save"}
-            </button>
+            {!isEditingTerms ? (
+              <button 
+                onClick={() => setIsEditingTerms(true)}
+                className="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-2 rounded-md font-medium hover:bg-brand-100 transition"
+              >
+                {t("edit") || "Edit"}
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setIsEditingTerms(false)}
+                  className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium hover:bg-gray-50 transition"
+                >
+                  {t("cancel") || "Cancel"}
+                </button>
+                <button 
+                  onClick={() => setIsTermsConfirmModalOpen(true)}
+                  disabled={termsSaving}
+                  className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
+                >
+                  {termsSaving ? t("saving") || "Saving..." : t("save") || "Save"}
+                </button>
+              </div>
+            )}
           </div>
           <div className="p-6">
-            <div className="mb-4 text-sm text-gray-500">
-              Edit the global Terms of Use. This content is visible to Shoppers and Shop Owners.
-            </div>
-            
-            <div className="space-y-8">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">English Terms</label>
-                <div className="border border-gray-300 rounded-md bg-white">
-                  <ReactQuill 
-                    theme="snow" 
-                    value={termsContent} 
-                    onChange={setTermsContent} 
-                    className="h-[300px] mb-12"
-                  />
+            {!isEditingTerms ? (
+              <div className="space-y-8">
+                <div>
+                  <h4 className="text-sm font-bold text-gray-700 mb-3 border-b pb-2">English Terms</h4>
+                  {termsContent ? (
+                    <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: termsContent }} />
+                  ) : (
+                    <p className="text-gray-500 italic">No English terms configured.</p>
+                  )}
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-700 mb-3 border-b pb-2">Thai Terms (ข้อกำหนดการใช้งาน)</h4>
+                  {termsContentTh ? (
+                    <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: termsContentTh }} />
+                  ) : (
+                    <p className="text-gray-500 italic">No Thai terms configured.</p>
+                  )}
                 </div>
               </div>
+            ) : (
+              <>
+                <div className="mb-4 text-sm text-gray-500">
+                  Edit the global Terms of Use. This content is visible to Shoppers and Shop Owners.
+                </div>
+                
+                <div className="space-y-8">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">English Terms</label>
+                    <div className="border border-gray-300 rounded-md bg-white">
+                      <ReactQuill 
+                        theme="snow" 
+                        value={termsContent} 
+                        onChange={setTermsContent} 
+                        className="h-[300px] mb-12"
+                      />
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Thai Terms (ข้อกำหนดการใช้งาน)</label>
-                <div className="border border-gray-300 rounded-md bg-white">
-                  <ReactQuill 
-                    theme="snow" 
-                    value={termsContentTh} 
-                    onChange={setTermsContentTh} 
-                    className="h-[300px] mb-12"
-                  />
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Thai Terms (ข้อกำหนดการใช้งาน)</label>
+                    <div className="border border-gray-300 rounded-md bg-white">
+                      <ReactQuill 
+                        theme="snow" 
+                        value={termsContentTh} 
+                        onChange={setTermsContentTh} 
+                        className="h-[300px] mb-12"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </div>
       )}
