@@ -28,6 +28,7 @@ export default function ShopOwnerDashboardClient({
 }) {
   const router = useRouter();
   const t = useTranslations("ShopOwnerDashboard");
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
   // State for selecting which shop to manage if they have multiple
   const [shops, setShops] = useState<any[]>(initialShops || []);
@@ -620,7 +621,6 @@ export default function ShopOwnerDashboardClient({
   const [isDecliningCancel, setIsDecliningCancel] = useState(false);
 
   // Order history
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [selectedPastOrder, setSelectedPastOrder] = useState<any | null>(null);
 
   const handleDeclineCancel = async () => {
