@@ -28,14 +28,18 @@ export default async function ShopOwnerDashboard() {
       .collection("shops")
       .where("ownerEmail", "==", userEmail)
       .get();
+    const serialize = (doc: any) => {
+      const data = doc.data();
+      return JSON.parse(JSON.stringify({ id: doc.id, ...data }));
+    };
       
-    ownedShops = shopSnapshot.docs.map(doc => doc.data());
+    ownedShops = shopSnapshot.docs.map(serialize);
     
     // Sort so approved shops appear first, then by date
     ownedShops.sort((a, b) => {
       if (a.status === "approved" && b.status !== "approved") return -1;
       if (a.status !== "approved" && b.status === "approved") return 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
     });
 
     if (ownedShops.length > 0) {
@@ -48,7 +52,7 @@ export default async function ShopOwnerDashboard() {
           .collection("markets")
           .where("id", "in", marketIds)
           .get();
-        markets = marketSnapshot.docs.map(doc => doc.data());
+        markets = marketSnapshot.docs.map(serialize);
       }
       
       // Fetch all products for all owned shops
@@ -57,8 +61,8 @@ export default async function ShopOwnerDashboard() {
         .where("shopId", "in", shopIds)
         .get();
         
-      products = productSnapshot.docs.map(doc => doc.data());
-      products.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      products = productSnapshot.docs.map(serialize);
+      products.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
       
       // Fetch all orders for all owned shops
       const orderSnapshot = await adminDb
@@ -66,8 +70,8 @@ export default async function ShopOwnerDashboard() {
         .where("shopId", "in", shopIds)
         .get();
         
-      orders = orderSnapshot.docs.map(doc => doc.data());
-      orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      orders = orderSnapshot.docs.map(serialize);
+      orders.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     }
 
     // Fetch user coins
