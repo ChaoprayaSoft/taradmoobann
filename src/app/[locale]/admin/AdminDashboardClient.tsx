@@ -4,6 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { storage } from "@/lib/firebase";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
+import "react-quill/dist/quill.snow.css";
+
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 export default function AdminDashboardClient({ 
   initialMarkets,
@@ -12,7 +16,8 @@ export default function AdminDashboardClient({
   initialAds = [],
   initialAdsSettings = null,
   totalUsers = 0,
-  initialFeedbacks = []
+  initialFeedbacks = [],
+  initialTermsOfUse = ""
 }: { 
   initialMarkets: any[],
   initialShops?: any[],
@@ -20,7 +25,8 @@ export default function AdminDashboardClient({
   initialAds?: any[],
   initialAdsSettings?: any,
   totalUsers?: number,
-  initialFeedbacks?: any[]
+  initialFeedbacks?: any[],
+  initialTermsOfUse?: string
 }) {
   const t = useTranslations("AdminDashboard");
   const router = useRouter();
@@ -31,7 +37,7 @@ export default function AdminDashboardClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"markets" | "shops" | "chats" | "ads" | "feedback">("markets");
+  const [activeTab, setActiveTab] = useState<"markets" | "shops" | "chats" | "ads" | "feedback" | "terms">("markets");
 
   const feedbacks = initialFeedbacks || [];
   const avgFeedbackRating = feedbacks.length > 0 
@@ -95,6 +101,10 @@ export default function AdminDashboardClient({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+
+  // Terms of Use State
+  const [termsContent, setTermsContent] = useState(initialTermsOfUse || "");
+  const [termsSaving, setTermsSaving] = useState(false);
 
   useEffect(() => {
     setMarkets(initialMarkets);
@@ -356,6 +366,23 @@ export default function AdminDashboardClient({
     }
   };
 
+  const handleSaveTerms = async () => {
+    setTermsSaving(true);
+    try {
+      const res = await fetch("/api/admin/terms", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: termsContent })
+      });
+      if (!res.ok) throw new Error("Failed to save terms");
+      alert("Terms of Use saved successfully!");
+    } catch (err) {
+      alert("Failed to save Terms of Use");
+    } finally {
+      setTermsSaving(false);
+    }
+  };
+
   const renderAdForm = () => (
     <form onSubmit={handleAdSubmit} className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6 space-y-4 max-w-xl">
       <h3 className="font-bold text-lg mb-4">{editingAd ? t("editAd") : t("newAd")}</h3>
@@ -458,6 +485,12 @@ export default function AdminDashboardClient({
             className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "feedback" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
           >
             {t("appFeedback")}
+          </button>
+          <button
+            onClick={() => setActiveTab("terms")}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "terms" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
+          >
+            {t("termsOfUse") || "Terms of Use"}
           </button>
         </nav>
       </div>
@@ -1338,6 +1371,34 @@ export default function AdminDashboardClient({
                 ))}
               </ul>
             )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "terms" && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 className="text-lg font-medium">{t("termsOfUse") || "Terms of Use"}</h3>
+            <button
+              onClick={handleSaveTerms}
+              disabled={termsSaving}
+              className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
+            >
+              {termsSaving ? t("saving") || "Saving..." : t("save") || "Save"}
+            </button>
+          </div>
+          <div className="p-6">
+            <div className="mb-4 text-sm text-gray-500">
+              Edit the global Terms of Use. This content is visible to Shoppers and Shop Owners.
+            </div>
+            <div className="border border-gray-300 rounded-md bg-white">
+              <ReactQuill 
+                theme="snow" 
+                value={termsContent} 
+                onChange={setTermsContent} 
+                className="h-[400px] mb-12"
+              />
+            </div>
           </div>
         </div>
       )}

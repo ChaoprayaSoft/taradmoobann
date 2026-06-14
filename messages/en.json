@@ -33,7 +33,8 @@
     "home": "Home",
     "signIn": "Sign In",
     "signOut": "Sign Out",
-    "goShopping": "Go Shopping"
+    "goShopping": "Go Shopping",
+    "termsOfUse": "Terms of Use"
   },
   "ShopperDashboard": {
     "addressRequiredFirst": "You must set your delivery address before opening a shop.",
@@ -264,7 +265,8 @@
     "appFeedback": "App Feedback",
     "totalComments": "Total Comments",
     "avgRating": "Average Rating",
-    "noFeedbackYet": "No feedback received yet."
+    "noFeedbackYet": "No feedback received yet.",
+    "termsOfUse": "Terms of Use"
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "Shopper requested cancellation:",

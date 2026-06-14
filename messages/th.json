@@ -62,7 +62,8 @@
     "home": "หน้าแรก",
     "signIn": "เข้าสู่ระบบ",
     "signOut": "ออกจากระบบ",
-    "goShopping": "ไปช้อปปิ้ง"
+    "goShopping": "ไปช้อปปิ้ง",
+    "termsOfUse": "ข้อกำหนดการใช้งาน"
   },
   "ShopperDashboard": {
     "addressRequiredFirst": "คุณต้องตั้งค่าที่อยู่สำหรับจัดส่งก่อนเปิดร้านค้า",
@@ -292,7 +293,8 @@
     "appFeedback": "ข้อเสนอแนะแอป",
     "totalComments": "ความคิดเห็นทั้งหมด",
     "avgRating": "คะแนนเฉลี่ย",
-    "noFeedbackYet": "ยังไม่มีข้อเสนอแนะ"
+    "noFeedbackYet": "ยังไม่มีข้อเสนอแนะ",
+    "termsOfUse": "ข้อกำหนดการใช้งาน"
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "ลูกค้าขอยกเลิกออเดอร์:",

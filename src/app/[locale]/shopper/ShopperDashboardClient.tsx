@@ -9,6 +9,7 @@ import { db } from "@/lib/firebase";
 import { Coins, Coffee } from "lucide-react";
 import BuyCoffeeModal from "@/components/BuyCoffeeModal";
 import { useTranslations } from "next-intl";
+import TermsModal from "@/components/TermsModal";
 
 const CATEGORIES = [
   "Food & Beverage",
@@ -42,6 +43,7 @@ export default function ShopperDashboardClient({
   const router = useRouter();
   const { data: session } = useSession();
   const t = useTranslations("ShopperDashboard");
+  const navT = useTranslations("Navigation");
 
   const uniqueVillageNames = Array.from(new Set(allMarkets.map(m => m.villageName).filter(Boolean)));
 
@@ -65,6 +67,7 @@ export default function ShopperDashboardClient({
   const [feedbackComment, setFeedbackComment] = useState("");
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackSuccess, setFeedbackSuccess] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
 
   const handleFeedbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -649,6 +652,15 @@ export default function ShopperDashboardClient({
           <p className="text-gray-500 mt-1">{t("description")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setIsTermsOpen(true)}
+            className="flex items-center gap-2 bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-md hover:bg-gray-100 transition shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            <span className="font-bold text-sm">{navT("termsOfUse") || "Terms of Use"}</span>
+          </button>
           <button
             onClick={() => setShowFeedbackModal(true)}
             className="flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 px-4 py-2 rounded-md hover:bg-blue-100 transition shadow-sm"

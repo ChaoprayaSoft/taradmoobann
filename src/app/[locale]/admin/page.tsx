@@ -21,6 +21,7 @@ export default async function AdminDashboard() {
   let adsSettings: any = { maxAds: 3 };
   let totalUsers: number = 0;
   let feedbacks: any[] = [];
+  let initialTermsOfUse: string = "";
   
   try {
     const snapshot = await adminDb.collection("markets").orderBy("createdAt", "desc").get();
@@ -45,9 +46,14 @@ export default async function AdminDashboard() {
 
     const feedbacksSnap = await adminDb.collection("app_feedback").orderBy("createdAt", "desc").get();
     feedbacks = feedbacksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    const termsDoc = await adminDb.collection("settings").doc("terms_of_use").get();
+    if (termsDoc.exists) {
+      initialTermsOfUse = termsDoc.data()?.content || "";
+    }
   } catch (error) {
     console.error("Error fetching data for Admin Dashboard:", error);
   }
 
-  return <AdminDashboardClient initialMarkets={markets} initialShops={shops} initialOrders={orders} initialAds={ads} initialAdsSettings={adsSettings} totalUsers={totalUsers} initialFeedbacks={feedbacks} />;
+  return <AdminDashboardClient initialMarkets={markets} initialShops={shops} initialOrders={orders} initialAds={ads} initialAdsSettings={adsSettings} totalUsers={totalUsers} initialFeedbacks={feedbacks} initialTermsOfUse={initialTermsOfUse} />;
 }

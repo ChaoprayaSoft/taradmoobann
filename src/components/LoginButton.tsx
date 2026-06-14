@@ -7,6 +7,7 @@ import { useCart } from "./CartProvider";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useTranslations } from "next-intl";
+import TermsModal from "./TermsModal";
 
 export default function LoginButton() {
   const { data: session, status, update } = useSession();
@@ -17,6 +18,7 @@ export default function LoginButton() {
   const [newName, setNewName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
 
   const handleSaveName = async () => {
     if (!newName.trim()) return;
@@ -86,6 +88,12 @@ export default function LoginButton() {
             My Shop
           </Link>
         )}
+        <button onClick={() => { setIsMobileMenuOpen(false); setIsTermsOpen(true); }} className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-900 border border-gray-200 transition whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+          {t('termsOfUse')}
+        </button>
       </>
     );
 
@@ -216,6 +224,7 @@ export default function LoginButton() {
             </div>
           </div>
         )}
+        <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
       </>
     );
   }
@@ -229,6 +238,12 @@ export default function LoginButton() {
           </svg>
           {t('goShopping')}
         </Link>
+        <button onClick={() => { setIsMobileMenuOpen(false); setIsTermsOpen(true); }} className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-900 border border-gray-200 transition whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+          {t('termsOfUse')}
+        </button>
       </div>
 
       <button
@@ -277,9 +292,16 @@ export default function LoginButton() {
               </svg>
               {t('goShopping')}
             </Link>
+            <button onClick={() => { setIsMobileMenuOpen(false); setIsTermsOpen(true); }} className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-900 border border-gray-200 transition whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+              {t('termsOfUse')}
+            </button>
           </div>
         </div>
       )}
+      <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Coins, Coffee } from "lucide-react";
 import BuyCoffeeModal from "@/components/BuyCoffeeModal";
+import TermsModal from "@/components/TermsModal";
 import { useTranslations } from "next-intl";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -28,6 +29,7 @@ export default function ShopOwnerDashboardClient({
 }) {
   const router = useRouter();
   const t = useTranslations("ShopOwnerDashboard");
+  const navT = useTranslations("Navigation");
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
   // State for selecting which shop to manage if they have multiple
@@ -63,6 +65,7 @@ export default function ShopOwnerDashboardClient({
 
   // Product State
   const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isRevisingShop, setIsRevisingShop] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
@@ -691,12 +694,20 @@ export default function ShopOwnerDashboardClient({
         <div>
           <div className="flex items-center gap-3 relative group">
             <h1 className="text-3xl font-bold text-gray-900">{t("shopDashboard")}</h1>
-            {/* Moved buttons to the Add Product section */}
           </div>
           <p className="text-gray-500 mt-1">{t("manageProducts")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
+          <button
+            onClick={() => setIsTermsOpen(true)}
+            className="flex items-center gap-2 bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-md hover:bg-gray-100 transition shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            <span className="font-bold text-sm">Terms of Use</span>
+          </button>
           <button
             onClick={() => setShowFeedbackModal(true)}
             className="flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 px-4 py-2 rounded-md hover:bg-blue-100 transition shadow-sm"
@@ -1935,6 +1946,7 @@ export default function ShopOwnerDashboardClient({
       )}
 
       <BuyCoffeeModal isOpen={showCoffeeModal} onClose={() => setShowCoffeeModal(false)} />
+      <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
 
       {/* DECLINE CANCEL MODAL */}
       {declineCancelModalOpen && (
