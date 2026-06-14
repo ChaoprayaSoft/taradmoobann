@@ -473,7 +473,7 @@
     "monthlyMaintenanceFee": "ค่าบำรุงรักษารายเดือน: {fee} เหรียญ",
     "completedOrdersPeriod": "คำสั่งซื้อที่เสร็จสิ้น",
     "filteredTotalEarnings": "รายได้รวม",
-    "feeDeductionNotice": "ค่าธรรมเนียมรายเดือนจะถูกหักจากยอดเหรียญของคุณภายใน {days} วัน"
+    "feeDeductionNotice": "ค่าธรรมเนียมรายเดือนจะถูกหักจากยอดเหรียญของคุณภายใน {days} วัน (ในวันที่ {date})"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "แดชบอร์ดเจ้าของตลาด",

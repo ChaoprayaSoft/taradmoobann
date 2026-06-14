@@ -84,6 +84,10 @@ export default function ShopOwnerDashboardClient({
     }
   }
 
+  let nextDeductionDate = new Date(currentCycleStart.getTime());
+  nextDeductionDate.setDate(nextDeductionDate.getDate() + 30);
+  const nextDeductionDateStr = nextDeductionDate.toLocaleDateString('en-GB'); // DD/MM/YYYY
+
   const monthlyCompletedOrders = completedOrders.filter(o => {
     if (!o.createdAt) return false;
     return new Date(o.createdAt) >= currentCycleStart;
@@ -904,7 +908,7 @@ export default function ShopOwnerDashboardClient({
                 </button>
               </div>
               <p className="text-xs text-gray-500 ml-1">
-                {t("feeDeductionNotice", { days: daysUntilNextFee }) || `Monthly fee will be deducted from your coin balance within ${daysUntilNextFee} days.`}
+                {t("feeDeductionNotice", { days: daysUntilNextFee, date: nextDeductionDateStr }) || `Monthly fee will be deducted from your coin balance within ${daysUntilNextFee} days (on ${nextDeductionDateStr}).`}
               </p>
             </div>
 
