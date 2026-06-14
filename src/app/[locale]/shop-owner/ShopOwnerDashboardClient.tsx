@@ -1225,106 +1225,113 @@ export default function ShopOwnerDashboardClient({
                     <p>{t("noActiveOrders")}</p>
                   </div>
                 ) : (
-                  activeOrders.map(order => (
-                    <div key={order.id} className="border border-brand-200 rounded-lg p-4 bg-brand-50 text-sm relative">
-                      <div className="flex justify-between items-start border-b border-brand-200 pb-2 mb-2">
-                        <div>
-                          <p className="font-bold text-gray-900">{order.shopperName}</p>
-                          <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(order.createdAt).toLocaleString()}</p>
+                  activeOrders.map(order => {
+                    try {
+                      return (
+                        <div key={order.id} className="border border-brand-200 rounded-lg p-4 bg-brand-50 text-sm relative">
+                          <div className="flex justify-between items-start border-b border-brand-200 pb-2 mb-2">
+                            <div>
+                              <p className="font-bold text-gray-900">{order.shopperName}</p>
+                              <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(order.createdAt).toLocaleString()}</p>
+                            </div>
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
+                                order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
+                                  order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
+                                    order.status === 'Cancel Requested' ? 'bg-orange-100 text-orange-800' :
+                                      'bg-gray-200 text-gray-800'
+                              }`}>
+                              {order.status}
+                            </span>
+                          </div>
+
+                          {(() => {
+                            const deliveryAddressStr = typeof order.deliveryAddress === 'string' ? order.deliveryAddress : "";
+                            const houseNoMatch = deliveryAddressStr.match(/House No(?:[.:\s]*)([^\n,]+)/i) || 
+                                                 deliveryAddressStr.match(/บ้านเลขที่(?:[.:\s]*)([^\n,]+)/i);
+                            const houseNo = houseNoMatch ? houseNoMatch[1].trim() : "-";
+                            
+                            return (
+                              <div className="flex justify-between items-center mb-3 bg-white p-2.5 rounded border border-gray-100 shadow-sm">
+                                <div className="flex flex-col gap-1.5">
+                                  <span className="font-semibold text-gray-700 text-xs">{t("houseNo") || "House No"}: <span className="font-bold text-brand-700">{houseNo}</span></span>
+                                  <span className="font-bold text-gray-900 text-sm">฿{Number(order.totalAmount || 0).toFixed(2)}</span>
+                                </div>
+                                <button
+                                  onClick={() => setSelectedPastOrder(order)}
+                                  className="text-brand-600 hover:text-brand-800 font-medium text-xs bg-brand-50 hover:bg-brand-100 px-3 py-2 rounded transition shadow-sm border border-brand-100"
+                                >
+                                  {t("viewDetails") || "View Details"}
+                                </button>
+                              </div>
+                            );
+                          })()}
+
+                          <div className="flex flex-col gap-2 mt-3">
+                            {order.status === "Pending" && (
+                              <button
+                                disabled={updatingOrderId === order.id}
+                                onClick={() => handleUpdateOrderStatus(order.id, "Preparing")}
+                                className="w-full bg-brand-600 text-white font-medium py-2 rounded text-xs hover:bg-brand-700 transition disabled:opacity-50"
+                              >
+                                {t("startPreparing")}
+                              </button>
+                            )}
+                            {order.status === "Preparing" && (
+                              <button
+                                disabled={updatingOrderId === order.id}
+                                onClick={() => handleUpdateOrderStatus(order.id, "Out for Delivery")}
+                                className="w-full bg-purple-600 text-white font-medium py-2 rounded text-xs hover:bg-purple-700 transition disabled:opacity-50"
+                              >
+                                {t("markOutForDelivery")}
+                              </button>
+                            )}
+                            {order.status === "Cancel Requested" && (
+                              <div className="bg-orange-50 border border-orange-200 rounded p-3 flex flex-col gap-2">
+                                <p className="text-orange-800 text-xs font-semibold">{t("shopperRequestedCancel") || "Shopper requested cancellation:"}</p>
+                                {order.cancelReason && <p className="text-orange-700 text-xs italic border-l-2 border-orange-300 pl-2">"{order.cancelReason}"</p>}
+                                <div className="flex gap-2 mt-1">
+                                  <button
+                                    disabled={updatingOrderId === order.id}
+                                    onClick={() => handleUpdateOrderStatus(order.id, "Cancelled")}
+                                    className="flex-1 bg-red-600 text-white font-medium py-1.5 rounded text-xs hover:bg-red-700 transition disabled:opacity-50 shadow-sm"
+                                  >
+                                    {t("acceptCancel") || "Accept"}
+                                  </button>
+                                  <button
+                                    disabled={updatingOrderId === order.id}
+                                    onClick={() => {
+                                      setDeclineCancelOrderId(order.id);
+                                      setDeclineCancelModalOpen(true);
+                                    }}
+                                    className="flex-1 bg-white text-gray-700 border border-gray-300 font-medium py-1.5 rounded text-xs hover:bg-gray-50 transition disabled:opacity-50 shadow-sm"
+                                  >
+                                    {t("declineCancel") || "Decline"}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            {order.status === "Out for Delivery" && (
+                              <button
+                                disabled={updatingOrderId === order.id}
+                                onClick={() => handleUpdateOrderStatus(order.id, "Pending Completion")}
+                                className="w-full bg-gray-800 text-white font-medium py-2 rounded text-xs hover:bg-gray-900 transition disabled:opacity-50"
+                              >
+                                {t("requestCompletion")}
+                              </button>
+                            )}
+                            {order.status === "Pending Completion" && (
+                              <p className="text-xs text-center text-blue-600 font-medium p-2 bg-blue-50 rounded">
+                                {t("waitingForShopperToAccept")}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending Completion' ? 'bg-blue-100 text-blue-800' :
-                            order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
-                              order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
-                                order.status === 'Cancel Requested' ? 'bg-orange-100 text-orange-800' :
-                                  'bg-gray-200 text-gray-800'
-                          }`}>
-                          {order.status}
-                        </span>
-                      </div>
-
-                      {(() => {
-                        const deliveryAddressStr = typeof order.deliveryAddress === 'string' ? order.deliveryAddress : "";
-                        const houseNoMatch = deliveryAddressStr.match(/House No(?:[.:\s]*)([^\n,]+)/i) || 
-                                             deliveryAddressStr.match(/บ้านเลขที่(?:[.:\s]*)([^\n,]+)/i);
-                        const houseNo = houseNoMatch ? houseNoMatch[1].trim() : "-";
-                        
-                        return (
-                          <div className="flex justify-between items-center mb-3 bg-white p-2.5 rounded border border-gray-100 shadow-sm">
-                            <div className="flex flex-col gap-1.5">
-                              <span className="font-semibold text-gray-700 text-xs">{t("houseNo") || "House No"}: <span className="font-bold text-brand-700">{houseNo}</span></span>
-                              <span className="font-bold text-gray-900 text-sm">฿{Number(order.totalAmount || 0).toFixed(2)}</span>
-                            </div>
-                            <button
-                              onClick={() => setSelectedPastOrder(order)}
-                              className="text-brand-600 hover:text-brand-800 font-medium text-xs bg-brand-50 hover:bg-brand-100 px-3 py-2 rounded transition shadow-sm border border-brand-100"
-                            >
-                              {t("viewDetails") || "View Details"}
-                            </button>
-                          </div>
-                        );
-                      })()}
-
-                      <div className="flex flex-col gap-2 mt-3">
-                        {order.status === "Pending" && (
-                          <button
-                            disabled={updatingOrderId === order.id}
-                            onClick={() => handleUpdateOrderStatus(order.id, "Preparing")}
-                            className="w-full bg-brand-600 text-white font-medium py-2 rounded text-xs hover:bg-brand-700 transition disabled:opacity-50"
-                          >
-                            {t("startPreparing")}
-                          </button>
-                        )}
-                        {order.status === "Preparing" && (
-                          <button
-                            disabled={updatingOrderId === order.id}
-                            onClick={() => handleUpdateOrderStatus(order.id, "Out for Delivery")}
-                            className="w-full bg-purple-600 text-white font-medium py-2 rounded text-xs hover:bg-purple-700 transition disabled:opacity-50"
-                          >
-                            {t("markOutForDelivery")}
-                          </button>
-                        )}
-                        {order.status === "Cancel Requested" && (
-                          <div className="bg-orange-50 border border-orange-200 rounded p-3 flex flex-col gap-2">
-                            <p className="text-orange-800 text-xs font-semibold">{t("shopperRequestedCancel") || "Shopper requested cancellation:"}</p>
-                            {order.cancelReason && <p className="text-orange-700 text-xs italic border-l-2 border-orange-300 pl-2">"{order.cancelReason}"</p>}
-                            <div className="flex gap-2 mt-1">
-                              <button
-                                disabled={updatingOrderId === order.id}
-                                onClick={() => handleUpdateOrderStatus(order.id, "Cancelled")}
-                                className="flex-1 bg-red-600 text-white font-medium py-1.5 rounded text-xs hover:bg-red-700 transition disabled:opacity-50 shadow-sm"
-                              >
-                                {t("acceptCancel") || "Accept"}
-                              </button>
-                              <button
-                                disabled={updatingOrderId === order.id}
-                                onClick={() => {
-                                  setDeclineCancelOrderId(order.id);
-                                  setDeclineCancelModalOpen(true);
-                                }}
-                                className="flex-1 bg-white text-gray-700 border border-gray-300 font-medium py-1.5 rounded text-xs hover:bg-gray-50 transition disabled:opacity-50 shadow-sm"
-                              >
-                                {t("declineCancel") || "Decline"}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        {order.status === "Out for Delivery" && (
-                          <button
-                            disabled={updatingOrderId === order.id}
-                            onClick={() => handleUpdateOrderStatus(order.id, "Pending Completion")}
-                            className="w-full bg-gray-800 text-white font-medium py-2 rounded text-xs hover:bg-gray-900 transition disabled:opacity-50"
-                          >
-                            {t("requestCompletion")}
-                          </button>
-                        )}
-                        {order.status === "Pending Completion" && (
-                          <p className="text-xs text-center text-blue-600 font-medium p-2 bg-blue-50 rounded">
-                            {t("waitingForShopperToAccept")}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))
+                      );
+                    } catch (e) {
+                      console.error("Error rendering active order", e);
+                      return null;
+                    }
+                  })
                 )}
               </div>
             </div>
@@ -1380,43 +1387,48 @@ export default function ShopOwnerDashboardClient({
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {pastOrders.map((order) => {
-                      const deliveryAddressStr = typeof order.deliveryAddress === 'string' ? order.deliveryAddress : "";
-                      const houseNoMatch = deliveryAddressStr.match(/House No(?:[.:\s]*)([^\n,]+)/i) || 
-                                           deliveryAddressStr.match(/บ้านเลขที่(?:[.:\s]*)([^\n,]+)/i);
-                      const houseNo = houseNoMatch ? houseNoMatch[1].trim() : "-";
-                      
-                      return (
-                        <tr key={order.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <div className="flex flex-col">
-                              <span suppressHydrationWarning>{new Date(order.createdAt).toLocaleDateString()}</span>
-                              {order.status === "Cancelled" && (
-                                <span className="text-[10px] bg-red-100 text-red-800 px-1.5 rounded w-fit mt-1">Cancelled</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                            {(order.id || "").slice(-8)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {order.shopperName}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {houseNo}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
-                            ฿{Number(order.totalAmount || 0).toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                            <button
-                              onClick={() => setSelectedPastOrder(order)}
-                              className="text-brand-600 hover:text-brand-800 font-medium bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded transition"
-                            >
-                              {t("viewDetails")}
-                            </button>
-                          </td>
-                        </tr>
-                      );
+                      try {
+                        const deliveryAddressStr = typeof order.deliveryAddress === 'string' ? order.deliveryAddress : "";
+                        const houseNoMatch = deliveryAddressStr.match(/House No(?:[.:\s]*)([^\n,]+)/i) || 
+                                             deliveryAddressStr.match(/บ้านเลขที่(?:[.:\s]*)([^\n,]+)/i);
+                        const houseNo = houseNoMatch ? houseNoMatch[1].trim() : "-";
+                        
+                        return (
+                          <tr key={order.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <div className="flex flex-col">
+                                <span suppressHydrationWarning>{new Date(order.createdAt).toLocaleDateString()}</span>
+                                {order.status === "Cancelled" && (
+                                  <span className="text-[10px] bg-red-100 text-red-800 px-1.5 rounded w-fit mt-1">Cancelled</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                              {(order.id || "").slice(-8)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {order.shopperName}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {houseNo}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
+                              ฿{Number(order.totalAmount || 0).toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                              <button
+                                onClick={() => setSelectedPastOrder(order)}
+                                className="text-brand-600 hover:text-brand-800 font-medium bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded transition"
+                              >
+                                {t("viewDetails")}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      } catch (e) {
+                        console.error("Error rendering past order", e);
+                        return null;
+                      }
                     })}
                   </tbody>
                 </table>
