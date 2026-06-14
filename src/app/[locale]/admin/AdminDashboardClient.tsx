@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { storage } from "@/lib/firebase";
 import { useTranslations } from "next-intl";
@@ -17,7 +17,8 @@ export default function AdminDashboardClient({
   initialAdsSettings = null,
   totalUsers = 0,
   initialFeedbacks = [],
-  initialTermsOfUse = ""
+  initialTermsOfUse = "",
+  initialUsers = []
 }: { 
   initialMarkets: any[],
   initialShops?: any[],
@@ -26,7 +27,8 @@ export default function AdminDashboardClient({
   initialAdsSettings?: any,
   totalUsers?: number,
   initialFeedbacks?: any[],
-  initialTermsOfUse?: any
+  initialTermsOfUse?: any,
+  initialUsers?: any[]
 }) {
   const t = useTranslations("AdminDashboard");
   const router = useRouter();
@@ -37,7 +39,13 @@ export default function AdminDashboardClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"markets" | "shops" | "chats" | "ads" | "feedback" | "terms">("markets");
+  const [activeTab, setActiveTab] = useState<"markets" | "shops" | "chats" | "ads" | "feedback" | "terms" | "users">("markets");
+
+  // Users Tab State
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [filterUserMarket, setFilterUserMarket] = useState("");
+  const [filterUserVillageName, setFilterUserVillageName] = useState("");
+  const [selectedUserAddresses, setSelectedUserAddresses] = useState<any[] | null>(null);
 
   const feedbacks = initialFeedbacks || [];
   const avgFeedbackRating = feedbacks.length > 0 
@@ -106,6 +114,67 @@ export default function AdminDashboardClient({
   const [termsContent, setTermsContent] = useState(initialTermsOfUse?.content || "");
   const [termsContentTh, setTermsContentTh] = useState(initialTermsOfUse?.content_th || "");
   const [termsSaving, setTermsSaving] = useState(false);
+
+  const derivedUsers = useMemo(() => {
+    return (initialUsers || []).map(u => {
+      let villageName = "";
+      let houseNo = "";
+      if (u.addresses && u.addresses.length > 0) {
+        try {
+          const defaultAddr = u.addresses.find((a: string) => {
+            try { return JSON.parse(a).isDefault; } catch { return false; }
+          }) || u.addresses[0];
+          
+          const parsed = JSON.parse(defaultAddr);
+          villageName = parsed.villageName || "";
+          houseNo = parsed.houseNo || "";
+        } catch {
+          // If fallback string or fail
+        }
+      }
+      
+      const market = markets.find(m => m.villageName === villageName);
+      const marketName = market ? market.name : "";
+      
+      return {
+        ...u,
+        villageName,
+        houseNo,
+        marketName,
+        marketId: market ? market.id : ""
+      };
+    });
+  }, [initialUsers, markets]);
+
+  const filteredUsers = useMemo(() => {
+    return derivedUsers.filter(u => {
+      let matches = true;
+      if (filterUserMarket && u.marketId !== filterUserMarket) matches = false;
+      if (filterUserVillageName && u.villageName !== filterUserVillageName) matches = false;
+      if (userSearchQuery) {
+        const q = userSearchQuery.toLowerCase();
+        if (!u.name?.toLowerCase().includes(q) && 
+            !u.email?.toLowerCase().includes(q) && 
+            !u.houseNo?.toLowerCase().includes(q)) {
+          matches = false;
+        }
+      }
+      return matches;
+    });
+  }, [derivedUsers, filterUserMarket, filterUserVillageName, userSearchQuery]);
+
+  const uniqueUserMarkets = useMemo(() => {
+    const map = new Map();
+    derivedUsers.forEach(u => {
+      if (u.marketId) map.set(u.marketId, u.marketName);
+    });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [derivedUsers]);
+
+  const uniqueUserVillages = useMemo(() => {
+    const set = new Set(derivedUsers.map(u => u.villageName).filter(Boolean));
+    return Array.from(set);
+  }, [derivedUsers]);
 
   useEffect(() => {
     setMarkets(initialMarkets);
@@ -459,6 +528,12 @@ export default function AdminDashboardClient({
             className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "markets" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
           >
             {t("marketsAndReports")}
+          </button>
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === "users" ? "bg-brand-50 text-brand-700 border-b-2 border-brand-600 rounded-b-none" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-b-2 border-transparent rounded-b-none"}`}
+          >
+            {t("manageUsers") || "Manage Users"}
           </button>
           <button
             onClick={() => setActiveTab("shops")}
@@ -832,6 +907,97 @@ export default function AdminDashboardClient({
         )}
       </div>
       </>
+      )}
+
+      {/* Users Tab UI */}
+      {activeTab === "users" && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">{t("manageUsers") || "Manage Users"}</h3>
+            
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder={t("searchUsersPlaceholder") || "Search by name, email, or house number..."}
+                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="md:w-48">
+                <select
+                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={filterUserMarket}
+                  onChange={(e) => setFilterUserMarket(e.target.value)}
+                >
+                  <option value="">{t("allMarkets") || "All Markets"}</option>
+                  {uniqueUserMarkets.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:w-48">
+                <select
+                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={filterUserVillageName}
+                  onChange={(e) => setFilterUserVillageName(e.target.value)}
+                >
+                  <option value="">{t("allVillages") || "All Villages"}</option>
+                  {uniqueUserVillages.map(v => (
+                    <option key={v} value={v as string}>{v as string}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("market")}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("villageName")}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("houseNo") || "House No."}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("username") || "Username"}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("email") || "Email"}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("createdDate") || "Created Date"}</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("address") || "Address"}</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map((user) => (
+                      <tr key={user.id} className="hover:bg-gray-50 transition">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.marketName || "-"}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.villageName || "-"}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.houseNo || "-"}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name || "-"}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email || "-"}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => setSelectedUserAddresses(user.addresses || [])}
+                            className="text-brand-600 hover:text-brand-900 bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded-md transition"
+                          >
+                            {t("viewAddresses") || "View Addresses"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                        {t("noUsersFound") || "No users found."}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* SHOPS TAB */}
@@ -1422,6 +1588,65 @@ export default function AdminDashboardClient({
         </div>
       )}
 
+      {/* Delivery Addresses Modal */}
+      {selectedUserAddresses !== null && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="text-lg font-bold text-gray-900">{t("deliveryAddresses") || "Delivery Addresses"}</h3>
+              <button 
+                onClick={() => setSelectedUserAddresses(null)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200 transition"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              {selectedUserAddresses && selectedUserAddresses.length > 0 ? (
+                <div className="space-y-4">
+                  {selectedUserAddresses.map((addrStr, idx) => {
+                    let parsed: any = {};
+                    try {
+                      parsed = JSON.parse(addrStr);
+                    } catch {
+                      parsed = { address: addrStr };
+                    }
+                    return (
+                      <div key={idx} className="p-4 border border-gray-200 rounded-lg bg-gray-50 relative">
+                        {parsed.isDefault && (
+                          <span className="absolute top-3 right-3 bg-brand-100 text-brand-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">
+                            {t("default") || "Default"}
+                          </span>
+                        )}
+                        <div className="space-y-1 pr-16 text-sm">
+                          {parsed.villageName && <p><span className="font-medium text-gray-700">{t("villageName")}:</span> {parsed.villageName}</p>}
+                          {parsed.houseNo && <p><span className="font-medium text-gray-700">{t("houseNo")}:</span> {parsed.houseNo}</p>}
+                          {parsed.telephone && <p><span className="font-medium text-gray-700">{t("telephone")}:</span> {parsed.telephone}</p>}
+                          <p><span className="font-medium text-gray-700">{t("addressLine") || "Address"}:</span> {parsed.address || parsed}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  {t("noAddressesFound") || "No addresses found for this user."}
+                </div>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+              <button
+                onClick={() => setSelectedUserAddresses(null)}
+                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition"
+              >
+                {t("close")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

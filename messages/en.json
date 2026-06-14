@@ -267,7 +267,18 @@
     "totalComments": "Total Comments",
     "avgRating": "Average Rating",
     "noFeedbackYet": "No feedback received yet.",
-    "termsOfUse": "Terms of Use"
+    "termsOfUse": "Terms of Use",
+    "manageUsers": "Manage Users",
+    "searchUsersPlaceholder": "Search by name, email, or house number...",
+    "allVillages": "All Villages",
+    "username": "Username",
+    "email": "Email",
+    "createdDate": "Created Date",
+    "address": "Address",
+    "viewAddresses": "View Addresses",
+    "noUsersFound": "No users found.",
+    "deliveryAddresses": "Delivery Addresses",
+    "noAddressesFound": "No addresses found for this user."
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "Shopper requested cancellation:",

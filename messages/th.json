@@ -295,7 +295,18 @@
     "totalComments": "ความคิดเห็นทั้งหมด",
     "avgRating": "คะแนนเฉลี่ย",
     "noFeedbackYet": "ยังไม่มีข้อเสนอแนะ",
-    "termsOfUse": "ข้อกำหนดการใช้งาน"
+    "termsOfUse": "ข้อกำหนดการใช้งาน",
+    "manageUsers": "จัดการผู้ใช้",
+    "searchUsersPlaceholder": "ค้นหาตามชื่อ อีเมล หรือบ้านเลขที่...",
+    "allVillages": "หมู่บ้านทั้งหมด",
+    "username": "ชื่อผู้ใช้",
+    "email": "อีเมล",
+    "createdDate": "วันที่สร้าง",
+    "address": "ที่อยู่",
+    "viewAddresses": "ดูที่อยู่",
+    "noUsersFound": "ไม่พบผู้ใช้",
+    "deliveryAddresses": "ที่อยู่สำหรับจัดส่ง",
+    "noAddressesFound": "ไม่พบที่อยู่สำหรับผู้ใช้นี้"
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "ลูกค้าขอยกเลิกออเดอร์:",
