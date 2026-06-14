@@ -38,7 +38,7 @@
   "ShopperDashboard": {
     "addressRequiredFirst": "You must set your delivery address before opening a shop.",
     "title": "Shopper Dashboard",
-    "description": "Discover markets, track memberships, and open your own shop.",
+    "description": "Discover markets and open your own shop.",
     "buyCoffee": "Buy developer a coffee",
     "wallet": "Wallet",
     "coins": "{coins} Coins",
