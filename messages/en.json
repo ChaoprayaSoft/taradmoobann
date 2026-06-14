@@ -208,7 +208,7 @@
     "outOfTotalMarkets": "Out of {total} total markets",
     "approvedShops": "Active Shops",
     "acrossAllMarkets": "Across all markets",
-    "totalUsers": "Total Users",
+    "totalUsers": "Total Users: {total}",
     "registeredPlatformUsers": "Registered platform users",
     "globalTransactionList": "Global Transaction List",
     "noCompletedTransactions": "No completed transactions have occurred on the platform yet.",
@@ -279,7 +279,10 @@
     "noUsersFound": "No users found.",
     "deliveryAddresses": "Delivery Addresses",
     "noAddressesFound": "No addresses found for this user.",
-    "houseNo": "House No."
+    "houseNo": "House No.",
+    "confirmSave": "Confirm Save",
+    "confirmSaveTermsDesc": "Are you sure you want to save the Terms of Use? These changes will be immediately visible to all users.",
+    "confirm": "Confirm"
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "Shopper requested cancellation:",

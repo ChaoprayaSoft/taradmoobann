@@ -236,7 +236,7 @@
     "outOfTotalMarkets": "จากทั้งหมด {total} ตลาด",
     "approvedShops": "ร้านค้าที่เปิดใช้งาน",
     "acrossAllMarkets": "จากตลาดทั้งหมด",
-    "totalUsers": "ผู้ใช้งานทั้งหมด",
+    "totalUsers": "ผู้ใช้ทั้งหมด: {total}",
     "registeredPlatformUsers": "ผู้ใช้งานที่ลงทะเบียนในระบบ",
     "globalTransactionList": "รายการธุรกรรมทั้งหมด",
     "noCompletedTransactions": "ยังไม่มีธุรกรรมที่เสร็จสมบูรณ์ในระบบ",
@@ -307,7 +307,10 @@
     "noUsersFound": "ไม่พบผู้ใช้",
     "deliveryAddresses": "ที่อยู่สำหรับจัดส่ง",
     "noAddressesFound": "ไม่พบที่อยู่สำหรับผู้ใช้นี้",
-    "houseNo": "บ้านเลขที่"
+    "houseNo": "บ้านเลขที่",
+    "confirmSave": "ยืนยันการบันทึก",
+    "confirmSaveTermsDesc": "คุณแน่ใจหรือไม่ว่าต้องการบันทึกข้อกำหนดการใช้งาน? การเปลี่ยนแปลงนี้จะแสดงให้ผู้ใช้ทุกคนเห็นทันที",
+    "confirm": "ยืนยัน"
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "ลูกค้าขอยกเลิกออเดอร์:",
