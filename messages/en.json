@@ -290,7 +290,11 @@
     "houseNo": "House No.",
     "confirmSave": "Confirm Save",
     "confirmSaveTermsDesc": "Are you sure you want to save the Terms of Use? These changes will be immediately visible to all users.",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "active": "Active",
+    "inactive": "Inactive",
+    "enable": "Enable",
+    "disable": "Disable"
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "Shopper requested cancellation:",

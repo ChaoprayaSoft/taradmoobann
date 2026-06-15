@@ -117,6 +117,8 @@ export default function AdminDashboardClient({
   const [isEditingTerms, setIsEditingTerms] = useState(false);
   const [termsSaving, setTermsSaving] = useState(false);
   const [isTermsConfirmModalOpen, setIsTermsConfirmModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [shopToDelete, setShopToDelete] = useState<string | null>(null);
 
   const derivedUsers = useMemo(() => {
     return (usersList || []).map(u => {
@@ -473,13 +475,13 @@ export default function AdminDashboardClient({
   };
 
   const handleDeleteUser = async (email: string) => {
-    if (!confirm("Are you sure you want to completely remove this user? This will also delete all their shops and products. This action cannot be undone.")) return;
     try {
       const res = await fetch(`/api/admin/users?email=${encodeURIComponent(email)}`, {
         method: "DELETE"
       });
       if (!res.ok) throw new Error("Failed to delete user");
       setUsersList(prev => prev.filter(u => u.email !== email));
+      setUserToDelete(null);
     } catch (err) {
       alert("Failed to delete user");
     }
@@ -501,13 +503,13 @@ export default function AdminDashboardClient({
   };
 
   const handleDeleteShop = async (shopId: string) => {
-    if (!confirm("Are you sure you want to completely remove this shop? This will also delete all its products. This action cannot be undone.")) return;
     try {
       const res = await fetch(`/api/admin/shops?id=${encodeURIComponent(shopId)}`, {
         method: "DELETE"
       });
       if (!res.ok) throw new Error("Failed to delete shop");
       setShopsList(prev => prev.filter(s => s.id !== shopId));
+      setShopToDelete(null);
     } catch (err) {
       alert("Failed to delete shop");
     }
@@ -1069,7 +1071,7 @@ export default function AdminDashboardClient({
                             {user.isActive === false ? (t("enable") || "Enable") : (t("disable") || "Disable")}
                           </button>
                           <button
-                            onClick={() => handleDeleteUser(user.email)}
+                            onClick={() => setUserToDelete(user.email)}
                             className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition"
                           >
                             {t("delete") || "Delete"}
@@ -1218,7 +1220,7 @@ export default function AdminDashboardClient({
                             {shop.status === 'inactive' ? (t("enable") || "Enable") : (t("disable") || "Disable")}
                           </button>
                           <button
-                            onClick={() => handleDeleteShop(shop.id)}
+                            onClick={() => setShopToDelete(shop.id)}
                             className="text-xs text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition"
                           >
                             {t("delete") || "Delete"}
@@ -1832,6 +1834,57 @@ export default function AdminDashboardClient({
                   {t("confirm") || "Confirm"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Delete User Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete User</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to completely remove this user? This will also delete all their shops and products. This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setUserToDelete(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition"
+              >
+                {t("cancel") || "Cancel"}
+              </button>
+              <button
+                onClick={() => handleDeleteUser(userToDelete)}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition"
+              >
+                {t("delete") || "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Shop Modal */}
+      {shopToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Shop</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to completely remove this shop? This will also delete all its products. This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShopToDelete(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition"
+              >
+                {t("cancel") || "Cancel"}
+              </button>
+              <button
+                onClick={() => handleDeleteShop(shopToDelete)}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition"
+              >
+                {t("delete") || "Delete"}
+              </button>
             </div>
           </div>
         </div>
