@@ -456,6 +456,62 @@ export default function AdminDashboardClient({
     }
   };
 
+  const handleToggleUserStatus = async (email: string) => {
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, action: "toggleStatus" })
+      });
+      if (!res.ok) throw new Error("Failed to toggle user status");
+      const data = await res.json();
+      setUsers(prev => prev.map(u => u.email === email ? { ...u, isActive: data.isActive } : u));
+    } catch (err) {
+      alert("Failed to toggle user status");
+    }
+  };
+
+  const handleDeleteUser = async (email: string) => {
+    if (!confirm("Are you sure you want to completely remove this user? This will also delete all their shops and products. This action cannot be undone.")) return;
+    try {
+      const res = await fetch(`/api/admin/users?email=${encodeURIComponent(email)}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) throw new Error("Failed to delete user");
+      setUsers(prev => prev.filter(u => u.email !== email));
+    } catch (err) {
+      alert("Failed to delete user");
+    }
+  };
+
+  const handleToggleShopStatus = async (shopId: string) => {
+    try {
+      const res = await fetch("/api/admin/shops", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: shopId, action: "toggleStatus" })
+      });
+      if (!res.ok) throw new Error("Failed to toggle shop status");
+      const data = await res.json();
+      setShops(prev => prev.map(s => s.id === shopId ? { ...s, status: data.status } : s));
+    } catch (err) {
+      alert("Failed to toggle shop status");
+    }
+  };
+
+  const handleDeleteShop = async (shopId: string) => {
+    if (!confirm("Are you sure you want to completely remove this shop? This will also delete all its products. This action cannot be undone.")) return;
+    try {
+      const res = await fetch(`/api/admin/shops?id=${encodeURIComponent(shopId)}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) throw new Error("Failed to delete shop");
+      setShops(prev => prev.filter(s => s.id !== shopId));
+    } catch (err) {
+      alert("Failed to delete shop");
+    }
+  };
+
   const renderAdForm = () => (
     <form onSubmit={handleAdSubmit} className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6 space-y-4 max-w-xl">
       <h3 className="font-bold text-lg mb-4">{editingAd ? t("editAd") : t("newAd")}</h3>
@@ -969,7 +1025,9 @@ export default function AdminDashboardClient({
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("villageName")}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("market")}</th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t("address") || "Address"}</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t("status") || "Status"}</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("createdDate") || "Created Date"}</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("actions") || "Actions"}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -989,6 +1047,11 @@ export default function AdminDashboardClient({
                             {t("viewAddresses") || "View Addresses"}
                           </button>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive === false ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                            {user.isActive === false ? (t("inactive") || "Inactive") : (t("active") || "Active")}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
                           {user.createdAt ? (
                             (() => {
@@ -997,11 +1060,25 @@ export default function AdminDashboardClient({
                             })()
                           ) : "-"}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-2 justify-end">
+                          <button
+                            onClick={() => handleToggleUserStatus(user.email)}
+                            className="text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-md transition"
+                          >
+                            {user.isActive === false ? (t("enable") || "Enable") : (t("disable") || "Disable")}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user.email)}
+                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition"
+                          >
+                            {t("delete") || "Delete"}
+                          </button>
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                      <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
                         {t("noUsersFound") || "No users found."}
                       </td>
                     </tr>
@@ -1052,7 +1129,12 @@ export default function AdminDashboardClient({
                           )}
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-brand-900">{shop.name}</h3>
+                          <h3 className="text-lg font-semibold text-brand-900 flex items-center gap-2">
+                            {shop.name}
+                            <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-full ${shop.status === 'inactive' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                              {shop.status === 'inactive' ? (t("inactive") || "Inactive") : (t("active") || "Active")}
+                            </span>
+                          </h3>
                           <p className="text-sm font-medium text-brand-600 bg-brand-50 inline-block px-2 py-0.5 rounded mt-1">
                             {marketName}
                           </p>
@@ -1115,18 +1197,32 @@ export default function AdminDashboardClient({
                            shop.operatingStatus === 'scheduled' ? t("scheduled", { dates: shop.validDates }) :
                            t("open")}
                         </p>
-                        <button 
-                          onClick={() => {
-                            setEditingShop(shop);
-                            setShopFormData({
-                              operatingStatus: shop.operatingStatus || "always_open",
-                              validDates: shop.validDates || ""
-                            });
-                          }}
-                          className="text-sm bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-50 transition"
-                        >
-                          {t("editStatus")}
-                        </button>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => {
+                              setEditingShop(shop);
+                              setShopFormData({
+                                operatingStatus: shop.operatingStatus || "always_open",
+                                validDates: shop.validDates || ""
+                              });
+                            }}
+                            className="text-xs bg-white border border-gray-300 text-gray-700 px-2 py-1 rounded hover:bg-gray-50 transition"
+                          >
+                            {t("editStatus")}
+                          </button>
+                          <button
+                            onClick={() => handleToggleShopStatus(shop.id)}
+                            className="text-xs text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition"
+                          >
+                            {shop.status === 'inactive' ? (t("enable") || "Enable") : (t("disable") || "Disable")}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteShop(shop.id)}
+                            className="text-xs text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition"
+                          >
+                            {t("delete") || "Delete"}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </li>

@@ -34,9 +34,16 @@ export const authOptions: AuthOptions = {
             roles: ["shopper"],
             coins: 50,
             showWelcomeModal: true,
+            isActive: true, // Default to true
             createdAt: new Date().toISOString()
           });
           console.log("Successfully created user doc");
+        } else {
+          const data = doc.data();
+          if (data?.isActive === false) {
+            console.error("User is inactive and blocked from logging in.");
+            return false; // Blocks login
+          }
         }
       } catch (error) {
         console.error("Error in NextAuth signIn callback:", error);
