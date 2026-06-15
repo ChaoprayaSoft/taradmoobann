@@ -294,7 +294,8 @@
     "active": "Active",
     "inactive": "Inactive",
     "enable": "Enable",
-    "disable": "Disable"
+    "disable": "Disable",
+    "totalUsersTitle": "Total Users"
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "Shopper requested cancellation:",

@@ -322,7 +322,8 @@
     "active": "เปิดใช้งาน",
     "inactive": "ปิดใช้งาน",
     "enable": "เปิดใช้งาน",
-    "disable": "ระงับการใช้งาน"
+    "disable": "ระงับการใช้งาน",
+    "totalUsersTitle": "ผู้ใช้ทั้งหมด"
   },
   "ShopOwnerDashboard": {
     "shopperRequestedCancel": "ลูกค้าขอยกเลิกออเดอร์:",

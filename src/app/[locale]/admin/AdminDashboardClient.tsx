@@ -908,7 +908,7 @@ export default function AdminDashboardClient({
             <p className="text-xs text-green-600 mt-2">{t("acrossAllMarkets")}</p>
           </div>
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
-            <p className="text-sm text-purple-700 font-medium uppercase tracking-wider mb-1">{t("totalUsers")}</p>
+            <p className="text-sm text-purple-700 font-medium uppercase tracking-wider mb-1">{t("totalUsersTitle")}</p>
             <p className="text-3xl font-bold text-purple-900">{totalUsers}</p>
             <p className="text-xs text-purple-600 mt-2">{t("registeredPlatformUsers")}</p>
           </div>
