@@ -46,6 +46,7 @@ export default function AdminDashboardClient({
   const [filterUserMarket, setFilterUserMarket] = useState("");
   const [filterUserVillageName, setFilterUserVillageName] = useState("");
   const [selectedUserAddresses, setSelectedUserAddresses] = useState<any[] | null>(null);
+  const [usersList, setUsersList] = useState(initialUsers || []);
 
   const feedbacks = initialFeedbacks || [];
   const avgFeedbackRating = feedbacks.length > 0 
@@ -118,7 +119,7 @@ export default function AdminDashboardClient({
   const [isTermsConfirmModalOpen, setIsTermsConfirmModalOpen] = useState(false);
 
   const derivedUsers = useMemo(() => {
-    return (initialUsers || []).map(u => {
+    return (usersList || []).map(u => {
       let villageName = "";
       let houseNo = "";
       if (u.addresses && u.addresses.length > 0) {
@@ -146,7 +147,7 @@ export default function AdminDashboardClient({
         marketId: market ? market.id : ""
       };
     });
-  }, [initialUsers, markets]);
+  }, [usersList, markets]);
 
   const filteredUsers = useMemo(() => {
     return derivedUsers.filter(u => {
@@ -465,7 +466,7 @@ export default function AdminDashboardClient({
       });
       if (!res.ok) throw new Error("Failed to toggle user status");
       const data = await res.json();
-      setUsers(prev => prev.map(u => u.email === email ? { ...u, isActive: data.isActive } : u));
+      setUsersList(prev => prev.map(u => u.email === email ? { ...u, isActive: data.isActive } : u));
     } catch (err) {
       alert("Failed to toggle user status");
     }
@@ -478,7 +479,7 @@ export default function AdminDashboardClient({
         method: "DELETE"
       });
       if (!res.ok) throw new Error("Failed to delete user");
-      setUsers(prev => prev.filter(u => u.email !== email));
+      setUsersList(prev => prev.filter(u => u.email !== email));
     } catch (err) {
       alert("Failed to delete user");
     }
@@ -493,7 +494,7 @@ export default function AdminDashboardClient({
       });
       if (!res.ok) throw new Error("Failed to toggle shop status");
       const data = await res.json();
-      setShops(prev => prev.map(s => s.id === shopId ? { ...s, status: data.status } : s));
+      setShopsList(prev => prev.map(s => s.id === shopId ? { ...s, status: data.status } : s));
     } catch (err) {
       alert("Failed to toggle shop status");
     }
@@ -506,7 +507,7 @@ export default function AdminDashboardClient({
         method: "DELETE"
       });
       if (!res.ok) throw new Error("Failed to delete shop");
-      setShops(prev => prev.filter(s => s.id !== shopId));
+      setShopsList(prev => prev.filter(s => s.id !== shopId));
     } catch (err) {
       alert("Failed to delete shop");
     }

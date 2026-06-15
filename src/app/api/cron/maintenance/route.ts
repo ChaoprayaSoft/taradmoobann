@@ -3,6 +3,8 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import * as admin from "firebase-admin";
 import { sendNotificationToUser } from "@/lib/sendNotification";
 
+export const dynamic = 'force-dynamic';
+
 // Trigger this endpoint daily using Vercel Cron
 export async function GET(req: Request) {
   try {
