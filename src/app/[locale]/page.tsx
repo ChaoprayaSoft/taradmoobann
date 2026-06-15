@@ -161,7 +161,10 @@ export default async function Home() {
           shopMap.set(doc.id, doc.data());
         }
       });
-      globalActiveProducts = globalActiveProducts.map(p => {
+      globalActiveProducts = globalActiveProducts.filter(p => {
+        const shop = shopMap.get(p.shopId);
+        return shop && shop.status === "approved" && shop.operatingStatus !== "closed";
+      }).map(p => {
         const shop = shopMap.get(p.shopId);
         const market = markets.find(m => m.id === shop?.marketId);
         return {
