@@ -37,6 +37,12 @@ export default async function ShopperDashboard() {
 
     allShops = allShops.filter(shop => (userCoinsMap.get(shop.ownerEmail) ?? 0) > 0);
 
+    // Populate shopsCount for each market
+    allMarkets = allMarkets.map(market => {
+      const count = allShops.filter(shop => shop.marketId === market.id).length;
+      return { ...market, shopsCount: count };
+    });
+
     // Fetch user's shops
     const shopsSnapshot = await adminDb
       .collection("shops")
