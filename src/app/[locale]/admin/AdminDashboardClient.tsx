@@ -1689,7 +1689,7 @@ export default function AdminDashboardClient({
                 <div>
                   <h4 className="text-sm font-bold text-gray-700 mb-3 border-b pb-2">English Terms</h4>
                   {termsContent ? (
-                    <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: termsContent }} />
+                    <div className="prose max-w-none text-sm ql-editor" dangerouslySetInnerHTML={{ __html: termsContent }} />
                   ) : (
                     <p className="text-gray-500 italic">No English terms configured.</p>
                   )}
@@ -1697,7 +1697,7 @@ export default function AdminDashboardClient({
                 <div>
                   <h4 className="text-sm font-bold text-gray-700 mb-3 border-b pb-2">Thai Terms (ข้อกำหนดการใช้งาน)</h4>
                   {termsContentTh ? (
-                    <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: termsContentTh }} />
+                    <div className="prose max-w-none text-sm ql-editor" dangerouslySetInnerHTML={{ __html: termsContentTh }} />
                   ) : (
                     <p className="text-gray-500 italic">No Thai terms configured.</p>
                   )}
