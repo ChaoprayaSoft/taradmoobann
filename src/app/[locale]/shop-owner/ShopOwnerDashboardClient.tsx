@@ -712,28 +712,6 @@ export default function ShopOwnerDashboardClient({
     }
   };
 
-  const [completingOrderId, setCompletingOrderId] = useState<string | null>(null);
-  const handleAcceptDelivery = async (orderId: string) => {
-    setCompletingOrderId(orderId);
-    try {
-      const res = await fetch("/api/shop-owner/orders", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, status: "Completed" }),
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        const data = await res.json();
-        alert(data.error || "Failed to update order status");
-      }
-    } catch (err) {
-      alert("Something went wrong");
-    } finally {
-      setCompletingOrderId(null);
-    }
-  };
-
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
     setUpdatingOrderId(orderId);
     try {
@@ -1399,15 +1377,6 @@ return (
                                   >
                                     {t("viewDetails") || "View Details"}
                                   </button>
-                                  {(order.status === "Pending Completion" || order.status === "Out for Delivery") && (
-                                    <button
-                                      disabled={completingOrderId === order.id}
-                                      onClick={() => handleAcceptDelivery(order.id)}
-                                      className="text-white font-bold bg-brand-600 hover:bg-brand-700 px-4 py-2 rounded-md shadow-sm transition disabled:opacity-50 text-sm"
-                                    >
-                                      {t("acceptDelivery") || "Accept Delivery"}
-                                    </button>
-                                  )}
                                   {(order.status === "Pending Completion" || order.status === "Out for Delivery") && selectedShop?.promptpayId && (
                                     <button
                                       onClick={() => setShowQrModal({ amount: order.totalAmount, promptpayId: selectedShop.promptpayId, promptpayName: selectedShop.promptpayName })}
