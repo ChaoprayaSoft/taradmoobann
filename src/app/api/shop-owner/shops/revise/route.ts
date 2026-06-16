@@ -14,7 +14,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { shopId, name, description, category, houseNumber, location, coverImage } = body;
+    const { shopId, name, description, category, houseNumber, location, coverImage, promptpayId, promptpayName } = body;
     const userEmail = session?.user?.email;
 
     if (!shopId || !name) {
@@ -51,6 +51,8 @@ export async function PUT(req: Request) {
     if (houseNumber !== undefined) updateData.houseNumber = houseNumber;
     if (location !== undefined) updateData.location = location;
     if (coverImage !== undefined) updateData.coverImage = coverImage;
+    if (promptpayId !== undefined) updateData.promptpayId = promptpayId;
+    if (promptpayName !== undefined) updateData.promptpayName = promptpayName;
 
     await shopRef.update(updateData);
 

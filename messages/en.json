@@ -452,7 +452,13 @@
     "completedOrdersPeriod": "Completed Orders",
     "filteredTotalEarnings": "Total Earnings",
     "feeDeductionNotice": "Monthly fee will be deducted from your coin balance within {days} days (on {date}).",
-    "chatWithCustomer": "Chat with Customer"
+    "chatWithCustomer": "Chat with Customer",
+    "promptpaySetup": "PromptPay Details (Optional)",
+    "promptpayId": "PromptPay ID (Phone/Citizen ID)",
+    "promptpayName": "Account Name",
+    "showPromptpayQr": "Show PromptPay QR",
+    "promptpaySecurityNote": "Your ID is securely stored and encrypted in our database.",
+    "scanToPay": "Scan to Pay"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "Market Owner Dashboard",

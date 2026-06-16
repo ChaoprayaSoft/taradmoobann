@@ -7,7 +7,9 @@ import { db } from "@/lib/firebase";
 import { Coins, Coffee } from "lucide-react";
 import BuyCoffeeModal from "@/components/BuyCoffeeModal";
 import TermsModal from "@/components/TermsModal";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { QRCodeSVG } from "qrcode.react";
+const generatePayload = require("promptpay-qr");
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function ShopOwnerDashboardClient({
@@ -160,11 +162,14 @@ export default function ShopOwnerDashboardClient({
     locationType: "house",
     houseNumber: "",
     location: "",
-    coverImage: ""
+    coverImage: "",
+    promptpayId: "",
+    promptpayName: ""
   });
   const [shopReviseFile, setShopReviseFile] = useState<File | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCoffeeModal, setShowCoffeeModal] = useState(false);
+  const [showQrModal, setShowQrModal] = useState<{ amount: number, promptpayId: string, promptpayName: string } | null>(null);
 
   // Reviews State
   const [shopReviews, setShopReviews] = useState<any[]>([]);
@@ -649,6 +654,8 @@ export default function ShopOwnerDashboardClient({
           category: shopReviseData.category,
           houseNumber: shopReviseData.locationType === "house" ? shopReviseData.houseNumber : "",
           location: shopReviseData.locationType === "area" ? shopReviseData.location : "",
+          promptpayId: shopReviseData.promptpayId,
+          promptpayName: shopReviseData.promptpayName,
           coverImage: finalImageUrl
         }),
       });
@@ -705,6 +712,28 @@ export default function ShopOwnerDashboardClient({
     }
   };
 
+  const [completingOrderId, setCompletingOrderId] = useState<string | null>(null);
+  const handleAcceptDelivery = async (orderId: string) => {
+    setCompletingOrderId(orderId);
+    try {
+      const res = await fetch("/api/shop-owner/orders", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, status: "Completed" }),
+      });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update order status");
+      }
+    } catch (err) {
+      alert("Something went wrong");
+    } finally {
+      setCompletingOrderId(null);
+    }
+  };
+
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
     setUpdatingOrderId(orderId);
     try {
@@ -740,6 +769,28 @@ export default function ShopOwnerDashboardClient({
 
   return (
     <ErrorBoundary>
+      {showQrModal && (
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full text-center">
+            <h3 className="font-bold text-lg mb-4">{t("scanToPay")}</h3>
+            <div className="mx-auto bg-white p-2 rounded-lg border">
+              <QRCodeSVG 
+                value={generatePayload(showQrModal.promptpayId, { amount: showQrModal.amount })}
+                size={256}
+                level="H"
+              />
+            </div>
+            <p className="mt-4 text-sm font-semibold text-gray-700">{showQrModal.promptpayName}</p>
+            <p className="text-xl font-bold text-brand-600">฿{showQrModal.amount.toFixed(2)}</p>
+            <button 
+              onClick={() => setShowQrModal(null)}
+              className="mt-6 w-full py-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-sm font-bold"
+            >
+              {t("close")}
+            </button>
+          </div>
+        </div>
+      )}
       <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -794,7 +845,9 @@ export default function ShopOwnerDashboardClient({
                 locationType: selectedShop.houseNumber ? "house" : "area",
                 houseNumber: selectedShop.houseNumber || "",
                 location: selectedShop.location || "",
-                coverImage: selectedShop.coverImage || ""
+                coverImage: selectedShop.coverImage || "",
+                promptpayId: selectedShop.promptpayId || "",
+                promptpayName: selectedShop.promptpayName || ""
               });
               setIsRevisingShop(true);
             }}
@@ -873,7 +926,9 @@ export default function ShopOwnerDashboardClient({
                     locationType: selectedShop.houseNumber ? "house" : "area",
                     houseNumber: selectedShop.houseNumber || "",
                     location: selectedShop.location || "",
-                    coverImage: selectedShop.coverImage || ""
+                    coverImage: selectedShop.coverImage || "",
+                    promptpayId: selectedShop.promptpayId || "",
+                    promptpayName: selectedShop.promptpayName || ""
                   });
                   setIsRevisingShop(true);
                 }}
@@ -1344,6 +1399,27 @@ export default function ShopOwnerDashboardClient({
                                   >
                                     {t("viewDetails") || "View Details"}
                                   </button>
+                                  {(order.status === "Pending Completion" || order.status === "Out for Delivery") && (
+                                    <button
+                                      disabled={completingOrderId === order.id}
+                                      onClick={() => handleAcceptDelivery(order.id)}
+                                      className="text-white font-bold bg-brand-600 hover:bg-brand-700 px-4 py-2 rounded-md shadow-sm transition disabled:opacity-50 text-sm"
+                                    >
+                                      {t("acceptDelivery") || "Accept Delivery"}
+                                    </button>
+                                  )}
+                                  {(order.status === "Pending Completion" || order.status === "Out for Delivery") && selectedShop?.promptpayId && (
+                                    <button
+                                      onClick={() => setShowQrModal({ amount: order.totalAmount, promptpayId: selectedShop.promptpayId, promptpayName: selectedShop.promptpayName })}
+                                      className="text-brand-700 font-bold bg-brand-100 hover:bg-brand-200 border border-brand-300 px-4 py-2 rounded-md shadow-sm transition text-sm flex items-center justify-center gap-2"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
+                                      </svg>
+                                      {t("showPromptpayQr") || "Show PromptPay QR"}
+                                    </button>
+                                  )}
                                   <button
                                     onClick={() => handleChatWithCustomer(order.shopperEmail)}
                                     className="text-white font-medium text-xs bg-gray-900 hover:bg-gray-800 px-3 py-2 rounded transition shadow-sm"
@@ -1971,8 +2047,34 @@ export default function ShopOwnerDashboardClient({
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Shop Cover Image</label>
+              <div className="pt-4 border-t border-gray-200">
+                <h4 className="font-bold text-gray-900 mb-2">{t("promptpaySetup") || "PromptPay Details (Optional)"}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">{t("promptpayId") || "PromptPay ID"}</label>
+                    <input
+                      type="text"
+                      placeholder="0812345678"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={shopReviseData.promptpayId}
+                      onChange={(e) => setShopReviseData({ ...shopReviseData, promptpayId: e.target.value })}
+                    />
+                    <p className="text-[10px] text-gray-500 mt-1">{t("promptpaySecurityNote") || "Your ID is securely stored and encrypted in our database."}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">{t("promptpayName") || "Account Name"}</label>
+                    <input
+                      type="text"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                      value={shopReviseData.promptpayName}
+                      onChange={(e) => setShopReviseData({ ...shopReviseData, promptpayName: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Shop Cover Image</label>
                 <input
                   type="file"
                   accept="image/*"
