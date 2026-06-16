@@ -1400,8 +1400,8 @@ export default function ShopperDashboardClient({
               <div key={order.id} className="border border-gray-100 rounded-lg p-3 bg-gray-50 flex justify-between items-center opacity-75 hover:opacity-100 transition">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800">
-                      Completed
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${order.status === "Cancelled" ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}`}>
+                      {order.status === "Cancelled" ? (t("cancelled") || "Cancelled") : (t("completed") || "Completed")}
                     </span>
                     <span className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</span>
                   </div>
