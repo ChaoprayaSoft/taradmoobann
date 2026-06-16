@@ -22,6 +22,7 @@ export default async function ShopperDashboard() {
   let userMaxShopSlots: number = 1;
   let emailNotificationsEnabled: boolean = true;
   let pushNotificationsEnabled: boolean = true;
+  let shopNamesMap: Record<string, string> = {};
 
   try {
     const marketSnapshot = await adminDb.collection("markets").get();
@@ -82,6 +83,8 @@ export default async function ShopperDashboard() {
     });
     orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
+    rawAllShops.forEach(s => shopNamesMap[s.id] = s.name);
+
   } catch (error) {
     console.error("Error fetching data for Shopper Dashboard:", error);
   }
@@ -96,6 +99,7 @@ export default async function ShopperDashboard() {
       userMaxShopSlots={userMaxShopSlots}
       initialEmailNotificationsEnabled={emailNotificationsEnabled}
       initialPushNotificationsEnabled={pushNotificationsEnabled}
+      shopNamesMap={shopNamesMap}
     />
   );
 }

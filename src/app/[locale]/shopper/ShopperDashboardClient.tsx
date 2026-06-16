@@ -29,7 +29,8 @@ export default function ShopperDashboardClient({
   userCoins = 0,
   userMaxShopSlots = 0,
   initialEmailNotificationsEnabled = true,
-  initialPushNotificationsEnabled = true
+  initialPushNotificationsEnabled = true,
+  shopNamesMap
 }: {
   allMarkets: any[],
   initialShops?: any[],
@@ -38,7 +39,8 @@ export default function ShopperDashboardClient({
   userCoins?: number,
   userMaxShopSlots?: number,
   initialEmailNotificationsEnabled?: boolean,
-  initialPushNotificationsEnabled?: boolean
+  initialPushNotificationsEnabled?: boolean,
+  shopNamesMap?: Record<string, string>
 }) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -1494,7 +1496,7 @@ export default function ShopperDashboardClient({
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-1">Shop</p>
                 <p className="font-medium text-gray-900">
-                  {selectedOrderDetails.shopName || "Unknown Shop"}
+                  {selectedOrderDetails.shopName || (shopNamesMap ? shopNamesMap[selectedOrderDetails.shopId] : "Unknown Shop") || "Unknown Shop"}
                 </p>
               </div>
               <div className="mb-6">

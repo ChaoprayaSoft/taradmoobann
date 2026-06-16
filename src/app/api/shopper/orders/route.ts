@@ -95,12 +95,16 @@ export async function POST(req: Request) {
       // Calculate total
       const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+      const shopDoc = await adminDb.collection("shops").doc(shopId).get();
+      const shopName = shopDoc.exists ? (shopDoc.data()?.name || "Unknown Shop") : "Unknown Shop";
+
       // Create new document ref
       const orderRef = adminDb.collection("orders").doc();
       
       batch.set(orderRef, {
         id: orderRef.id,
         shopId,
+        shopName,
         shopperEmail,
         shopperName,
         deliveryAddress,
