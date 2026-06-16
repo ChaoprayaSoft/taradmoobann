@@ -152,7 +152,9 @@
     "monthlyMaintenanceNoteDesc3": "Active Store Discount: Reduced to 2 Coins per month for stores that meet the minimum required order threshold through the platform (>= 5 orders per month).",
     "monthlyMaintenanceNoteDesc4": "Store Deactivation: If your Coin balance reaches zero, your store and listings will be temporarily hidden from public view until the wallet is topped up.",
     "goToAddress": "Go to Address Section",
-    "chatWithShop": "Chat with Shop"
+    "chatWithShop": "Chat with Shop",
+    "cancelled": "Cancelled",
+    "completed": "Completed"
   },
   "ShopperWallet": {
     "myWallet": "My Wallet",
