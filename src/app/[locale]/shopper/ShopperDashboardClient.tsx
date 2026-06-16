@@ -737,22 +737,22 @@ export default function ShopperDashboardClient({
 
       {/* QUICK ACCESS BUTTONS */}
       <div className="flex flex-wrap items-center gap-3 mt-4 border-b border-gray-200 pb-4">
-        <a href="#my-messages" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
+        <a href="#my-messages" className="text-sm font-semibold text-pink-800 bg-pink-100 border border-transparent px-5 py-2.5 rounded-full hover:bg-pink-200 transition shadow-sm flex items-center gap-2">
           {t("myMessage")}
         </a>
-        <a href="#active-orders" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
+        <a href="#active-orders" className="text-sm font-semibold text-blue-800 bg-blue-100 border border-transparent px-5 py-2.5 rounded-full hover:bg-blue-200 transition shadow-sm flex items-center gap-2">
           {t("activeOrders")}
         </a>
-        <a href="#discover-markets" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
+        <a href="#discover-markets" className="text-sm font-semibold text-purple-800 bg-purple-100 border border-transparent px-5 py-2.5 rounded-full hover:bg-purple-200 transition shadow-sm flex items-center gap-2">
           {t("discoverMarkets")}
         </a>
-        <a href="#notification-settings" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
+        <a href="#notification-settings" className="text-sm font-semibold text-teal-800 bg-teal-100 border border-transparent px-5 py-2.5 rounded-full hover:bg-teal-200 transition shadow-sm flex items-center gap-2">
           {t("notifications")}
         </a>
         {shopRequests.length > 0 && (
-          <a href="#my-requests" className="text-sm font-medium text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 transition shadow-sm flex items-center gap-2">
+          <a href="#my-requests" className="text-sm font-semibold text-orange-800 bg-orange-100 border border-transparent px-5 py-2.5 rounded-full hover:bg-orange-200 transition shadow-sm flex items-center gap-2">
             {t("myRequests")}
-            <span className="bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full ml-1 font-bold">
+            <span className="bg-orange-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full ml-1 font-bold">
               {shopRequests.length}
             </span>
           </a>
