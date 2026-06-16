@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb, adminMessaging } from "@/lib/firebaseAdmin";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
+import { sendNotificationToUser } from "@/lib/sendNotification";
 
 export async function GET(req: Request) {
   try {
@@ -147,10 +148,8 @@ export async function POST(req: Request) {
 
     if (!chatDoc.exists) {
       // Must be a shopper initiating the first message since owner can only reply to existing
-      if (isShopOwner) {
-        return NextResponse.json({ error: "Cannot initiate chat as owner" }, { status: 400 });
-      }
-
+      // Allow either shopper or owner to initiate chat
+      
       await chatRef.set({
         shopId,
         shopOwnerEmail,
@@ -177,33 +176,19 @@ export async function POST(req: Request) {
       });
     }
 
-    // Send Push Notification
+    // Send Push & Email Notification
     try {
       const recipientEmail = isShopOwner ? targetShopperEmail : shopOwnerEmail;
-      const recipientDoc = await adminDb.collection("users").doc(recipientEmail).get();
-      const fcmToken = recipientDoc.data()?.fcmToken;
-
-      if (fcmToken) {
-        const senderName = isShopOwner ? shopDoc.data()?.name : session.user.name || "Shopper";
-        await adminMessaging.send({
-          token: fcmToken,
-          notification: {
-            title: `New message from ${senderName}`,
-            body: text,
-          },
-          data: {
-            shopId: shopId,
-            url: isShopOwner ? "/shopper" : "/shop-owner"
-          }
-        });
-      }
+      const senderName = isShopOwner ? shopDoc.data()?.name : session.user.name || "Shopper";
+      
+      await sendNotificationToUser(
+        recipientEmail,
+        { key: "Notifications.newChatMessageTitle", params: { sender: senderName } },
+        text, // send raw text as body
+        { url: isShopOwner ? "/shopper" : "/shop-owner", shopId }
+      );
     } catch (pushError: any) {
-      console.error("Failed to send push notification:", pushError);
-      try {
-        const fs = require('fs');
-        fs.writeFileSync('push-error.log', pushError.toString() + '\\n' + (pushError.stack || ''));
-      } catch(e){}
-      // Don't fail the request if push fails
+      console.error("Failed to send notification:", pushError);
     }
 
     return NextResponse.json({ success: true, message: newMessage });

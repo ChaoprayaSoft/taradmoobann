@@ -334,6 +334,21 @@ export default function ShopOwnerDashboardClient({
     }
   };
 
+  const handleChatWithCustomer = (shopperEmail: string) => {
+    const existingChat = customerChats.find(c => c.shopperEmail === shopperEmail);
+    if (existingChat) {
+      setSelectedChat(existingChat);
+    } else {
+      setSelectedChat({
+        id: `temp_${shopperEmail}`,
+        shopId: selectedShopId,
+        shopperEmail: shopperEmail,
+        messages: []
+      });
+    }
+    document.getElementById("customer-messages-section")?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const submitReply = async (reviewId: string) => {
     if (!replyInput[reviewId]) return;
     setReplyLoading(reviewId);
@@ -1322,12 +1337,20 @@ export default function ShopOwnerDashboardClient({
                                   <span className="font-semibold text-gray-700 text-xs">{t("houseNo") || "House No"}: <span className="font-bold text-brand-700">{houseNo}</span></span>
                                   <span className="font-bold text-gray-900 text-sm">฿{Number(order.totalAmount || 0).toFixed(2)}</span>
                                 </div>
-                                <button
-                                  onClick={() => setSelectedPastOrder(order)}
-                                  className="text-brand-600 hover:text-brand-800 font-medium text-xs bg-brand-50 hover:bg-brand-100 px-3 py-2 rounded transition shadow-sm border border-brand-100"
-                                >
-                                  {t("viewDetails") || "View Details"}
-                                </button>
+                                <div className="flex flex-col gap-2">
+                                  <button
+                                    onClick={() => setSelectedPastOrder(order)}
+                                    className="text-brand-600 hover:text-brand-800 font-medium text-xs bg-brand-50 hover:bg-brand-100 px-3 py-2 rounded transition shadow-sm border border-brand-100"
+                                  >
+                                    {t("viewDetails") || "View Details"}
+                                  </button>
+                                  <button
+                                    onClick={() => handleChatWithCustomer(order.shopperEmail)}
+                                    className="text-white font-medium text-xs bg-gray-900 hover:bg-gray-800 px-3 py-2 rounded transition shadow-sm"
+                                  >
+                                    {t("chatWithCustomer") || "Chat with Customer"}
+                                  </button>
+                                </div>
                               </div>
                             );
                           })()}
@@ -1509,7 +1532,7 @@ export default function ShopOwnerDashboardClient({
           </div>
 
           {/* CUSTOMER MESSAGES */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-6">
+          <div id="customer-messages-section" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-6 scroll-mt-6">
             <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
               {t("customerMessages")}
               {customerChats.some(c => c.unreadByShopOwner) && (

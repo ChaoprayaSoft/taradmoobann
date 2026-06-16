@@ -397,6 +397,21 @@ export default function ShopperDashboardClient({
     }
   };
 
+  const handleChatWithShop = (shopId: string, shopName: string) => {
+    const existingChat = myChats.find(c => c.shopId === shopId);
+    if (existingChat) {
+      setSelectedChat(existingChat);
+    } else {
+      setSelectedChat({
+        id: `temp_${shopId}`,
+        shopId: shopId,
+        shopName: shopName,
+        messages: []
+      });
+    }
+    document.getElementById("chats-section")?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const activeOrders = orders.filter(o => o.status !== "Completed" && o.status !== "Cancelled");
   const pastOrders = orders.filter(o => o.status === "Completed" || o.status === "Cancelled");
 
@@ -1177,8 +1192,8 @@ export default function ShopperDashboardClient({
         </div>
       )}
 
-      {/* MY MESSAGES */}
-      <div id="my-messages" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
+        {/* CHATS TAB / SECTION */}
+        <div id="chats-section" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 scroll-mt-6">
         <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-gray-900">
           {t("myMessage")}
           {myChats.some(c => c.unreadByShopper) && (
@@ -1320,6 +1335,12 @@ export default function ShopperDashboardClient({
                         className="bg-brand-50 text-brand-700 border border-brand-200 px-3 py-1.5 rounded-md text-xs font-medium hover:bg-brand-100 transition whitespace-nowrap"
                       >
                         {t("viewDetails") || "View Details"}
+                      </button>
+                      <button
+                        onClick={() => handleChatWithShop(order.shopId, shop?.name || "Shop")}
+                        className="bg-gray-900 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-gray-800 transition whitespace-nowrap"
+                      >
+                        {t("chatWithShop") || "Chat with Shop"}
                       </button>
                       {(order.status === "Pending Completion" || order.status === "Out for Delivery") && (
                         <button

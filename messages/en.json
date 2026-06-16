@@ -151,7 +151,8 @@
     "monthlyMaintenanceNoteDesc2": "Standard Rate: 5 Coins per month for stores with no successful orders in that period.",
     "monthlyMaintenanceNoteDesc3": "Active Store Discount: Reduced to 2 Coins per month for stores that meet the minimum required order threshold through the platform (>= 5 orders per month).",
     "monthlyMaintenanceNoteDesc4": "Store Deactivation: If your Coin balance reaches zero, your store and listings will be temporarily hidden from public view until the wallet is topped up.",
-    "goToAddress": "Go to Address Section"
+    "goToAddress": "Go to Address Section",
+    "chatWithShop": "Chat with Shop"
   },
   "ShopperWallet": {
     "myWallet": "My Wallet",
@@ -450,7 +451,8 @@
     "monthlyMaintenanceFee": "Monthly Maintenance: {fee} coins",
     "completedOrdersPeriod": "Completed Orders",
     "filteredTotalEarnings": "Total Earnings",
-    "feeDeductionNotice": "Monthly fee will be deducted from your coin balance within {days} days (on {date})."
+    "feeDeductionNotice": "Monthly fee will be deducted from your coin balance within {days} days (on {date}).",
+    "chatWithCustomer": "Chat with Customer"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "Market Owner Dashboard",
@@ -667,6 +669,7 @@
     "maintenanceFeeReminderTitle": "Maintenance Fee Reminder",
     "maintenanceFeeReminderBody": "Your monthly maintenance fee will be deducted in 7 days (on {date}).",
     "maintenanceFeeDeductedTitle": "Maintenance Fee Deducted",
-    "maintenanceFeeDeductedBody": "Your monthly maintenance fee of {fee} coins has been deducted."
+    "maintenanceFeeDeductedBody": "Your monthly maintenance fee of {fee} coins has been deducted.",
+    "newChatMessageTitle": "New message from {sender}"
   }
 }
