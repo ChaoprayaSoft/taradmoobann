@@ -1201,9 +1201,9 @@ export default function ShopperDashboardClient({
           )}
         </h2>
 
-        <div className="flex flex-col md:flex-row gap-6 border border-gray-200 rounded-lg overflow-hidden h-[600px] md:h-[500px]">
+        <div className="flex flex-col md:flex-row border border-gray-200 rounded-lg overflow-hidden h-[600px] md:h-[500px]">
           {/* Chat List */}
-          <div className={`w-full md:w-1/3 border-r border-gray-200 bg-gray-50 flex-col overflow-y-auto ${selectedChat ? 'hidden md:flex' : 'flex'}`}>
+          <div className={`w-full md:w-1/3 h-full border-b md:border-b-0 md:border-r border-gray-200 bg-gray-50 flex-col overflow-y-auto ${selectedChat ? 'hidden md:flex' : 'flex'}`}>
             {myChats.length === 0 ? (
               <p className="p-4 text-sm text-gray-500 text-center mt-10">{t("noMessages")}</p>
             ) : (
@@ -1238,7 +1238,7 @@ export default function ShopperDashboardClient({
           </div>
 
           {/* Chat View */}
-          <div className={`w-full md:w-2/3 bg-white flex-col relative ${!selectedChat ? 'hidden md:flex' : 'flex'}`}>
+          <div className={`w-full md:w-2/3 h-full bg-white flex-col relative ${!selectedChat ? 'hidden md:flex' : 'flex'}`}>
             {selectedChat ? (
               <>
                 <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10 flex items-center">
