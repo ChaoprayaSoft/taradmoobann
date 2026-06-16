@@ -458,7 +458,8 @@
     "promptpayName": "Account Name",
     "showPromptpayQr": "Show PromptPay QR",
     "promptpaySecurityNote": "Your ID is securely stored and encrypted in our database.",
-    "scanToPay": "Scan to Pay"
+    "scanToPay": "Scan to Pay",
+    "acceptDelivery": "Accept Delivery"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "Market Owner Dashboard",

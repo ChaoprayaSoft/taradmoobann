@@ -486,7 +486,8 @@
     "promptpayName": "ชื่อบัญชี",
     "showPromptpayQr": "แสดงคิวอาร์โค้ดพร้อมเพย์",
     "promptpaySecurityNote": "หมายเลขของคุณถูกจัดเก็บและเข้ารหัสอย่างปลอดภัยในฐานข้อมูลของเรา",
-    "scanToPay": "สแกนเพื่อชำระเงิน"
+    "scanToPay": "สแกนเพื่อชำระเงิน",
+    "acceptDelivery": "รับสินค้าสำเร็จ"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "แดชบอร์ดเจ้าของตลาด",

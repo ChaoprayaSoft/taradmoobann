@@ -767,13 +767,13 @@ export default function ShopOwnerDashboardClient({
 
   const actualMaxProductSlots = Math.max(selectedShop?.maxProductSlots || 1, selectedShopProducts.length);
 
-  return (
+return (
     <ErrorBoundary>
       {showQrModal && (
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
           <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full text-center">
             <h3 className="font-bold text-lg mb-4">{t("scanToPay")}</h3>
-            <div className="mx-auto bg-white p-2 rounded-lg border">
+            <div className="inline-block bg-white p-2 rounded-lg border">
               <QRCodeSVG 
                 value={generatePayload(showQrModal.promptpayId, { amount: showQrModal.amount })}
                 size={256}
