@@ -562,7 +562,8 @@
     "villageName": "ชื่อหมู่บ้าน",
     "houseNo": "บ้านเลขที่",
     "addressLine": "ที่อยู่",
-    "telephone": "เบอร์โทรศัพท์"
+    "telephone": "เบอร์โทรศัพท์",
+    "hidePhone": "ซ่อนเบอร์โทรศัพท์ของฉันจากเจ้าของร้าน"
   },
   "MarketShopping": {
     "allCategories": "ทุกหมวดหมู่",

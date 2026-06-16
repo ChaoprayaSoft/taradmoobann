@@ -15,6 +15,7 @@ export default function CheckoutClient({ userAddresses }: { userAddresses: strin
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [hidePhone, setHidePhone] = useState(false);
 
   const formatAddressForDisplay = (addrStr: string) => {
     try {
@@ -30,7 +31,11 @@ export default function CheckoutClient({ userAddresses }: { userAddresses: strin
     try {
       const parsed = JSON.parse(addrStr);
       if (parsed.villageName !== undefined) {
-        return `Village Name: ${parsed.villageName}\nHouse No.: ${parsed.houseNo}\nAddress: ${parsed.address}\nTelephone No.: ${parsed.telephone}`;
+        let addr = `Village Name: ${parsed.villageName}\nHouse No.: ${parsed.houseNo}\nAddress: ${parsed.address}`;
+        if (!hidePhone && parsed.telephone) {
+          addr += `\nTelephone No.: ${parsed.telephone}`;
+        }
+        return addr;
       }
     } catch(e) {}
     return addrStr;
@@ -155,6 +160,20 @@ export default function CheckoutClient({ userAddresses }: { userAddresses: strin
                     <span className="text-gray-800 whitespace-pre-wrap flex-1 leading-relaxed">{formatAddressForDisplay(addr)}</span>
                   </label>
                 ))}
+              </div>
+            )}
+            
+            {userAddresses.length > 0 && (
+              <div className="mt-4 border-t border-gray-100 pt-4">
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={hidePhone}
+                    onChange={(e) => setHidePhone(e.target.checked)}
+                    className="text-brand-600 rounded focus:ring-brand-500"
+                  />
+                  {t("hidePhone")}
+                </label>
               </div>
             )}
           </div>

@@ -534,7 +534,8 @@
     "villageName": "Village Name",
     "houseNo": "House No.",
     "addressLine": "Address",
-    "telephone": "Telephone No."
+    "telephone": "Telephone No.",
+    "hidePhone": "Hide my phone number from shop owner"
   },
   "MarketShopping": {
     "allCategories": "All Categories",
