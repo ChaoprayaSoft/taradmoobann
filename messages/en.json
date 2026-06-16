@@ -459,7 +459,14 @@
     "showPromptpayQr": "Show PromptPay QR",
     "promptpaySecurityNote": "Your ID is securely stored and encrypted in our database.",
     "scanToPay": "Scan to Pay",
-    "acceptDelivery": "Accept Delivery"
+    "acceptDelivery": "Accept Delivery",
+    "cancelOrder": "Cancel Order",
+    "cancelOrderModalTitle": "Cancel Order",
+    "cancelReasonPlaceholder": "Why are you cancelling this order?",
+    "submitCancel": "Confirm Cancellation",
+    "predefinedReason1": "Out of stock",
+    "predefinedReason2": "Cannot deliver right now",
+    "predefinedReason3": "Shop is closing"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "Market Owner Dashboard",
@@ -678,6 +685,8 @@
     "maintenanceFeeReminderBody": "Your monthly maintenance fee will be deducted in 7 days (on {date}).",
     "maintenanceFeeDeductedTitle": "Maintenance Fee Deducted",
     "maintenanceFeeDeductedBody": "Your monthly maintenance fee of {fee} coins has been deducted.",
-    "newChatMessageTitle": "New message from {sender}"
+    "newChatMessageTitle": "New message from {sender}",
+    "orderCancelledByShopTitle": "Order Cancelled by Shop",
+    "orderCancelledByShopBody": "Your order was cancelled by {shopName}. Reason: {cancelReason}"
   }
 }

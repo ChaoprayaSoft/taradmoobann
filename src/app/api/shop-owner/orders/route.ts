@@ -12,7 +12,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { orderId, status, declineCancel, declineReason } = await req.json();
+    const { orderId, status, declineCancel, declineReason, cancelReason } = await req.json();
 
     if (!orderId || (!status && !declineCancel)) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -61,8 +61,15 @@ export async function PUT(req: Request) {
     } else {
       updateData.status = status;
       if (status === "Cancelled") {
-        notificationKey = "Notifications.cancelAcceptedTitle";
-        notificationBodyKey = "Notifications.cancelAcceptedBody";
+        if (cancelReason) {
+          updateData.cancelReason = cancelReason;
+          notificationKey = "Notifications.orderCancelledByShopTitle";
+          notificationBodyKey = "Notifications.orderCancelledByShopBody";
+          notifParams.cancelReason = cancelReason;
+        } else {
+          notificationKey = "Notifications.cancelAcceptedTitle";
+          notificationBodyKey = "Notifications.cancelAcceptedBody";
+        }
       } else if (status === "Out for Delivery") {
         updateData.deliveryToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       }

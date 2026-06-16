@@ -171,6 +171,9 @@ export default function ShopOwnerDashboardClient({
   const [showCoffeeModal, setShowCoffeeModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState<{ amount: number, promptpayId: string, promptpayName: string } | null>(null);
 
+  const [shopCancelModalOrderId, setShopCancelModalOrderId] = useState<string | null>(null);
+  const [shopCancelReason, setShopCancelReason] = useState("");
+
   // Reviews State
   const [shopReviews, setShopReviews] = useState<any[]>([]);
   const [replyInput, setReplyInput] = useState<{ [key: string]: string }>({});
@@ -712,13 +715,13 @@ export default function ShopOwnerDashboardClient({
     }
   };
 
-  const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: string, cancelReason?: string) => {
     setUpdatingOrderId(orderId);
     try {
       const res = await fetch("/api/shop-owner/orders", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, status: newStatus }),
+        body: JSON.stringify({ orderId, status: newStatus, cancelReason }),
       });
       if (res.ok) {
         router.refresh();
@@ -1405,6 +1408,15 @@ return (
                                 className="w-full bg-purple-600 text-white font-medium py-2 rounded text-xs hover:bg-purple-700 transition disabled:opacity-50"
                               >
                                 {t("markOutForDelivery")}
+                              </button>
+                            )}
+                            {(order.status === "Pending" || order.status === "Preparing") && (
+                              <button
+                                disabled={updatingOrderId === order.id}
+                                onClick={() => setShopCancelModalOrderId(order.id)}
+                                className="w-full bg-red-50 text-red-600 border border-red-200 font-medium py-2 rounded text-xs hover:bg-red-100 transition disabled:opacity-50"
+                              >
+                                {t("cancelOrder") || "Cancel Order"}
                               </button>
                             )}
                             {order.status === "Cancel Requested" && (
@@ -2276,6 +2288,68 @@ return (
                   </div>
                 </form>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* SHOP OWNER CANCEL ORDER MODAL */}
+      {shopCancelModalOrderId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-900">{t("cancelOrderModalTitle") || "Cancel Order"}</h3>
+              <button onClick={() => { setShopCancelModalOrderId(null); setShopCancelReason(""); }} className="text-gray-400 hover:text-gray-600">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t("cancelReasonPlaceholder") || "Why are you cancelling this order?"}</label>
+              
+              {/* Predefined Reasons */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {[t("predefinedReason1") || "Out of stock", t("predefinedReason2") || "Cannot deliver right now", t("predefinedReason3") || "Shop is closing"].map((reason, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setShopCancelReason(reason)}
+                    className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition border border-gray-200"
+                  >
+                    {reason}
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                required
+                rows={3}
+                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 p-2 border"
+                placeholder={t("cancelReasonPlaceholder") || "Enter cancellation reason..."}
+                value={shopCancelReason}
+                onChange={(e) => setShopCancelReason(e.target.value)}
+              ></textarea>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => { setShopCancelModalOrderId(null); setShopCancelReason(""); }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
+              >
+                {t("close") || "Close"}
+              </button>
+              <button
+                type="button"
+                disabled={!shopCancelReason.trim() || updatingOrderId === shopCancelModalOrderId}
+                onClick={async () => {
+                  await handleUpdateOrderStatus(shopCancelModalOrderId, "Cancelled", shopCancelReason);
+                  setShopCancelModalOrderId(null);
+                  setShopCancelReason("");
+                }}
+                className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 transition disabled:opacity-50"
+              >
+                {updatingOrderId === shopCancelModalOrderId ? "..." : (t("submitCancel") || "Confirm Cancellation")}
+              </button>
             </div>
           </div>
         </div>

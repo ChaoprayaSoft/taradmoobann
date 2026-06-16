@@ -487,7 +487,14 @@
     "showPromptpayQr": "แสดงคิวอาร์โค้ดพร้อมเพย์",
     "promptpaySecurityNote": "หมายเลขของคุณถูกจัดเก็บและเข้ารหัสอย่างปลอดภัยในฐานข้อมูลของเรา",
     "scanToPay": "สแกนเพื่อชำระเงิน",
-    "acceptDelivery": "รับสินค้าสำเร็จ"
+    "acceptDelivery": "รับสินค้าสำเร็จ",
+    "cancelOrder": "ยกเลิกคำสั่งซื้อ",
+    "cancelOrderModalTitle": "ยกเลิกคำสั่งซื้อ",
+    "cancelReasonPlaceholder": "ทำไมคุณถึงยกเลิกคำสั่งซื้อนี้?",
+    "submitCancel": "ยืนยันการยกเลิก",
+    "predefinedReason1": "สินค้าหมด",
+    "predefinedReason2": "ไม่สามารถจัดส่งได้ในขณะนี้",
+    "predefinedReason3": "ร้านกำลังจะปิด"
   },
   "MarketOwnerDashboard": {
     "marketDashboard": "แดชบอร์ดเจ้าของตลาด",
@@ -679,6 +686,8 @@
     "maintenanceFeeReminderBody": "ค่าบำรุงรักษารายเดือนของคุณจะถูกหักภายใน 7 วัน (ในวันที่ {date})",
     "maintenanceFeeDeductedTitle": "หักค่าบำรุงรักษารายเดือนแล้ว",
     "maintenanceFeeDeductedBody": "ค่าบำรุงรักษารายเดือนของคุณจำนวน {fee} เหรียญถูกหักเรียบร้อยแล้ว",
-    "newChatMessageTitle": "ข้อความใหม่จาก {sender}"
+    "newChatMessageTitle": "ข้อความใหม่จาก {sender}",
+    "orderCancelledByShopTitle": "คำสั่งซื้อถูกยกเลิกโดยร้านค้า",
+    "orderCancelledByShopBody": "คำสั่งซื้อของคุณถูกยกเลิกโดย {shopName} เหตุผล: {cancelReason}"
   }
 }
