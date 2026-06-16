@@ -1494,10 +1494,7 @@ export default function ShopperDashboardClient({
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-1">Shop</p>
                 <p className="font-medium text-gray-900">
-                  {(() => {
-                    const shop = initialShops.find(s => s.id === selectedOrderDetails.shopId);
-                    return shop ? shop.name : "Unknown Shop";
-                  })()}
+                  {selectedOrderDetails.shopName || "Unknown Shop"}
                 </p>
               </div>
               <div className="mb-6">

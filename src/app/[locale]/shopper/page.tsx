@@ -28,8 +28,9 @@ export default async function ShopperDashboard() {
     allMarkets = marketSnapshot.docs.map(doc => doc.data());
     allMarkets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    const allShopsSnapshot = await adminDb.collection("shops").where("status", "==", "approved").get();
-    let allShops = allShopsSnapshot.docs.map(doc => doc.data());
+    const allShopsSnapshot = await adminDb.collection("shops").get();
+    const rawAllShops = allShopsSnapshot.docs.map(doc => doc.data());
+    let allShops = rawAllShops.filter(shop => shop.status === "approved");
 
     const usersSnapshot = await adminDb.collection("users").get();
     const userCoinsMap = new Map<string, number>();
@@ -72,6 +73,13 @@ export default async function ShopperDashboard() {
       .get();
       
     orders = orderSnapshot.docs.map(doc => doc.data());
+    orders = orders.map(o => {
+      const shop = rawAllShops.find(s => s.id === o.shopId);
+      return {
+        ...o,
+        shopName: o.shopName || (shop ? shop.name : "Unknown Shop")
+      };
+    });
     orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   } catch (error) {
