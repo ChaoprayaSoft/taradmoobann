@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { adminDb } from "@/lib/firebaseAdmin";
+import { decryptAddress } from "@/lib/encryption";
 import CheckoutClient from "./CheckoutClient";
 
 export default async function CheckoutPage() {
@@ -18,7 +19,7 @@ export default async function CheckoutPage() {
     const userProfileSnapshot = await adminDb.collection("users").doc(userEmail).get();
     if (userProfileSnapshot.exists) {
       const data = userProfileSnapshot.data();
-      userAddresses = data?.addresses || [];
+      userAddresses = (data?.addresses || []).map(decryptAddress);
       if (data?.address && userAddresses.length === 0) {
         userAddresses = [data.address]; 
       }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
+import { encryptAddress } from "@/lib/encryption";
 
 export async function POST(req: Request) {
   try {
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
 
     // Save to users collection using the email as document ID
     await adminDb.collection("users").doc(userEmail).set({
-      addresses: addresses.map(a => typeof a === "string" ? a.trim() : "").filter(a => a.length > 0),
+      addresses: addresses.map(a => typeof a === "string" ? a.trim() : "").filter(a => a.length > 0).map(encryptAddress),
       updatedAt: new Date().toISOString()
     }, { merge: true });
 

@@ -270,8 +270,35 @@ export default function ShopperDashboardClient({
       where("shopperEmail", "==", session.user.email)
     );
 
-    const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
-      const freshOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const unsubscribeOrders = onSnapshot(ordersQuery, async (snapshot) => {
+      let freshOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      
+      const encryptedAddresses = freshOrders
+        .filter(o => o.deliveryAddress?.startsWith("ENC:"))
+        .map(o => o.deliveryAddress);
+
+      if (encryptedAddresses.length > 0) {
+        try {
+          const res = await fetch('/api/decrypt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ encryptedData: encryptedAddresses })
+          });
+          const data = await res.json();
+          if (data.success && Array.isArray(data.decrypted)) {
+            let i = 0;
+            freshOrders = freshOrders.map(o => {
+              if (o.deliveryAddress?.startsWith("ENC:")) {
+                return { ...o, deliveryAddress: data.decrypted[i++] };
+              }
+              return o;
+            });
+          }
+        } catch (e) {
+          console.error("Failed to decrypt addresses in real-time listener", e);
+        }
+      }
+
       freshOrders.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setOrders(freshOrders);
     }, (error) => {
@@ -854,6 +881,12 @@ export default function ShopperDashboardClient({
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{t("myAddresses")}</h2>
             <p className="text-gray-500 text-sm mt-1">Set up to 3 delivery addresses for faster checkout within your markets.</p>
+            <div className="flex items-center gap-1 mt-2 text-xs text-green-700 bg-green-50 w-fit px-2 py-1 rounded-md border border-green-100">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Your addresses are securely encrypted in our database.</span>
+            </div>
           </div>
           {addressSaved && <span className="text-green-600 text-sm font-medium bg-green-50 px-3 py-1 rounded-full">{t("addressSaved")}</span>}
         </div>

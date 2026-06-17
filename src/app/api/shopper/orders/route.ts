@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
+import { encryptAddress } from "@/lib/encryption";
 import { sendNotificationToUser } from "@/lib/sendNotification";
 
 export async function POST(req: Request) {
@@ -107,7 +108,7 @@ export async function POST(req: Request) {
         shopName,
         shopperEmail,
         shopperName,
-        deliveryAddress,
+        deliveryAddress: encryptAddress(deliveryAddress),
         items,
         totalAmount,
         status: "Pending", // Statuses: Pending, Preparing, Out for Delivery, Completed

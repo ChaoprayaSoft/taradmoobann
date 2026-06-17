@@ -2,6 +2,7 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
+import { decryptAddress } from "@/lib/encryption";
 import AdsSection from "@/components/AdsSection";
 import Logo from "@/components/Logo";
 import HomePageMarketsClient from "./HomePageMarketsClient";
@@ -43,10 +44,15 @@ export default async function Home() {
     if (userEmail) {
       const userDoc = await adminDb.collection("users").doc(userEmail).get();
       if (userDoc.exists) {
-        const addresses = userDoc.data()?.addresses || [];
+        const addresses = (userDoc.data()?.addresses || []).map(decryptAddress);
         if (addresses.length > 0) {
-          const defaultAddr = addresses.find((a: any) => a.isDefault);
-          userVillageName = defaultAddr ? (defaultAddr.villageName || "") : (addresses[0].villageName || "");
+          try {
+            const parsedAddresses = addresses.map((a: string) => JSON.parse(a));
+            const defaultAddr = parsedAddresses.find((a: any) => a.isDefault);
+            userVillageName = defaultAddr ? (defaultAddr.villageName || "") : (parsedAddresses[0].villageName || "");
+          } catch (e) {
+            console.error("Failed to parse addresses on homepage");
+          }
         }
       }
 

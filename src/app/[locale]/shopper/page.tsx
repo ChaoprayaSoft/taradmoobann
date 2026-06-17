@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { adminDb } from "@/lib/firebaseAdmin";
+import { decryptAddress } from "@/lib/encryption";
 import ShopperDashboardClient from "./ShopperDashboardClient";
 
 export default async function ShopperDashboard() {
@@ -31,7 +32,7 @@ export default async function ShopperDashboard() {
 
     const allShopsSnapshot = await adminDb.collection("shops").get();
     const rawAllShops = allShopsSnapshot.docs.map(doc => doc.data());
-    let allShops = rawAllShops.filter(shop => shop.status === "approved");
+    allShops = rawAllShops.filter(shop => shop.status === "approved");
 
     const usersSnapshot = await adminDb.collection("users").get();
     const userCoinsMap = new Map<string, number>();
@@ -57,7 +58,7 @@ export default async function ShopperDashboard() {
     const userProfileSnapshot = await adminDb.collection("users").doc(userEmail).get();
     if (userProfileSnapshot.exists) {
       const data = userProfileSnapshot.data();
-      userAddresses = data?.addresses || [];
+      userAddresses = (data?.addresses || []).map(decryptAddress);
       if (data?.address && userAddresses.length === 0) {
         userAddresses = [data.address]; // Fallback for old single address format
       }
@@ -78,6 +79,7 @@ export default async function ShopperDashboard() {
       const shop = rawAllShops.find(s => s.id === o.shopId);
       return {
         ...o,
+        deliveryAddress: decryptAddress(o.deliveryAddress || ""),
         shopName: o.shopName || (shop ? shop.name : "Unknown Shop")
       };
     });

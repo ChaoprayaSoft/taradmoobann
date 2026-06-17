@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { adminDb } from "@/lib/firebaseAdmin";
+import { decryptAddress } from "@/lib/encryption";
 import ShopOwnerDashboardClient from "./ShopOwnerDashboardClient";
 
 export default async function ShopOwnerDashboard() {
@@ -70,7 +71,10 @@ export default async function ShopOwnerDashboard() {
         .where("shopId", "in", shopIds)
         .get();
         
-      orders = orderSnapshot.docs.map(serialize);
+      orders = orderSnapshot.docs.map(serialize).map(o => ({
+        ...o,
+        deliveryAddress: decryptAddress(o.deliveryAddress || "")
+      }));
       orders.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     }
 

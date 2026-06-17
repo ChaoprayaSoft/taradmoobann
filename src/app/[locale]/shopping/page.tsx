@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { adminDb } from "@/lib/firebaseAdmin";
+import { decryptAddress } from "@/lib/encryption";
 import ShoppingClient from "./ShoppingClient";
 
 export default async function ShoppingPage() {
@@ -19,7 +20,7 @@ export default async function ShoppingPage() {
   if (userEmail) {
     const userDoc = await adminDb.collection("users").doc(userEmail).get();
     if (userDoc.exists) {
-      const addresses = userDoc.data()?.addresses || [];
+      const addresses = (userDoc.data()?.addresses || []).map(decryptAddress);
       if (addresses.length > 0) {
         try {
           const firstAddr = JSON.parse(addresses[0]);

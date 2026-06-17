@@ -225,8 +225,35 @@ export default function ShopOwnerDashboardClient({
 
     // Real-time Orders Listener
     const ordersQ = query(collection(db, "orders"), where("shopId", "==", selectedShopId));
-    const unsubOrders = onSnapshot(ordersQ, (snap) => {
-      const freshOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const unsubOrders = onSnapshot(ordersQ, async (snap) => {
+      let freshOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+
+      const encryptedAddresses = freshOrders
+        .filter(o => o.deliveryAddress?.startsWith("ENC:"))
+        .map(o => o.deliveryAddress);
+
+      if (encryptedAddresses.length > 0) {
+        try {
+          const res = await fetch('/api/decrypt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ encryptedData: encryptedAddresses })
+          });
+          const data = await res.json();
+          if (data.success && Array.isArray(data.decrypted)) {
+            let i = 0;
+            freshOrders = freshOrders.map(o => {
+              if (o.deliveryAddress?.startsWith("ENC:")) {
+                return { ...o, deliveryAddress: data.decrypted[i++] };
+              }
+              return o;
+            });
+          }
+        } catch (e) {
+          console.error("Failed to decrypt addresses in real-time listener", e);
+        }
+      }
+
       freshOrders.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setOrders(freshOrders);
     });
