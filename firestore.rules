@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ========================================================================
+    // CRITICAL SECURITY FIX: DENY ALL CLIENT-SIDE WRITES
+    // ========================================================================
+    // Hackers can no longer use the browser console to modify their coins, 
+    // orders, or shop statuses. 
+    // 
+    // Note: The legitimate app will still work perfectly because all writes 
+    // (topping up coins, placing orders, adding addresses) are handled safely 
+    // on the Next.js server via API Routes using the Firebase Admin SDK, 
+    // which automatically bypasses these rules.
+    match /{document=**} {
+      allow write: if false;
+    }
+
+    // ========================================================================
+    // PUBLIC READS (Safe for anyone browsing the marketplace)
+    // ========================================================================
+    match /markets/{document} {
+      allow read: if true;
+    }
+    match /shops/{document} {
+      allow read: if true;
+    }
+    match /products/{document} {
+      allow read: if true;
+    }
+    match /reviews/{document} {
+      allow read: if true;
+    }
+    match /ads/{document} {
+      allow read: if true;
+    }
+
+    // ========================================================================
+    // PRIVATE READS (Securing sensitive data)
+    // ========================================================================
+    
+    // Users Collection (Contains coins, addresses, etc.)
+    // Only allow a user to read their own document via real-time listeners.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.token.email == userId;
+    }
+
+    // Orders & Chats 
+    // Because the Shop Owner dashboard queries orders by `shopId` (and not by email),
+    // we must allow authenticated users to read. This is necessary to prevent breaking
+    // the real-time listeners (onSnapshot) for Shop Owners. 
+    // While reads are broad, WRITES are completely disabled, meaning hackers cannot 
+    // modify anything here.
+    match /orders/{document} {
+      allow read: if request.auth != null;
+    }
+    match /shop_chats/{document} {
+      allow read: if request.auth != null;
+    }
+    match /chat_messages/{document} {
+      allow read: if request.auth != null;
+    }
+    match /market_memberships/{document} {
+      allow read: if request.auth != null;
+    }
+  }
+}
