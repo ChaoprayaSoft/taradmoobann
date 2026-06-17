@@ -10,6 +10,7 @@ import { Coins, Coffee } from "lucide-react";
 import BuyCoffeeModal from "@/components/BuyCoffeeModal";
 import { useTranslations } from "next-intl";
 import TermsModal from "@/components/TermsModal";
+const generatePayload = require("promptpay-qr");
 
 const CATEGORIES = [
   "Food & Beverage",
@@ -256,6 +257,28 @@ export default function ShopperDashboardClient({
   const [chatLoading, setChatLoading] = useState(false);
   const [chatToDelete, setChatToDelete] = useState<{ chatId: string, shopId: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // PromptPay Modal
+  const [showQrModal, setShowQrModal] = useState<{ amount: number, promptpayId: string, promptpayName: string } | null>(null);
+  const [qrLoading, setQrLoading] = useState<string | null>(null);
+
+  const fetchAndShowPromptpay = async (shopId: string, amount: number) => {
+    setQrLoading(shopId);
+    try {
+      const res = await fetch(`/api/shopper/shops/promptpay?shopId=${shopId}`);
+      const data = await res.json();
+      if (data.success && data.promptpayId) {
+        setShowQrModal({ amount, promptpayId: data.promptpayId, promptpayName: data.promptpayName });
+      } else {
+        alert(data.error || "This shop has not configured PromptPay.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to load PromptPay details.");
+    } finally {
+      setQrLoading(null);
+    }
+  };
 
   const [shopRequests, setShopRequests] = useState<any[]>(
     initialShops ? initialShops.filter(s => s.ownerEmail === session?.user?.email && s.status !== "approved") : []
@@ -1378,6 +1401,15 @@ export default function ShopperDashboardClient({
                       >
                         {t("chatWithShop") || "Chat with Shop"}
                       </button>
+                      {(order.status === "Pending Completion" || order.status === "Out for Delivery") && (
+                        <button
+                          disabled={qrLoading === order.shopId}
+                          onClick={() => fetchAndShowPromptpay(order.shopId, order.totalAmount)}
+                          className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition disabled:opacity-50"
+                        >
+                          {qrLoading === order.shopId ? "Loading..." : (t("showPromptpayQr") || "Show PromptPay QR")}
+                        </button>
+                      )}
                       {(order.status === "Pending Completion" || order.status === "Out for Delivery") && (
                         <button
                           disabled={completingOrderId === order.id}
