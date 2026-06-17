@@ -4,11 +4,38 @@ import * as admin from "firebase-admin";
 
 export async function POST(req: Request) {
   try {
-    const event = await req.json();
+    const incomingEvent = await req.json();
+
+    const eventId = incomingEvent.id;
+    if (!eventId || !eventId.startsWith('evnt_')) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
+
+    const omiseSecretKey = process.env.OMISE_SECRET_KEY;
+    if (!omiseSecretKey) {
+      console.error("OMISE_SECRET_KEY is missing");
+      return NextResponse.json({ error: "Server Configuration Error" }, { status: 500 });
+    }
+
+    // Verify the event directly with Omise
+    const authHeader = `Basic ${Buffer.from(`${omiseSecretKey}:`).toString('base64')}`;
+    const response = await fetch(`https://api.omise.co/events/${eventId}`, {
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      console.error("Omise webhook verification failed", response.status);
+      return NextResponse.json({ error: "Unauthorized webhook" }, { status: 401 });
+    }
+
+    const verifiedEvent = await response.json();
 
     // Verify event is charge.complete
-    if (event.key === "charge.complete") {
-      const charge = event.data;
+    if (verifiedEvent.key === "charge.complete") {
+      const charge = verifiedEvent.data;
       
       // We only care if it's successful
       if (charge.status === "successful") {
