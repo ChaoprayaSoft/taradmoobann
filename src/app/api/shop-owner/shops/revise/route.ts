@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
+import { encryptAddress } from "@/lib/encryption";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { sendNotificationToUser } from "@/lib/sendNotification";
 
@@ -51,7 +52,7 @@ export async function PUT(req: Request) {
     if (houseNumber !== undefined) updateData.houseNumber = houseNumber;
     if (location !== undefined) updateData.location = location;
     if (coverImage !== undefined) updateData.coverImage = coverImage;
-    if (promptpayId !== undefined) updateData.promptpayId = promptpayId;
+    if (promptpayId !== undefined) updateData.promptpayId = encryptAddress(promptpayId);
     if (promptpayName !== undefined) updateData.promptpayName = promptpayName;
 
     await shopRef.update(updateData);

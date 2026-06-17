@@ -31,7 +31,11 @@ export default async function ShopOwnerDashboard() {
       .get();
     const serialize = (doc: any) => {
       const data = doc.data();
-      return JSON.parse(JSON.stringify({ id: doc.id, ...data }));
+      const s = JSON.parse(JSON.stringify({ id: doc.id, ...data }));
+      if (s.promptpayId) {
+        s.promptpayId = decryptAddress(s.promptpayId);
+      }
+      return s;
     };
       
     ownedShops = shopSnapshot.docs.map(serialize);

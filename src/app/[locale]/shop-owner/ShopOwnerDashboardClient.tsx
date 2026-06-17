@@ -196,8 +196,35 @@ export default function ShopOwnerDashboardClient({
 
     // Real-time Shops Listener
     const shopsQ = query(collection(db, "shops"), where("ownerEmail", "==", userEmail));
-    const unsubShops = onSnapshot(shopsQ, (snap) => {
-      const freshShops = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const unsubShops = onSnapshot(shopsQ, async (snap) => {
+      let freshShops = snap.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+
+      const encryptedIds = freshShops
+        .filter(s => s.promptpayId?.startsWith("ENC:"))
+        .map(s => s.promptpayId);
+
+      if (encryptedIds.length > 0) {
+        try {
+          const res = await fetch('/api/decrypt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ encryptedData: encryptedIds })
+          });
+          const data = await res.json();
+          if (data.success && Array.isArray(data.decrypted)) {
+            let i = 0;
+            freshShops = freshShops.map(s => {
+              if (s.promptpayId?.startsWith("ENC:")) {
+                return { ...s, promptpayId: data.decrypted[i++] };
+              }
+              return s;
+            });
+          }
+        } catch (e) {
+          console.error("Failed to decrypt promptpay in real-time listener", e);
+        }
+      }
+
       freshShops.sort((a: any, b: any) => {
         if (a.status === "approved" && b.status !== "approved") return -1;
         if (a.status !== "approved" && b.status === "approved") return 1;
