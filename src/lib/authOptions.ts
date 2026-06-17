@@ -45,6 +45,19 @@ export const authOptions: AuthOptions = {
             return false; // Blocks login
           }
         }
+        
+        // Log the successful login
+        try {
+          await adminDb.collection("activity_logs").add({
+            userEmail: user.email,
+            action: "LOGIN",
+            details: "User logged in via Google",
+            timestamp: new Date().toISOString()
+          });
+        } catch (logErr) {
+          console.error("Failed to write login activity log:", logErr);
+        }
+
       } catch (error) {
         console.error("Error in NextAuth signIn callback:", error);
       }

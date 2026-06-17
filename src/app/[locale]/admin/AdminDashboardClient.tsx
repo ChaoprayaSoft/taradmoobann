@@ -120,6 +120,11 @@ export default function AdminDashboardClient({
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [shopToDelete, setShopToDelete] = useState<string | null>(null);
 
+  // Activity Logs State
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsMetrics, setLogsMetrics] = useState({ todayLogins: 0, uniqueUsersToday: 0, topPage: "None" });
+
   const derivedUsers = useMemo(() => {
     return (usersList || []).map(u => {
       let villageName = "";
@@ -198,6 +203,30 @@ export default function AdminDashboardClient({
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [selectedChat?.messages]);
+
+  useEffect(() => {
+    if (activeTab === "logs" as any && activityLogs.length === 0) {
+      fetchLogs();
+    }
+  }, [activeTab]);
+
+  const fetchLogs = async () => {
+    setLogsLoading(true);
+    try {
+      const res = await fetch("/api/admin/logs?limit=200");
+      const data = await res.json();
+      if (data.success) {
+        setActivityLogs(data.logs || []);
+        if (data.metrics) {
+          setLogsMetrics(data.metrics);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch logs", e);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
 
   const fetchChats = async () => {
     try {
@@ -629,6 +658,12 @@ export default function AdminDashboardClient({
             className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "terms" ? "bg-white text-purple-700 shadow-sm border border-purple-200" : "text-purple-600 hover:bg-white/50 hover:text-purple-900 border border-transparent"}`}
           >
             {t("termsOfUse") || "Terms of Use"}
+          </button>
+          <button
+            onClick={() => setActiveTab("logs" as any)}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "logs" as any ? "bg-white text-purple-700 shadow-sm border border-purple-200" : "text-purple-600 hover:bg-white/50 hover:text-purple-900 border border-transparent"}`}
+          >
+            {t("activityLogs") || "Activity Logs"}
           </button>
         </nav>
       </div>
@@ -1736,6 +1771,82 @@ export default function AdminDashboardClient({
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ACTIVITY LOGS TAB */}
+      {activeTab === "logs" as any && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center">
+              <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-2">Today's Logins</p>
+              <p className="text-4xl font-bold text-gray-900">{logsMetrics.todayLogins}</p>
+            </div>
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center">
+              <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-2">Unique Users Today</p>
+              <p className="text-4xl font-bold text-brand-600">{logsMetrics.uniqueUsersToday}</p>
+            </div>
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center text-center">
+              <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-2">Top Page Visited</p>
+              <p className="text-xl font-bold text-gray-900 break-all">{logsMetrics.topPage}</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-lg font-medium">Recent Activity Logs</h3>
+              <button 
+                onClick={fetchLogs}
+                disabled={logsLoading}
+                className="bg-brand-50 border border-brand-200 text-brand-700 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-brand-100 transition disabled:opacity-50"
+              >
+                {logsLoading ? "Refreshing..." : "Refresh"}
+              </button>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {logsLoading && activityLogs.length === 0 ? (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">Loading logs...</td></tr>
+                  ) : activityLogs.length === 0 ? (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No activity logs found.</td></tr>
+                  ) : (
+                    activityLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {log.userEmail}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            log.action === 'LOGIN' ? 'bg-green-100 text-green-800' :
+                            log.action === 'LOGOUT' ? 'bg-red-100 text-red-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {log.action}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                          {log.details}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

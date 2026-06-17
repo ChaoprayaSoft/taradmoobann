@@ -43,6 +43,19 @@ export default function LoginButton() {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/logger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: "LOGOUT", details: "User logged out manually" })
+      });
+    } catch (e) {
+      console.error("Failed to log logout", e);
+    }
+    signOut();
+  };
+
   if (status === "loading") {
     return <span className="text-gray-400 text-sm">Loading...</span>;
   }
@@ -137,7 +150,7 @@ export default function LoginButton() {
             </button>
           </div>
           <button
-            onClick={() => signOut()}
+            onClick={() => handleSignOut()}
             className="text-sm text-red-600 hover:text-red-700 font-medium hidden sm:block"
           >
             {t('signOut')}
@@ -183,7 +196,7 @@ export default function LoginButton() {
                 {navLinks}
               </div>
               <button
-                onClick={() => { signOut(); setIsMobileMenuOpen(false); }}
+                onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }}
                 className="text-left text-sm text-red-600 hover:text-red-700 font-medium py-2 mt-2 border-t border-gray-100 sm:hidden"
               >
                 {t('signOut')}

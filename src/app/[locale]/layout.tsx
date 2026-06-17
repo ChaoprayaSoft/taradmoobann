@@ -13,6 +13,7 @@ import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import ActivityTracker from "@/components/ActivityTracker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -65,6 +66,7 @@ export default async function RootLayout({
               <NotificationPrompt />
               <WelcomeModal />
               <ScrollToTopButton />
+              <ActivityTracker />
             </div>
           </Providers>
         </NextIntlClientProvider>

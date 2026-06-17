@@ -142,6 +142,22 @@ export async function GET(req: Request) {
       }
     }
 
+    // --- Activity Log Cleanup (Older than 90 days) ---
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+    const oldLogsSnapshot = await adminDb
+      .collection("activity_logs")
+      .where("timestamp", "<", admin.firestore.Timestamp.fromDate(ninetyDaysAgo))
+      .limit(500) // Delete in batches to avoid timeout
+      .get();
+
+    for (const doc of oldLogsSnapshot.docs) {
+      batch.delete(doc.ref);
+      updatesCount++;
+    }
+    // ------------------------------------------------
+
     if (updatesCount > 0) {
       // Commit all batch operations
       await batch.commit();
