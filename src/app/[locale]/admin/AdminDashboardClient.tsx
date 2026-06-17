@@ -124,6 +124,29 @@ export default function AdminDashboardClient({
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsMetrics, setLogsMetrics] = useState({ todayLogins: 0, uniqueUsersToday: 0, topPage: "None" });
+  const [logsSearchQuery, setLogsSearchQuery] = useState("");
+  const [logsFilterAction, setLogsFilterAction] = useState("");
+
+  const filteredLogs = useMemo(() => {
+    return activityLogs.filter(log => {
+      let matches = true;
+      if (logsFilterAction && log.action !== logsFilterAction) matches = false;
+      if (logsSearchQuery) {
+        const q = logsSearchQuery.toLowerCase();
+        if (!log.userEmail?.toLowerCase().includes(q) && 
+            !log.action?.toLowerCase().includes(q) && 
+            !log.details?.toLowerCase().includes(q)) {
+          matches = false;
+        }
+      }
+      return matches;
+    });
+  }, [activityLogs, logsFilterAction, logsSearchQuery]);
+
+  const uniqueLogActions = useMemo(() => {
+    const set = new Set(activityLogs.map(l => l.action).filter(Boolean));
+    return Array.from(set);
+  }, [activityLogs]);
 
   const derivedUsers = useMemo(() => {
     return (usersList || []).map(u => {
@@ -1794,15 +1817,34 @@ export default function AdminDashboardClient({
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-medium">Recent Activity Logs</h3>
-              <button 
-                onClick={fetchLogs}
-                disabled={logsLoading}
-                className="bg-brand-50 border border-brand-200 text-brand-700 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-brand-100 transition disabled:opacity-50"
-              >
-                {logsLoading ? "Refreshing..." : "Refresh"}
-              </button>
+            <div className="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <h3 className="text-lg font-medium">{t("activityLogs") || "Activity Logs"}</h3>
+              <div className="flex flex-col md:flex-row gap-3 items-center">
+                <input
+                  type="text"
+                  placeholder={t("searchLogsPlaceholder") || "Search email, action..."}
+                  className="w-full md:w-64 border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
+                  value={logsSearchQuery}
+                  onChange={(e) => setLogsSearchQuery(e.target.value)}
+                />
+                <select
+                  className="w-full md:w-auto border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
+                  value={logsFilterAction}
+                  onChange={(e) => setLogsFilterAction(e.target.value)}
+                >
+                  <option value="">{t("allActions") || "All Actions"}</option>
+                  {uniqueLogActions.map((action: string) => (
+                    <option key={action} value={action}>{action}</option>
+                  ))}
+                </select>
+                <button 
+                  onClick={fetchLogs}
+                  disabled={logsLoading}
+                  className="w-full md:w-auto bg-brand-50 border border-brand-200 text-brand-700 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-brand-100 transition disabled:opacity-50"
+                >
+                  {logsLoading ? "Refreshing..." : "Refresh"}
+                </button>
+              </div>
             </div>
             
             <div className="overflow-x-auto">
@@ -1816,12 +1858,12 @@ export default function AdminDashboardClient({
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {logsLoading && activityLogs.length === 0 ? (
+                  {logsLoading && filteredLogs.length === 0 ? (
                     <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">Loading logs...</td></tr>
-                  ) : activityLogs.length === 0 ? (
+                  ) : filteredLogs.length === 0 ? (
                     <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No activity logs found.</td></tr>
                   ) : (
-                    activityLogs.map((log) => (
+                    filteredLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(log.timestamp).toLocaleString()}
