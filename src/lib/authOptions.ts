@@ -1,6 +1,7 @@
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { adminDb } from "@/lib/firebaseAdmin";
+import * as admin from "firebase-admin";
 
 export const authOptions: AuthOptions = {
   session: {
@@ -52,7 +53,7 @@ export const authOptions: AuthOptions = {
             userEmail: user.email,
             action: "LOGIN",
             details: "User logged in via Google",
-            timestamp: new Date().toISOString()
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
           });
         } catch (logErr) {
           console.error("Failed to write login activity log:", logErr);

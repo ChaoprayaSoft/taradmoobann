@@ -31,7 +31,7 @@ export async function GET(req: Request) {
         userEmail: data.userEmail,
         action: data.action,
         details: data.details,
-        timestamp: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
+        timestamp: data.timestamp ? (typeof data.timestamp.toDate === 'function' ? data.timestamp.toDate().toISOString() : new Date(data.timestamp).toISOString()) : new Date().toISOString()
       };
     });
 
