@@ -4,11 +4,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { storage } from "@/lib/firebase";
 import { useTranslations } from "next-intl";
-import dynamic from "next/dynamic";
-import "react-quill/dist/quill.snow.css";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import TipTapEditor from "@/components/TipTapEditor";
 
 export default function AdminDashboardClient({ 
   initialMarkets,
@@ -1790,8 +1787,7 @@ export default function AdminDashboardClient({
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">English Terms</label>
                     <div className="border border-gray-300 rounded-md bg-white">
-                      <ReactQuill 
-                        theme="snow" 
+                      <TipTapEditor 
                         value={termsContent} 
                         onChange={setTermsContent} 
                         className="h-[300px] mb-12"
@@ -1802,8 +1798,7 @@ export default function AdminDashboardClient({
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Thai Terms (ข้อกำหนดการใช้งาน)</label>
                     <div className="border border-gray-300 rounded-md bg-white">
-                      <ReactQuill 
-                        theme="snow" 
+                      <TipTapEditor 
                         value={termsContentTh} 
                         onChange={setTermsContentTh} 
                         className="h-[300px] mb-12"

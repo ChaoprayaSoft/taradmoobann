@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useTranslations, useLocale } from "next-intl";
-import "react-quill/dist/quill.snow.css";
 
 interface TermsModalProps {
   isOpen: boolean;
@@ -72,7 +71,7 @@ export default function TermsModal({ isOpen, onClose }: TermsModalProps) {
             </div>
           ) : (
             <div 
-              className="prose prose-sm sm:prose-base max-w-none text-gray-700 ql-editor"
+              className="prose prose-sm sm:prose-base max-w-none text-gray-700"
               dangerouslySetInnerHTML={{ __html: content }}
             />
           )}
