@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { adminDb } from "@/lib/firebaseAdmin";
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,8 +74,8 @@ export async function GET(req: Request) {
       
       const countSnapshot = await adminDb
         .collection("activity_logs")
-        .where("timestamp", ">=", admin.firestore.Timestamp.fromDate(startOfMonth))
-        .where("timestamp", "<=", admin.firestore.Timestamp.fromDate(endOfMonth))
+        .where("timestamp", ">=", Timestamp.fromDate(startOfMonth))
+        .where("timestamp", "<=", Timestamp.fromDate(endOfMonth))
         .count()
         .get();
 

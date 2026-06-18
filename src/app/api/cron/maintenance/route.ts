@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { sendNotificationToUser } from "@/lib/sendNotification";
 
 export const dynamic = 'force-dynamic';
@@ -148,7 +148,7 @@ export async function GET(req: Request) {
 
     const oldLogsSnapshot = await adminDb
       .collection("activity_logs")
-      .where("timestamp", "<", admin.firestore.Timestamp.fromDate(ninetyDaysAgo))
+      .where("timestamp", "<", Timestamp.fromDate(ninetyDaysAgo))
       .limit(500) // Delete in batches to avoid timeout
       .get();
 
