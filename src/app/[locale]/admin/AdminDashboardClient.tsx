@@ -228,7 +228,7 @@ export default function AdminDashboardClient({
   }, [selectedChat?.messages]);
 
   useEffect(() => {
-    if (activeTab === "logs" as any && activityLogs.length === 0) {
+    if (activeTab === "logs" as any) {
       fetchLogs();
     }
   }, [activeTab]);
