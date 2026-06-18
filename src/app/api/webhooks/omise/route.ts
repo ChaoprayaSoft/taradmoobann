@@ -40,7 +40,9 @@ export async function POST(req: Request) {
       // We only care if it's successful
       if (charge.status === "successful") {
         const userId = charge.metadata?.userId;
-        const coinsToAdd = charge.metadata?.coins;
+        // Use the verified charge.amount (in satang) as the source of truth,
+        // NOT the client-supplied metadata value.
+        const coinsToAdd = Math.floor(charge.amount / 100);
 
         if (userId && coinsToAdd) {
           const userRef = adminDb.collection("users").doc(userId);
