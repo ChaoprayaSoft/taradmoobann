@@ -124,7 +124,7 @@ export default function AdminDashboardClient({
   // Activity Logs State
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
-  const [logsMetrics, setLogsMetrics] = useState({ todayLogins: 0, uniqueUsersToday: 0, topPage: "None" });
+  const [logsMetrics, setLogsMetrics] = useState<any>({ todayLogins: 0, uniqueUsersToday: 0, topPages: [] });
   const [monthlyActivityData, setMonthlyActivityData] = useState<any[]>([]);
   const [logsSearchQuery, setLogsSearchQuery] = useState("");
   const [logsFilterAction, setLogsFilterAction] = useState("");
@@ -1820,7 +1820,7 @@ export default function AdminDashboardClient({
       {/* ACTIVITY LOGS TAB */}
       {activeTab === "logs" as any && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center">
               <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-2">Today's Logins</p>
               <p className="text-4xl font-bold text-gray-900">{logsMetrics.todayLogins}</p>
@@ -1829,9 +1829,20 @@ export default function AdminDashboardClient({
               <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-2">Unique Users Today</p>
               <p className="text-4xl font-bold text-brand-600">{logsMetrics.uniqueUsersToday}</p>
             </div>
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center text-center">
-              <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-2">Top Page Visited</p>
-              <p className="text-xl font-bold text-gray-900 break-all">{logsMetrics.topPage}</p>
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center text-center md:col-span-2">
+              <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-4">Top 5 Visited Pages Today</p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {logsMetrics.topPages && logsMetrics.topPages.length > 0 ? (
+                  logsMetrics.topPages.map((item: any, idx: number) => (
+                    <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 flex items-center gap-3">
+                      <span className="text-sm font-medium text-gray-900 break-all">{item.page}</span>
+                      <span className="bg-brand-100 text-brand-700 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">{item.count} visits</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-sm">No page visits recorded today</p>
+                )}
+              </div>
             </div>
           </div>
 

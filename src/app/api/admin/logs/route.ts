@@ -60,15 +60,11 @@ export async function GET(req: Request) {
       }
     });
 
-    // Find top visited page
-    let topPage = "None";
-    let maxVisits = 0;
-    for (const [page, count] of Object.entries(pageVisitsToday)) {
-      if (count > maxVisits) {
-        maxVisits = count;
-        topPage = page;
-      }
-    }
+    // Find top 5 visited pages
+    const sortedPages = Object.entries(pageVisitsToday)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([page, count]) => ({ page, count }));
 
     // Calculate monthly activity for the current year
     const currentYear = new Date().getFullYear();
@@ -98,7 +94,7 @@ export async function GET(req: Request) {
       metrics: {
         todayLogins,
         uniqueUsersToday: uniqueUsersToday.size,
-        topPage: `${topPage} (${maxVisits})`
+        topPages: sortedPages
       },
       monthlyData
     });
