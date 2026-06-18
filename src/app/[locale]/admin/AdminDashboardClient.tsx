@@ -988,7 +988,7 @@ export default function AdminDashboardClient({
           </div>
         </div>
 
-        <h3 className="text-lg font-medium mb-4 border-b border-gray-200 pb-2">{t("globalTransactionList")} ({orders.length})</h3>
+        <h3 className="text-lg font-medium mb-4 border-b border-gray-200 pb-2">{t("globalTransactionList")} ({completedOrders.length})</h3>
         {completedOrders.length === 0 ? (
           <p className="text-gray-500 text-sm">{t("noCompletedTransactions")}</p>
         ) : (
