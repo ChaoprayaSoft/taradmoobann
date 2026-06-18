@@ -100,7 +100,7 @@ export async function POST(req: Request) {
         recipients.push(chatEmail);
       } else {
         const adminsSnapshot = await adminDb.collection("users").where("roles", "array-contains", "admin").get();
-        adminsSnapshot.docs.forEach(doc => recipients.push(doc.id));
+        adminsSnapshot.docs.forEach((doc: any) => recipients.push(doc.id));
       }
 
       const senderName = isAdmin ? "Admin" : session.user.name || "User";

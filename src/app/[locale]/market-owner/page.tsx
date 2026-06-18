@@ -25,7 +25,7 @@ export default async function MarketOwnerDashboard() {
       .where("ownerEmail", "==", userEmail)
       .get();
       
-    markets = marketSnapshot.docs.map(doc => doc.data());
+    markets = marketSnapshot.docs.map((doc: any) => doc.data());
 
     if (markets.length > 0) {
       const marketIds = markets.map(m => m.id);
@@ -35,7 +35,7 @@ export default async function MarketOwnerDashboard() {
         .where("marketId", "in", marketIds)
         .get();
         
-      shops = shopSnapshot.docs.map(doc => doc.data());
+      shops = shopSnapshot.docs.map((doc: any) => doc.data());
       shops.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
       const membershipSnapshot = await adminDb
@@ -43,7 +43,7 @@ export default async function MarketOwnerDashboard() {
         .where("marketId", "in", marketIds)
         .get();
       
-      memberships = membershipSnapshot.docs.map(doc => doc.data());
+      memberships = membershipSnapshot.docs.map((doc: any) => doc.data());
       memberships.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
   } catch (error) {

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { adminDb } from "@/lib/firebaseAdmin";
-import * as admin from "firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
       .limit(limit)
       .get();
 
-    const logs = logsSnapshot.docs.map(doc => {
+    const logs = logsSnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         id: doc.id,

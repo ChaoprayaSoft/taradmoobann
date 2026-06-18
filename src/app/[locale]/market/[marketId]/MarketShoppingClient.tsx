@@ -69,7 +69,7 @@ export default function MarketShoppingClient({
     // Listen to Shops
     const shopsQ = query(collection(db, "shops"), where("marketId", "==", market.id), where("status", "==", "approved"));
     const unsubShops = onSnapshot(shopsQ, (snap) => {
-      const freshShops: any[] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const freshShops: any[] = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
       setLocalShops(prev => freshShops.map(fs => {
         const existing = prev.find(p => p.id === fs.id);
         return { ...fs, averageRating: existing?.averageRating };
@@ -94,7 +94,7 @@ export default function MarketShoppingClient({
     const unsubs = chunks.map(chunk => {
       const prodQ = query(collection(db, "products"), where("shopId", "in", chunk));
       return onSnapshot(prodQ, (snap) => {
-        const freshProds: any[] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const freshProds: any[] = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
         setLocalProducts(prev => {
           const others = prev.filter((p: any) => !chunk.includes(p.shopId));
           // add shopName for UI

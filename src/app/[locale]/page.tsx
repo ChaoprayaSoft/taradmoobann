@@ -24,7 +24,7 @@ export default async function Home() {
 
   try {
     const snapshot = await adminDb.collection("markets").get();
-    markets = await Promise.all(snapshot.docs.map(async doc => {
+    markets = await Promise.all(snapshot.docs.map(async (doc: any) => {
       const data = doc.data();
       const mId = doc.id;
       const shopsCountSnap = await adminDb.collection("shops").where("marketId", "==", mId).where("status", "==", "approved").count().get();
@@ -62,7 +62,7 @@ export default async function Home() {
         .where("userEmail", "==", userEmail)
         .get();
 
-      memSnapshot.docs.forEach(doc => {
+      memSnapshot.docs.forEach((doc: any) => {
         const data = doc.data();
         marketStatusMap.set(data.marketId, data.status);
       });
@@ -73,7 +73,7 @@ export default async function Home() {
         .where("ownerEmail", "==", userEmail)
         .get();
 
-      shopsSnapshot.docs.forEach(doc => {
+      shopsSnapshot.docs.forEach((doc: any) => {
         marketStatusMap.set(doc.data().marketId, "approved");
       });
     }
@@ -86,8 +86,8 @@ export default async function Home() {
     const todayStr = new Date().toISOString().split('T')[0];
 
     let fetchedAds = adsSnapshot.docs
-      .map(doc => doc.data())
-      .filter(ad => ad.validUntil >= todayStr && (!ad.placement || ad.placement === "Main Page"));
+      .map((doc: any) => doc.data())
+      .filter((ad: any) => ad.validUntil >= todayStr && (!ad.placement || ad.placement === "Main Page"));
 
     // If no ads exist, inject mock ads automatically as requested
     if (fetchedAds.length === 0) {
@@ -106,7 +106,7 @@ export default async function Home() {
     // Fetch user coins map to filter inactive shops
     const usersSnapshot = await adminDb.collection("users").get();
     const userCoinsMap = new Map<string, number>();
-    usersSnapshot.docs.forEach(doc => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
+    usersSnapshot.docs.forEach((doc: any) => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
 
     // Fetch Spotlight Products
     const spotlightSnapshot = await adminDb
@@ -115,8 +115,8 @@ export default async function Home() {
       .get();
 
     spotlightProducts = spotlightSnapshot.docs
-      .map(doc => ({ id: doc.id, ...doc.data() } as any))
-      .filter(p => p.spotlightExpiry && new Date(p.spotlightExpiry) > new Date());
+      .map((doc: any) => ({ id: doc.id, ...doc.data() } as any))
+      .filter((p: any) => p.spotlightExpiry && new Date(p.spotlightExpiry) > new Date());
 
     if (spotlightProducts.length > 0) {
       const shopIds = Array.from(new Set(spotlightProducts.map(p => p.shopId)));
@@ -153,7 +153,7 @@ export default async function Home() {
 
     // Fetch Global Active Products for "What's up today?"
     const allProductsSnap = await adminDb.collection("products").get();
-    globalActiveProducts = allProductsSnap.docs.map(doc => {
+    globalActiveProducts = allProductsSnap.docs.map((doc: any) => {
       const data = doc.data();
       return { id: doc.id, ...data } as any;
     }).filter(p => p.isAvailable === undefined || p.isAvailable === true);

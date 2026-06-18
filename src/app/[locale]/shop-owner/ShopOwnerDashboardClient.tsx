@@ -197,7 +197,7 @@ export default function ShopOwnerDashboardClient({
     // Real-time Shops Listener
     const shopsQ = query(collection(db, "shops"), where("ownerEmail", "==", userEmail));
     const unsubShops = onSnapshot(shopsQ, async (snap) => {
-      let freshShops = snap.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      let freshShops = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() as any }));
 
       const encryptedIds = freshShops
         .filter(s => s.promptpayId?.startsWith("ENC:"))
@@ -253,7 +253,7 @@ export default function ShopOwnerDashboardClient({
     // Real-time Orders Listener
     const ordersQ = query(collection(db, "orders"), where("shopId", "==", selectedShopId));
     const unsubOrders = onSnapshot(ordersQ, async (snap) => {
-      let freshOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      let freshOrders = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() as any }));
 
       const encryptedAddresses = freshOrders
         .filter(o => o.deliveryAddress?.startsWith("ENC:"))
@@ -288,7 +288,7 @@ export default function ShopOwnerDashboardClient({
     // Real-time Reviews Listener
     const reviewsQ = query(collection(db, "reviews"), where("shopId", "==", selectedShopId));
     const unsubReviews = onSnapshot(reviewsQ, (snap) => {
-      const freshReviews = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const freshReviews = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       freshReviews.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setShopReviews(freshReviews);
     });
@@ -296,7 +296,7 @@ export default function ShopOwnerDashboardClient({
     // Real-time Products Listener
     const productsQ = query(collection(db, "products"), where("shopId", "==", selectedShopId));
     const unsubProducts = onSnapshot(productsQ, (snap) => {
-      const freshProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const freshProducts = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       freshProducts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setProducts(freshProducts);
     });
@@ -307,7 +307,7 @@ export default function ShopOwnerDashboardClient({
       where("shopId", "==", selectedShopId)
     );
     const unsubChats = onSnapshot(chatsQ, (snap) => {
-      let freshChats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let freshChats = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       freshChats = freshChats.filter((c: any) => !c.deletedByShopOwner);
       freshChats.sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
 

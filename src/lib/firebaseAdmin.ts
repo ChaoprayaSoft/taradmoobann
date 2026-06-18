@@ -1,8 +1,10 @@
-import * as admin from "firebase-admin";
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
+if (!getApps().length) {
+  initializeApp({
+    credential: cert({
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       clientEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       // Replace literal \n with actual newlines for the private key
@@ -12,5 +14,7 @@ if (!admin.apps.length) {
   });
 }
 
-export const adminDb = admin.firestore();
-export const adminMessaging = admin.messaging();
+export const adminDb = getFirestore();
+export const adminMessaging = getMessaging();
+import { getStorage } from 'firebase-admin/storage';
+export const adminStorage = getStorage();

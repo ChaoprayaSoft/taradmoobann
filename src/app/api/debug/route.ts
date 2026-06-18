@@ -3,7 +3,7 @@ import { adminDb } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   const usersSnapshot = await adminDb.collection("users").get();
-  const users = usersSnapshot.docs.map(doc => ({
+  const users = usersSnapshot.docs.map((doc: any) => ({
     id: doc.id,
     hasFcmToken: !!doc.data().fcmToken,
     roles: doc.data().roles,
@@ -11,7 +11,7 @@ export async function GET() {
   }));
 
   const shopsSnapshot = await adminDb.collection("shops").get();
-  const shops = shopsSnapshot.docs.map(doc => ({
+  const shops = shopsSnapshot.docs.map((doc: any) => ({
     id: doc.id,
     ownerEmail: doc.data().ownerEmail
   }));

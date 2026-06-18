@@ -20,7 +20,7 @@ export async function GET(req: Request) {
         .where("shopperEmail", "==", session.user.email)
         .get();
 
-      let chats: any[] = chatsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let chats: any[] = chatsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       chats = chats.filter((c: any) => !c.deletedByShopper);
       
       chats.sort((a: any, b: any) => {
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
         // Need to batch if there are many shops, but usually < 30
         const shopsSnapshot = await adminDb.collection("shops").where("id", "in", shopIds.slice(0, 30)).get();
         const shopNames: { [key: string]: string } = {};
-        shopsSnapshot.docs.forEach(doc => {
+        shopsSnapshot.docs.forEach((doc: any) => {
           shopNames[doc.id] = doc.data().name;
         });
         
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
         .where("shopId", "==", shopId)
         .get();
 
-      let chats: any[] = chatsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let chats: any[] = chatsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       chats = chats.filter((c: any) => !c.deletedByShopOwner);
       
       // Sort in memory to avoid needing a Firestore composite index

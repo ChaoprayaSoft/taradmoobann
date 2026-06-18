@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     }
 
     const chatsSnapshot = await adminDb.collection("chats").orderBy("updatedAt", "desc").get();
-    const chats = chatsSnapshot.docs.map(doc => ({
+    const chats = chatsSnapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));

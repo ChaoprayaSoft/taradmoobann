@@ -294,7 +294,7 @@ export default function ShopperDashboardClient({
     );
 
     const unsubscribeOrders = onSnapshot(ordersQuery, async (snapshot) => {
-      let freshOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      let freshOrders = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() as any }));
       
       const encryptedAddresses = freshOrders
         .filter(o => o.deliveryAddress?.startsWith("ENC:"))
@@ -335,7 +335,7 @@ export default function ShopperDashboardClient({
     );
 
     const unsubscribeChats = onSnapshot(chatsQuery, async (snapshot) => {
-      let freshChats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let freshChats = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       freshChats = freshChats.filter((c: any) => !c.deletedByShopper);
       freshChats.sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
 
@@ -360,7 +360,7 @@ export default function ShopperDashboardClient({
       where("ownerEmail", "==", session.user.email)
     );
     const unsubShops = onSnapshot(shopReqQuery, (snapshot) => {
-      const allShops = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const allShops = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       setShopRequests(allShops.filter((s: any) => s.status !== "approved"));
       setOwnedShopsCount(allShops.length);
     });

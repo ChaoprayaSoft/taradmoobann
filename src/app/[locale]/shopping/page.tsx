@@ -13,7 +13,7 @@ export default async function ShoppingPage() {
 
   // 1. Fetch all markets
   const marketsSnapshot = await adminDb.collection("markets").get();
-  const allMarkets = marketsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+  const allMarkets = marketsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as any));
 
   // 2. Determine user's default village
   let userVillageName = "";
@@ -34,17 +34,17 @@ export default async function ShoppingPage() {
 
   // 3. Fetch all approved shops and their owners' coins
   const shopsSnapshot = await adminDb.collection("shops").where("status", "==", "approved").get();
-  let allShops = shopsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+  let allShops = shopsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as any));
 
   const usersSnapshot = await adminDb.collection("users").get();
   const userCoinsMap = new Map<string, number>();
-  usersSnapshot.docs.forEach(doc => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
+  usersSnapshot.docs.forEach((doc: any) => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
 
   allShops = allShops.filter(shop => (userCoinsMap.get(shop.ownerEmail) ?? 0) > 0);
 
   // 4. Fetch all available products
   const productsSnapshot = await adminDb.collection("products").get();
-  const allProducts = productsSnapshot.docs.map(doc => {
+  const allProducts = productsSnapshot.docs.map((doc: any) => {
     const data = doc.data();
     const shop = allShops.find(s => s.id === data.shopId);
     const market = shop ? allMarkets.find(m => m.id === shop.marketId) : null;
@@ -113,9 +113,9 @@ export default async function ShoppingPage() {
   let marketStatusMap = new Map<string, string>();
   if (userEmail) {
     const memSnapshot = await adminDb.collection("market_memberships").where("userEmail", "==", userEmail).get();
-    memSnapshot.docs.forEach(doc => marketStatusMap.set(doc.data().marketId, doc.data().status));
+    memSnapshot.docs.forEach((doc: any) => marketStatusMap.set(doc.data().marketId, doc.data().status));
     const ownedShopsSnapshot = await adminDb.collection("shops").where("ownerEmail", "==", userEmail).get();
-    ownedShopsSnapshot.docs.forEach(doc => marketStatusMap.set(doc.data().marketId, "approved"));
+    ownedShopsSnapshot.docs.forEach((doc: any) => marketStatusMap.set(doc.data().marketId, "approved"));
   }
 
   return (

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { adminDb } from "@/lib/firebaseAdmin";
-import * as admin from "firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 
 async function verifyShopOwnership(shopId: string, userEmail: string, roles: string[]) {
   const shopRef = adminDb.collection("shops").doc(shopId);
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
       
       // Deduct coins
       batch.update(userDoc.ref, {
-        coins: admin.firestore.FieldValue.increment(-cost)
+        coins: FieldValue.increment(-cost)
       });
       
       // Add transaction

@@ -26,16 +26,16 @@ export default async function AdminDashboard() {
   
   try {
     const snapshot = await adminDb.collection("markets").orderBy("createdAt", "desc").get();
-    markets = snapshot.docs.map(doc => doc.data());
+    markets = snapshot.docs.map((doc: any) => doc.data());
     
     const shopsSnapshot = await adminDb.collection("shops").get();
-    shops = shopsSnapshot.docs.map(doc => doc.data());
+    shops = shopsSnapshot.docs.map((doc: any) => doc.data());
     
     const ordersSnapshot = await adminDb.collection("orders").orderBy("createdAt", "desc").get();
-    orders = ordersSnapshot.docs.map(doc => doc.data());
+    orders = ordersSnapshot.docs.map((doc: any) => doc.data());
     
     const adsSnapshot = await adminDb.collection("ads").orderBy("createdAt", "desc").get();
-    ads = adsSnapshot.docs.map(doc => doc.data());
+    ads = adsSnapshot.docs.map((doc: any) => doc.data());
     
     const settingsDoc = await adminDb.collection("settings").doc("ads").get();
     if (settingsDoc.exists) {
@@ -43,11 +43,11 @@ export default async function AdminDashboard() {
     }
     
     const usersSnapshot = await adminDb.collection("users").orderBy("createdAt", "desc").get();
-    initialUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    initialUsers = usersSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     totalUsers = initialUsers.length;
 
     const feedbacksSnap = await adminDb.collection("app_feedback").orderBy("createdAt", "desc").get();
-    feedbacks = feedbacksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    feedbacks = feedbacksSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     const termsDoc = await adminDb.collection("settings").doc("terms_of_use").get();
     if (termsDoc.exists) {

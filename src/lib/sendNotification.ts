@@ -1,4 +1,5 @@
-import * as admin from "firebase-admin";
+import { Message } from 'firebase-admin/messaging';
+import { adminMessaging } from '@/lib/firebaseAdmin';
 import { adminDb } from "@/lib/firebaseAdmin";
 import { Resend } from "resend";
 import * as fs from "fs";
@@ -61,7 +62,7 @@ export async function sendNotificationToUser(
     // 1. Firebase Cloud Messaging Push Notification
     if (userData?.fcmToken && userData?.pushNotificationsEnabled !== false) {
       const fcmBody = finalBody.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>?/gm, '');
-      const message: admin.messaging.Message = {
+      const message: Message = {
         notification: {
           title: finalTitle,
           body: fcmBody,
@@ -71,7 +72,7 @@ export async function sendNotificationToUser(
       };
 
       try {
-        await admin.messaging().send(message);
+        await adminMessaging.send(message);
         console.log(`Successfully sent push notification to ${email}`);
       } catch (err) {
         console.error(`Error sending push notification:`, err);

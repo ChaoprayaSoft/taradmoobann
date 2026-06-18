@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { adminDb } from "@/lib/firebaseAdmin";
-import * as admin from "firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 import { sendNotificationToUser } from "@/lib/sendNotification";
 
 export async function POST(req: Request) {
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
       updates.roles = currentRoles;
     }
     if (cost > 0) {
-      updates.coins = admin.firestore.FieldValue.increment(-cost);
+      updates.coins = FieldValue.increment(-cost);
       updates.maxShopSlots = Math.max(maxShopSlots, shopsCount) + 1;
     }
     

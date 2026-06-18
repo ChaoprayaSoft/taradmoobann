@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { adminDb } from "@/lib/firebaseAdmin";
-import * as admin from "firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 
 export async function POST(req: Request) {
   try {
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
     // 1. Deduct coins
     batch.update(userDoc.ref, {
-      coins: admin.firestore.FieldValue.increment(-COST)
+      coins: FieldValue.increment(-COST)
     });
 
     // 2. Add transaction

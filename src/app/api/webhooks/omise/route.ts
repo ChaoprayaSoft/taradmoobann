@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
-import * as admin from "firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 
 export async function POST(req: Request) {
   try {
@@ -60,12 +60,12 @@ export async function POST(req: Request) {
               amountTHB: charge.amount / 100, // Amount is in satang
               coinsAdded: coinsToAdd,
               status: "successful",
-              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              createdAt: FieldValue.serverTimestamp(),
             });
 
             // 2. Increment user coins
             batch.update(userRef, {
-              coins: admin.firestore.FieldValue.increment(coinsToAdd)
+              coins: FieldValue.increment(coinsToAdd)
             });
 
             await batch.commit();

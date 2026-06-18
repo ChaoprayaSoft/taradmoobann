@@ -71,13 +71,13 @@ export default function MarketOwnerDashboardClient({
 
     const shopsQ = query(collection(db, "shops"), where("marketId", "in", chunkedMarketIds));
     const unsubShops = onSnapshot(shopsQ, (snap) => {
-      const freshShops = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const freshShops = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       setLiveShops(freshShops);
     });
 
     const membershipsQ = query(collection(db, "market_memberships"), where("marketId", "in", chunkedMarketIds));
     const unsubMemberships = onSnapshot(membershipsQ, (snap) => {
-      const freshMems = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const freshMems = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       setLiveMemberships(freshMems);
     });
 

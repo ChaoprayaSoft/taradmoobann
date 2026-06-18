@@ -17,7 +17,7 @@ export async function GET(req: Request) {
 
     const feedbackSnap = await adminDb.collection("app_feedback").orderBy("createdAt", "desc").get();
     
-    const feedbacks = feedbackSnap.docs.map(doc => ({
+    const feedbacks = feedbackSnap.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));

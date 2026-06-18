@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
-import * as admin from "firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 import { sendNotificationToUser } from "@/lib/sendNotification";
 
 export const dynamic = 'force-dynamic';
@@ -26,8 +26,8 @@ export async function GET(req: Request) {
     
     // 2. We need users' document references to deduct coins
     const usersSnapshot = await adminDb.collection("users").get();
-    const userDocsMap = new Map<string, admin.firestore.DocumentSnapshot>();
-    usersSnapshot.docs.forEach(doc => userDocsMap.set(doc.id, doc));
+    const userDocsMap = new Map<string, any>();
+    usersSnapshot.docs.forEach((doc: any) => userDocsMap.set(doc.id, doc));
 
     for (const shopDoc of shopsSnapshot.docs) {
       const shopData = shopDoc.data();
@@ -101,7 +101,7 @@ export async function GET(req: Request) {
         if (userDoc && userDoc.exists) {
           // 1. Deduct fee
           batch.update(userDoc.ref, {
-            coins: admin.firestore.FieldValue.increment(-fee)
+            coins: FieldValue.increment(-fee)
           });
 
           // 2. Transaction Record

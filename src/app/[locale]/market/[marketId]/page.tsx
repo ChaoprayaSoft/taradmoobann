@@ -36,7 +36,7 @@ export default async function MarketShoppingPage({ params, searchParams }: { par
 
     // 2. Fetch all markets to populate the switch dropdown
     const allMarketsSnapshot = await adminDb.collection("markets").get();
-    const allMarkets = allMarketsSnapshot.docs.map(doc => doc.data());
+    const allMarkets = allMarketsSnapshot.docs.map((doc: any) => doc.data());
     
     userAccessibleMarkets = allMarkets;
 
@@ -47,17 +47,17 @@ export default async function MarketShoppingPage({ params, searchParams }: { par
       .where("status", "==", "approved")
       .get();
       
-    let fetchedShops = shopsSnapshot.docs.map(doc => doc.data());
+    let fetchedShops = shopsSnapshot.docs.map((doc: any) => doc.data());
 
     const usersSnapshot = await adminDb.collection("users").get();
     const userCoinsMap = new Map<string, number>();
-    usersSnapshot.docs.forEach(doc => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
+    usersSnapshot.docs.forEach((doc: any) => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
 
-    shops = fetchedShops.filter(shop => (userCoinsMap.get(shop.ownerEmail) ?? 0) > 0);
+    shops = fetchedShops.filter((shop: any) => (userCoinsMap.get(shop.ownerEmail) ?? 0) > 0);
 
     // 4. Fetch Products for those shops
     if (shops.length > 0) {
-      const shopIds = shops.map(s => s.id);
+      const shopIds = shops.map((s: any) => s.id);
       // Firestore 'in' query limit is 10. If there are >10 shops, we should chunk it.
       // For now, let's chunk it.
       const chunkArray = (arr: any[], size: number) =>
@@ -73,9 +73,9 @@ export default async function MarketShoppingPage({ params, searchParams }: { par
           .where("shopId", "in", chunk)
           .get();
           
-        products.push(...prodSnapshot.docs.map(doc => {
+        products.push(...prodSnapshot.docs.map((doc: any) => {
           const productData = doc.data();
-          const shop = shops.find(s => s.id === productData.shopId);
+          const shop = shops.find((s: any) => s.id === productData.shopId);
           return {
             ...productData,
             shopName: shop ? shop.name : "Unknown Shop"
@@ -95,8 +95,8 @@ export default async function MarketShoppingPage({ params, searchParams }: { par
     const todayStr = new Date().toISOString().split('T')[0];
     
     let fetchedAds = adsSnapshot.docs
-      .map(doc => doc.data())
-      .filter(ad => ad.validUntil >= todayStr && ad.placement === "Market Page");
+      .map((doc: any) => doc.data())
+      .filter((ad: any) => ad.validUntil >= todayStr && ad.placement === "Market Page");
 
     if (fetchedAds.length === 0) {
       fetchedAds = [

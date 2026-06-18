@@ -1,19 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import * as admin from "firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 
-// Ensure Firebase Admin is initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      privateKey: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    }),
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  });
-}
+import { adminStorage } from "@/lib/firebaseAdmin";
 
 export async function POST(req: Request) {
   try {
@@ -34,7 +24,7 @@ export async function POST(req: Request) {
 
     // Use Firebase Admin Storage (Google Cloud Storage)
     const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-    const bucket = admin.storage().bucket(bucketName);
+    const bucket = adminStorage.bucket(bucketName);
     
     // Generate a unique file name
     const filename = `uploads/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;

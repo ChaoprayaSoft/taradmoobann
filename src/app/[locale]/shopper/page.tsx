@@ -27,16 +27,16 @@ export default async function ShopperDashboard() {
 
   try {
     const marketSnapshot = await adminDb.collection("markets").get();
-    allMarkets = marketSnapshot.docs.map(doc => doc.data());
+    allMarkets = marketSnapshot.docs.map((doc: any) => doc.data());
     allMarkets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     const allShopsSnapshot = await adminDb.collection("shops").get();
-    const rawAllShops = allShopsSnapshot.docs.map(doc => doc.data());
+    const rawAllShops = allShopsSnapshot.docs.map((doc: any) => doc.data());
     allShops = rawAllShops.filter(shop => shop.status === "approved");
 
     const usersSnapshot = await adminDb.collection("users").get();
     const userCoinsMap = new Map<string, number>();
-    usersSnapshot.docs.forEach(doc => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
+    usersSnapshot.docs.forEach((doc: any) => userCoinsMap.set(doc.id, doc.data()?.coins || 0));
 
     allShops = allShops.filter(shop => (userCoinsMap.get(shop.ownerEmail) ?? 0) > 0);
 
@@ -52,7 +52,7 @@ export default async function ShopperDashboard() {
       .where("ownerEmail", "==", userEmail)
       .get();
     
-    const ownedShops = shopsSnapshot.docs.map(doc => doc.data());
+    const ownedShops = shopsSnapshot.docs.map((doc: any) => doc.data());
 
     // Fetch user's profile/addresses
     const userProfileSnapshot = await adminDb.collection("users").doc(userEmail).get();
@@ -74,7 +74,7 @@ export default async function ShopperDashboard() {
       .where("shopperEmail", "==", userEmail)
       .get();
       
-    orders = orderSnapshot.docs.map(doc => doc.data());
+    orders = orderSnapshot.docs.map((doc: any) => doc.data());
     orders = orders.map(o => {
       const shop = rawAllShops.find(s => s.id === o.shopId);
       return {
