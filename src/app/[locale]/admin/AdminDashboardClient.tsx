@@ -126,6 +126,8 @@ export default function AdminDashboardClient({
   const [logsMetrics, setLogsMetrics] = useState({ todayLogins: 0, uniqueUsersToday: 0, topPage: "None" });
   const [logsSearchQuery, setLogsSearchQuery] = useState("");
   const [logsFilterAction, setLogsFilterAction] = useState("");
+  const [logsStartDate, setLogsStartDate] = useState("");
+  const [logsEndDate, setLogsEndDate] = useState("");
 
   const filteredLogs = useMemo(() => {
     return activityLogs.filter(log => {
@@ -139,9 +141,21 @@ export default function AdminDashboardClient({
           matches = false;
         }
       }
+      
+      if (logsStartDate) {
+        const start = new Date(logsStartDate);
+        start.setHours(0, 0, 0, 0);
+        if (new Date(log.timestamp) < start) matches = false;
+      }
+      if (logsEndDate) {
+        const end = new Date(logsEndDate);
+        end.setHours(23, 59, 59, 999);
+        if (new Date(log.timestamp) > end) matches = false;
+      }
+
       return matches;
     });
-  }, [activityLogs, logsFilterAction, logsSearchQuery]);
+  }, [activityLogs, logsFilterAction, logsSearchQuery, logsStartDate, logsEndDate]);
 
   const uniqueLogActions = useMemo(() => {
     const set = new Set(activityLogs.map(l => l.action).filter(Boolean));
@@ -1837,6 +1851,21 @@ export default function AdminDashboardClient({
                     <option key={action} value={action}>{action}</option>
                   ))}
                 </select>
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <input
+                    type="date"
+                    className="border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
+                    value={logsStartDate}
+                    onChange={(e) => setLogsStartDate(e.target.value)}
+                  />
+                  <span className="text-gray-500 text-sm">-</span>
+                  <input
+                    type="date"
+                    className="border border-gray-300 rounded-md p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
+                    value={logsEndDate}
+                    onChange={(e) => setLogsEndDate(e.target.value)}
+                  />
+                </div>
                 <button 
                   onClick={fetchLogs}
                   disabled={logsLoading}
