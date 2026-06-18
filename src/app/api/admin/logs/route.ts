@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { adminDb } from "@/lib/firebaseAdmin";
+import * as admin from "firebase-admin";
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +70,28 @@ export async function GET(req: Request) {
       }
     }
 
+    // Calculate monthly activity for the current year
+    const currentYear = new Date().getFullYear();
+    const monthlyDataPromises = Array.from({ length: 12 }).map(async (_, i) => {
+      const startOfMonth = new Date(currentYear, i, 1);
+      const endOfMonth = new Date(currentYear, i + 1, 0, 23, 59, 59, 999);
+      
+      const countSnapshot = await adminDb
+        .collection("activity_logs")
+        .where("timestamp", ">=", admin.firestore.Timestamp.fromDate(startOfMonth))
+        .where("timestamp", "<=", admin.firestore.Timestamp.fromDate(endOfMonth))
+        .count()
+        .get();
+
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return {
+        name: monthNames[i],
+        activity: countSnapshot.data().count
+      };
+    });
+
+    const monthlyData = await Promise.all(monthlyDataPromises);
+
     return NextResponse.json({ 
       success: true, 
       logs,
@@ -76,7 +99,8 @@ export async function GET(req: Request) {
         todayLogins,
         uniqueUsersToday: uniqueUsersToday.size,
         topPage: `${topPage} (${maxVisits})`
-      }
+      },
+      monthlyData
     });
   } catch (error: any) {
     console.error("Failed to fetch logs:", error);

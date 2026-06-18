@@ -6,6 +6,7 @@ import { storage } from "@/lib/firebase";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -124,6 +125,7 @@ export default function AdminDashboardClient({
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsMetrics, setLogsMetrics] = useState({ todayLogins: 0, uniqueUsersToday: 0, topPage: "None" });
+  const [monthlyActivityData, setMonthlyActivityData] = useState<any[]>([]);
   const [logsSearchQuery, setLogsSearchQuery] = useState("");
   const [logsFilterAction, setLogsFilterAction] = useState("");
   const [logsStartDate, setLogsStartDate] = useState("");
@@ -256,6 +258,9 @@ export default function AdminDashboardClient({
         setActivityLogs(data.logs || []);
         if (data.metrics) {
           setLogsMetrics(data.metrics);
+        }
+        if (data.monthlyData) {
+          setMonthlyActivityData(data.monthlyData);
         }
       }
     } catch (e) {
@@ -1827,6 +1832,24 @@ export default function AdminDashboardClient({
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center text-center">
               <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-2">Top Page Visited</p>
               <p className="text-xl font-bold text-gray-900 break-all">{logsMetrics.topPage}</p>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-8">
+            <h3 className="text-lg font-medium mb-4">Monthly Activity (This Year)</h3>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyActivityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
+                  <Tooltip 
+                    cursor={{ fill: '#f3f4f6' }}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Bar dataKey="activity" fill="#8b5cf6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
