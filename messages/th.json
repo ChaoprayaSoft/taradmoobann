@@ -333,6 +333,8 @@
     "totalUsersTitle": "ผู้ใช้ทั้งหมด"
   },
   "ShopOwnerDashboard": {
+    "buyCoffee": "เลี้ยงกาแฟนักพัฒนา",
+    "coins": "{coins} เหรียญ",
     "shopperRequestedCancel": "ลูกค้าขอยกเลิกออเดอร์:",
     "acceptCancel": "ยอมรับ",
     "declineCancel": "ปฏิเสธ",

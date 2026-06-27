@@ -305,6 +305,8 @@
     "totalUsersTitle": "Total Users"
   },
   "ShopOwnerDashboard": {
+    "buyCoffee": "Buy developer a coffee",
+    "coins": "{coins} Coins",
     "shopperRequestedCancel": "Shopper requested cancellation:",
     "acceptCancel": "Accept",
     "declineCancel": "Decline",
