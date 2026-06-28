@@ -1,8 +1,36 @@
+import type { Metadata, ResolvingMetadata } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { adminDb } from "@/lib/firebaseAdmin";
 import MarketShoppingClient from "./MarketShoppingClient";
+
+export async function generateMetadata(
+  { params }: { params: { marketId: string } },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { marketId } = params;
+  try {
+    const marketDoc = await adminDb.collection("markets").doc(marketId).get();
+    if (marketDoc.exists) {
+      const data = marketDoc.data();
+      return {
+        title: `${data?.name || "Market"}`,
+        description: data?.description || `Explore ${data?.name || "this market"} on TaradMooBann.`,
+        openGraph: {
+          title: `${data?.name || "Market"} - TaradMooBann`,
+          description: data?.description || `Explore ${data?.name || "this market"} on TaradMooBann.`,
+          images: data?.coverImage ? [data.coverImage] : [],
+        },
+      };
+    }
+  } catch (error) {
+    console.error("Error generating metadata for market:", error);
+  }
+  return {
+    title: "Market",
+  };
+}
 
 export const dynamic = "force-dynamic";
 

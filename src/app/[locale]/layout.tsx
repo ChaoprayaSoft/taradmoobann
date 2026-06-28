@@ -18,8 +18,26 @@ import ActivityTracker from "@/components/ActivityTracker";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TaradMooBann",
-  description: "Your local neighborhood online market.",
+  metadataBase: new URL('https://taradmoobann.com'),
+  title: {
+    default: 'TaradMooBann - Your Local Neighborhood Market',
+    template: '%s | TaradMooBann'
+  },
+  description: "Your local neighborhood online market. Buy and sell goods easily within your community.",
+  keywords: ["neighborhood market", "local market", "community shopping", "TaradMooBann", "online marketplace", "ตลาดนัดหมู่บ้าน", "ตลาดออนไลน์"],
+  openGraph: {
+    title: 'TaradMooBann - Your Local Neighborhood Market',
+    description: 'Your local neighborhood online market. Buy and sell goods easily within your community.',
+    url: 'https://taradmoobann.com',
+    siteName: 'TaradMooBann',
+    locale: 'th_TH',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TaradMooBann - Your Local Neighborhood Market',
+    description: 'Your local neighborhood online market. Buy and sell goods easily within your community.',
+  },
 };
 
 export default async function RootLayout({
