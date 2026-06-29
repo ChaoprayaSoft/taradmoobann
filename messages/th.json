@@ -67,6 +67,7 @@
     "close": "ปิด"
   },
   "ShopperDashboard": {
+    "close": "ปิด",
     "addressRequiredFirst": "คุณต้องตั้งค่าที่อยู่สำหรับจัดส่งก่อนเปิดร้านค้า",
     "myDashboard": "แดชบอร์ดของฉัน",
     "title": "แดชบอร์ดนักช้อป",

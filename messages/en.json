@@ -38,6 +38,7 @@
     "close": "Close"
   },
   "ShopperDashboard": {
+    "close": "Close",
     "addressRequiredFirst": "You must set your delivery address before opening a shop.",
     "title": "Shopper Dashboard",
     "description": "Discover markets and open your own shop.",
