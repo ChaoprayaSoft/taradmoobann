@@ -90,10 +90,7 @@ export default function MarketOwnerDashboardClient({
   const activeShops = liveShops.filter(s => 
     (selectedMarketFilter === "all" || s.marketId === selectedMarketFilter)
   );
-  const pendingMemberships = liveMemberships.filter(m => 
-    m.status === "pending" && 
-    (selectedMarketFilter === "all" || m.marketId === selectedMarketFilter)
-  );
+  // Removed pendingMemberships
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -355,56 +352,7 @@ export default function MarketOwnerDashboardClient({
         </div>
       )}
 
-      {/* Pending Memberships Section */}
-      {pendingMemberships.length > 0 && (
-        <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-blue-200 flex justify-between items-center bg-blue-100">
-            <h3 className="text-lg font-medium text-blue-800">{t("pendingShopperRequests")}</h3>
-            <span className="bg-blue-200 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-              {t("requiresAction", { count: pendingMemberships.length })}
-            </span>
-          </div>
-          
-          <ul className="divide-y divide-blue-200">
-            {pendingMemberships.map((membership) => (
-              <li key={membership.id} className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-lg font-medium text-gray-900 truncate">
-                      {membership.userEmail}
-                    </p>
-                    <p className="text-sm text-gray-600 truncate">
-                      <b>{t("applicationNote")}</b> {membership.applicationNote || t("noNoteProvided")}
-                    </p>
-                    <p className="text-xs text-blue-700 mt-1">
-                      {t("market")} {initialMarkets.find(m => m.id === membership.marketId)?.name || membership.marketId}
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0 space-x-2">
-                    <button
-                      onClick={() => setFeedbackModal({
-                        isOpen: true,
-                        targetId: membership.id,
-                        targetType: "membership",
-                        feedback: membership.feedback || ""
-                      })}
-                      className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium text-sm hover:bg-gray-50 transition"
-                    >
-                      {t("requestRevision")}
-                    </button>
-                    <button
-                      onClick={() => handleMembershipApprove(membership.id)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-blue-700 transition"
-                    >
-                      {t("approveAccess")}
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Removed Pending Memberships Section */}
 
       {/* Removed Pending Shops Section */}
 

@@ -40,11 +40,11 @@ export async function POST(req: Request) {
       const doc = membershipQuery.docs[0];
       const data = doc.data();
       
-      // If it exists and is 'needs_revision', we update it back to pending
+      // If it exists and is 'needs_revision', we update it to approved
       if (data.status === "needs_revision") {
         await doc.ref.update({
           applicationNote: applicationNote || "",
-          status: "pending",
+          status: "approved",
           updatedAt: new Date().toISOString()
         });
 
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
       marketId,
       userEmail,
       applicationNote: applicationNote || "",
-      status: "pending", // pending, approved, needs_revision
+      status: "approved", // auto-approved
       feedback: "", // Market owner can leave feedback here
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
