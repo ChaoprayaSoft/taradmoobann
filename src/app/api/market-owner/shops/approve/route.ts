@@ -71,6 +71,18 @@ export async function POST(req: Request) {
           { url: "/shop-owner" }
         );
       }
+    } else if (action === "ban") {
+      await shopRef.update({
+        status: "banned",
+        feedback: feedback || "Shop has been banned by the market owner.",
+        updatedAt: new Date().toISOString(),
+      });
+    } else if (action === "unban") {
+      await shopRef.update({
+        status: "approved",
+        feedback: feedback || "Shop has been unbanned.",
+        updatedAt: new Date().toISOString(),
+      });
     } else {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }

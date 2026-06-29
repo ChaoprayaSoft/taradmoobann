@@ -83,7 +83,7 @@
     "cancel": "Cancel",
     "addressSaved": "Address saved successfully!",
     "shopSubmitted": "Shop Request Submitted Successfully!",
-    "shopSubmittedDesc": "Your shop has been submitted to the Market Owner for approval. You have been granted the Shop Owner role.",
+    "shopSubmittedDesc": "Your shop is now open and ready! You have been granted the Shop Owner role.",
     "reLogin": "Please click here to quickly re-login so your new dashboard links appear!",
     "myMemberships": "My Market Memberships",
     "noMemberships": "You haven't joined any markets yet. Request access below!",
@@ -478,6 +478,12 @@
     "predefinedReason3": "Shop is closing"
   },
   "MarketOwnerDashboard": {
+    "banShop": "Ban Shop",
+    "unbanShop": "Unban Shop",
+    "banShopConfirmTitle": "Ban Shop?",
+    "banShopConfirmDesc": "Are you sure you want to ban {name}? This will hide the shop from the public market.",
+    "unbanShopConfirmTitle": "Unban Shop?",
+    "unbanShopConfirmDesc": "Are you sure you want to unban {name}? It will be visible again.",
     "marketDashboard": "Market Owner Dashboard",
     "manageMarkets": "Manage your markets and review new shops.",
     "allMarkets": "All Markets",

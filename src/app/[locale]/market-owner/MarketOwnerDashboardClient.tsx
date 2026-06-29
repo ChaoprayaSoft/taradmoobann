@@ -87,12 +87,7 @@ export default function MarketOwnerDashboardClient({
     };
   }, [initialMarkets]);
 
-  const pendingShops = liveShops.filter(s => 
-    (s.status === "pending" || s.status === "needs_revision") && 
-    (selectedMarketFilter === "all" || s.marketId === selectedMarketFilter)
-  );
   const activeShops = liveShops.filter(s => 
-    s.status !== "pending" && 
     (selectedMarketFilter === "all" || s.marketId === selectedMarketFilter)
   );
   const pendingMemberships = liveMemberships.filter(m => 
@@ -154,17 +149,20 @@ export default function MarketOwnerDashboardClient({
     }
   };
 
-  const handleShopApprove = async (shopId: string) => {
+  const handleShopStatus = async (shopId: string, shopName: string, action: "ban" | "unban") => {
+    if (action === "ban" && !window.confirm(t("banShopConfirmDesc", { name: shopName }))) return;
+    if (action === "unban" && !window.confirm(t("unbanShopConfirmDesc", { name: shopName }))) return;
+
     try {
       const res = await fetch("/api/market-owner/shops/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shopId, action: "approve" }),
+        body: JSON.stringify({ shopId, action }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to approve shop");
+        throw new Error(data.error || `Failed to ${action} shop`);
       }
       
       router.refresh();
@@ -408,66 +406,7 @@ export default function MarketOwnerDashboardClient({
         </div>
       )}
 
-      {/* Pending Shops Section */}
-      {pendingShops.length > 0 && (
-        <div className="bg-yellow-50 rounded-lg shadow-sm border border-yellow-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-yellow-200 flex justify-between items-center bg-yellow-100">
-            <h3 className="text-lg font-medium text-yellow-800">{t("pendingShopApprovals")}</h3>
-            <span className="bg-yellow-200 text-yellow-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-              {t("requiresAction", { count: pendingShops.length })}
-            </span>
-          </div>
-          
-          <ul className="divide-y divide-yellow-200">
-            {pendingShops.map((shop) => (
-              <li key={shop.id} className="p-6">
-                <div className="flex items-center space-x-4">
-                  {shop.coverImage ? (
-                    <img src={shop.coverImage} alt={shop.name} className="h-16 w-16 object-cover rounded-md border border-yellow-200" />
-                  ) : (
-                    <div className="h-16 w-16 bg-yellow-200 rounded-md flex items-center justify-center border border-yellow-300 text-yellow-600">
-                      {t("noImg")}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-lg font-medium text-gray-900 truncate">
-                      {shop.name} <span className="text-xs ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">{shop.category}</span>
-                    </p>
-                    <p className="text-sm text-gray-600 truncate">
-                      {shop.description || t("noDescriptionProvided")}
-                    </p>
-                    <p className="text-xs text-yellow-700 mt-1">
-                      {t("market")} {initialMarkets.find(m => m.id === shop.marketId)?.name || shop.marketId} • {t("requestedBy")} {shop.ownerEmail}
-                    </p>
-                    {shop.status === "needs_revision" && (
-                      <p className="text-xs font-semibold text-red-600 mt-1">{t("statusWaitingForShopper")}</p>
-                    )}
-                  </div>
-                  <div className="text-right flex-shrink-0 space-x-2">
-                    <button
-                      onClick={() => setFeedbackModal({
-                        isOpen: true,
-                        targetId: shop.id,
-                        targetType: "shop",
-                        feedback: shop.feedback || ""
-                      })}
-                      className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium text-sm hover:bg-gray-50 transition"
-                    >
-                      {t("requestRevision")}
-                    </button>
-                    <button
-                      onClick={() => handleShopApprove(shop.id)}
-                      className="bg-green-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-green-700 transition"
-                    >
-                      {t("approveShop")}
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Removed Pending Shops Section */}
 
       {/* Active Markets and Shops Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -541,8 +480,10 @@ export default function MarketOwnerDashboardClient({
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-lg font-medium text-gray-900 truncate">
-                        {shop.name} <span className="text-xs ml-2 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">{shop.category}</span>
+                      <p className="text-lg font-medium text-gray-900 truncate flex items-center gap-2">
+                        {shop.name} 
+                        <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">{shop.category}</span>
+                        {shop.status === "banned" && <span className="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-bold">Banned</span>}
                       </p>
                       <p className="text-sm text-gray-500 truncate">
                         {shop.description || t("noDescriptionProvided")}
@@ -562,7 +503,22 @@ export default function MarketOwnerDashboardClient({
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="text-sm font-medium text-gray-900">{t("owner")}</p>
-                      <p className="text-sm text-gray-500">{shop.ownerEmail}</p>
+                      <p className="text-sm text-gray-500 mb-2">{shop.ownerEmail}</p>
+                      {shop.status === "banned" ? (
+                        <button 
+                          onClick={() => handleShopStatus(shop.id, shop.name, "unban")}
+                          className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md hover:bg-green-200 transition"
+                        >
+                          {t("unbanShop") || "Unban Shop"}
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => handleShopStatus(shop.id, shop.name, "ban")}
+                          className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-md hover:bg-red-200 transition"
+                        >
+                          {t("banShop") || "Ban Shop"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </li>
