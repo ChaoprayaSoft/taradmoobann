@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, description, category, coverImage, marketId, houseNumber, location } = body;
 
-    if (!name || !marketId || !category || !houseNumber || !location) {
+    if (!name || !marketId || !category || (!houseNumber && !location)) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
