@@ -279,14 +279,14 @@ export default function MarketOwnerDashboardClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{t("marketDashboard")}</h1>
           <p className="text-gray-500 mt-1">{t("manageMarkets")}</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto">
           <select
-            className="border-gray-300 shadow-sm border p-2 rounded-md text-sm focus:ring-brand-500 focus:border-brand-500"
+            className="border-gray-300 shadow-sm border p-2 rounded-md text-sm focus:ring-brand-500 focus:border-brand-500 w-full sm:w-auto"
             value={selectedMarketFilter}
             onChange={(e) => setSelectedMarketFilter(e.target.value)}
           >
@@ -298,7 +298,7 @@ export default function MarketOwnerDashboardClient({
           <button 
             onClick={() => setIsCreating(!isCreating)}
             disabled={initialMarkets.length === 0}
-            className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50"
+            className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 transition disabled:opacity-50 w-full sm:w-auto text-center"
           >
             {isCreating ? t("cancel") : t("createNewShop")}
           </button>
@@ -480,54 +480,58 @@ export default function MarketOwnerDashboardClient({
             <ul className="divide-y divide-gray-200">
               {activeShops.map((shop) => (
                 <li key={shop.id} className="p-6 hover:bg-gray-50 transition">
-                  <div className="flex items-center space-x-4">
-                    {shop.coverImage ? (
-                      <img src={shop.coverImage} alt={shop.name} className="h-16 w-16 object-cover rounded-md border border-gray-200" />
-                    ) : (
-                      <div className="h-16 w-16 bg-gray-100 rounded-md flex items-center justify-center border border-gray-200 text-gray-400">
-                        {t("noImg")}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-lg font-medium text-gray-900 truncate flex items-center gap-2">
-                        {shop.name} 
-                        <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">{shop.category}</span>
-                        {shop.status === "banned" && <span className="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-bold">Banned</span>}
-                      </p>
-                      <p className="text-sm text-gray-500 truncate">
-                        {shop.description || t("noDescriptionProvided")}
-                      </p>
-                      <p className="text-xs text-brand-600 mt-1">
-                        {t("market")} {initialMarkets.find(m => m.id === shop.marketId)?.name || shop.marketId}
-                      </p>
-                      <p className={`text-xs mt-1 font-bold ${
-                        shop.operatingStatus === 'closed' ? 'text-red-500' :
-                        shop.operatingStatus === 'scheduled' ? 'text-blue-500' :
-                        'text-green-500'
-                      }`}>
-                        {shop.operatingStatus === 'closed' ? t("closedCamel") :
-                         shop.operatingStatus === 'scheduled' ? t("scheduledUntil", { dates: shop.validDates }) :
-                         t("openCamel")}
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-medium text-gray-900">{t("owner")}</p>
-                      <p className="text-sm text-gray-500 mb-2">{shop.ownerEmail}</p>
-                      {shop.status === "banned" ? (
-                        <button 
-                          onClick={() => handleShopStatus(shop.id, shop.name, "unban")}
-                          className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md hover:bg-green-200 transition"
-                        >
-                          {t("unbanShop") || "Unban Shop"}
-                        </button>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex items-center gap-4 flex-1 w-full min-w-0">
+                      {shop.coverImage ? (
+                        <img src={shop.coverImage} alt={shop.name} className="h-16 w-16 object-cover rounded-md border border-gray-200 flex-shrink-0" />
                       ) : (
-                        <button 
-                          onClick={() => handleShopStatus(shop.id, shop.name, "ban")}
-                          className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-md hover:bg-red-200 transition"
-                        >
-                          {t("banShop") || "Ban Shop"}
-                        </button>
+                        <div className="h-16 w-16 bg-gray-100 rounded-md flex items-center justify-center border border-gray-200 text-gray-400 flex-shrink-0 text-xs">
+                          {t("noImg")}
+                        </div>
                       )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-lg font-medium text-gray-900 flex flex-wrap items-center gap-2">
+                          <span className="truncate">{shop.name}</span>
+                          <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full flex-shrink-0">{shop.category}</span>
+                          {shop.status === "banned" && <span className="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-bold flex-shrink-0">Banned</span>}
+                        </p>
+                        <p className="text-sm text-gray-500 truncate mt-0.5">
+                          {shop.description || t("noDescriptionProvided")}
+                        </p>
+                        <p className="text-xs text-brand-600 mt-1">
+                          {t("market")} {initialMarkets.find(m => m.id === shop.marketId)?.name || shop.marketId}
+                        </p>
+                        <p className={`text-xs mt-1 font-bold ${
+                          shop.operatingStatus === 'closed' ? 'text-red-500' :
+                          shop.operatingStatus === 'scheduled' ? 'text-blue-500' :
+                          'text-green-500'
+                        }`}>
+                          {shop.operatingStatus === 'closed' ? t("closedCamel") :
+                           shop.operatingStatus === 'scheduled' ? t("scheduledUntil", { dates: shop.validDates }) :
+                           t("openCamel")}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-left sm:text-right flex-shrink-0 w-full sm:w-auto border-t sm:border-0 pt-3 sm:pt-0 border-gray-100 mt-1 sm:mt-0">
+                      <p className="text-sm font-medium text-gray-900">{t("owner")}</p>
+                      <p className="text-sm text-gray-500 mb-2 truncate">{shop.ownerEmail}</p>
+                      <div className="flex sm:block gap-2">
+                        {shop.status === "banned" ? (
+                          <button 
+                            onClick={() => handleShopStatus(shop.id, shop.name, "unban")}
+                            className="flex-1 sm:flex-none px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md hover:bg-green-200 transition"
+                          >
+                            {t("unbanShop") || "Unban Shop"}
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handleShopStatus(shop.id, shop.name, "ban")}
+                            className="flex-1 sm:flex-none px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-md hover:bg-red-200 transition"
+                          >
+                            {t("banShop") || "Ban Shop"}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </li>
