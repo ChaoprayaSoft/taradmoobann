@@ -560,7 +560,17 @@
     "feedback": "ข้อเสนอแนะ *",
     "feedbackPlaceholder": "เช่น โปรดให้รูปภาพหน้าปกที่ชัดเจนขึ้น...",
     "sending": "กำลังส่ง...",
-    "sendFeedback": "ส่งข้อเสนอแนะ"
+    "sendFeedback": "ส่งข้อเสนอแนะ",
+    "editMarket": "แก้ไขตลาด",
+    "marketName": "ชื่อตลาด",
+    "villageName": "ชื่อหมู่บ้าน",
+    "operatingStatus": "สถานะการเปิด",
+    "alwaysOpen": "เปิดตลอด",
+    "scheduled": "ตามกำหนดการ",
+    "validDates": "วันที่เปิด",
+    "coverImage": "รูปภาพหน้าปก",
+    "saving": "กำลังบันทึก...",
+    "saveChanges": "บันทึกการเปลี่ยนแปลง"
   },
   "Checkout": {
     "emptyCartTitle": "ตะกร้าสินค้าของคุณว่างเปล่า",

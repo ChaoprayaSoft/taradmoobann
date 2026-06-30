@@ -514,7 +514,7 @@
     "approveShop": "Approve Shop",
     "yourMarkets": "Your Markets",
     "noMarketsFound": "No markets found.",
-    "closed": "CLOSED",
+    "closed": "Closed",
     "untilDates": "UNTIL {dates}",
     "open": "OPEN",
     "shopsCount": "{count} Shops",
@@ -532,7 +532,17 @@
     "feedback": "Feedback *",
     "feedbackPlaceholder": "e.g. Please provide a clearer cover image...",
     "sending": "Sending...",
-    "sendFeedback": "Send Feedback"
+    "sendFeedback": "Send Feedback",
+    "editMarket": "Edit Market",
+    "marketName": "Market Name",
+    "villageName": "Village Name",
+    "operatingStatus": "Operating Status",
+    "alwaysOpen": "Always Open",
+    "scheduled": "Scheduled",
+    "validDates": "Valid Dates",
+    "coverImage": "Cover Image",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes"
   },
   "Checkout": {
     "emptyCartTitle": "Your Cart is Empty",

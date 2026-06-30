@@ -423,11 +423,15 @@ export default function MarketOwnerDashboardClient({
                         : "bg-white border-transparent hover:bg-gray-50 hover:border-gray-200"
                     }`}
                   >
-                    <div className={`h-10 w-10 rounded flex-shrink-0 flex items-center justify-center font-bold ${
-                      selectedMarketFilter === m.id ? "bg-brand-600 text-white" : "bg-brand-100 text-brand-600"
-                    }`}>
-                      {m.name.charAt(0)}
-                    </div>
+                    {m.coverImage ? (
+                      <img src={m.coverImage} alt={m.name} className="h-10 w-10 rounded object-cover flex-shrink-0 border border-gray-200" />
+                    ) : (
+                      <div className={`h-10 w-10 rounded flex-shrink-0 flex items-center justify-center font-bold ${
+                        selectedMarketFilter === m.id ? "bg-brand-600 text-white" : "bg-brand-100 text-brand-600"
+                      }`}>
+                        {m.name.charAt(0)}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium truncate ${selectedMarketFilter === m.id ? "text-brand-900" : "text-gray-900"}`}>{m.name}</p>
                       <div className="flex items-center gap-2 mt-1">
