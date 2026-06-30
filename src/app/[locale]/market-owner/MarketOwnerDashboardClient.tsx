@@ -434,24 +434,24 @@ export default function MarketOwnerDashboardClient({
                     )}
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium truncate ${selectedMarketFilter === m.id ? "text-brand-900" : "text-gray-900"}`}>{m.name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${
-                          m.operatingStatus === 'closed' ? 'bg-red-100 text-red-800' :
-                          m.operatingStatus === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                          'bg-green-100 text-green-800'
-                        }`}>
-                          {m.operatingStatus === 'closed' ? t("closed") :
-                           m.operatingStatus === 'scheduled' ? t("untilDates", { dates: m.validDates }) :
-                           t("open")}
-                        </span>
-                        <span className="text-xs text-gray-500 truncate">
-                          {t("shopsCount", { count: liveShops.filter(s => s.marketId === m.id).length })}
-                        </span>
-                      </div>
-                      <div className="mt-2 text-right">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${
+                            m.operatingStatus === 'closed' ? 'bg-red-100 text-red-800' :
+                            m.operatingStatus === 'scheduled' ? 'bg-blue-100 text-blue-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            {m.operatingStatus === 'closed' ? t("closed") :
+                             m.operatingStatus === 'scheduled' ? t("untilDates", { dates: m.validDates }) :
+                             t("open")}
+                          </span>
+                          <span className="text-xs text-gray-500 truncate">
+                            {t("shopsCount", { count: liveShops.filter(s => s.marketId === m.id).length })}
+                          </span>
+                        </div>
                         <span
                           onClick={(e) => { e.stopPropagation(); setEditingMarket(m); setMarketFile(null); }}
-                          className="text-xs text-brand-600 hover:text-brand-800 font-medium cursor-pointer"
+                          className="text-xs text-brand-600 hover:text-brand-800 font-medium cursor-pointer flex-shrink-0 text-left sm:text-right"
                         >
                           {t("editMarket") || "Edit Market"}
                         </span>
