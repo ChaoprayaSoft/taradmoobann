@@ -55,6 +55,11 @@ export default function MarketOwnerDashboardClient({
     feedback: "",
   });
 
+  // Edit Market State
+  const [editingMarket, setEditingMarket] = useState<any>(null);
+  const [editingMarketLoading, setEditingMarketLoading] = useState(false);
+  const [marketFile, setMarketFile] = useState<File | null>(null);
+
   // Live Data State
   const [liveShops, setLiveShops] = useState(initialShops);
   const [liveMemberships, setLiveMemberships] = useState(initialMemberships || []);
@@ -228,6 +233,50 @@ export default function MarketOwnerDashboardClient({
     }
   };
 
+  const handleEditMarketSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMarket) return;
+    setEditingMarketLoading(true);
+    try {
+      let finalImageUrl = editingMarket.coverImage;
+
+      if (marketFile) {
+        const uploadData = new FormData();
+        uploadData.append("file", marketFile);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+
+        const uploadJson = await uploadRes.json();
+        if (!uploadRes.ok) {
+          throw new Error(uploadJson.error || "Failed to upload image");
+        }
+        finalImageUrl = uploadJson.url;
+      }
+
+      const res = await fetch("/api/market-owner/markets", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...editingMarket, coverImage: finalImageUrl }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to update market");
+      }
+      
+      router.refresh();
+      setEditingMarket(null);
+      setMarketFile(null);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setEditingMarketLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -395,6 +444,14 @@ export default function MarketOwnerDashboardClient({
                           {t("shopsCount", { count: liveShops.filter(s => s.marketId === m.id).length })}
                         </span>
                       </div>
+                      <div className="mt-2 text-right">
+                        <span
+                          onClick={(e) => { e.stopPropagation(); setEditingMarket(m); setMarketFile(null); }}
+                          className="text-xs text-brand-600 hover:text-brand-800 font-medium cursor-pointer"
+                        >
+                          {t("editMarket") || "Edit Market"}
+                        </span>
+                      </div>
                     </div>
                   </button>
                 </li>
@@ -509,6 +566,99 @@ export default function MarketOwnerDashboardClient({
                   className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? t("sending") : t("sendFeedback")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT MARKET MODAL */}
+      {editingMarket && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t("editMarket") || "Edit Market"}</h2>
+            <form onSubmit={handleEditMarketSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t("marketName") || "Market Name"}</label>
+                <input
+                  required
+                  type="text"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={editingMarket.name}
+                  onChange={(e) => setEditingMarket({ ...editingMarket, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t("villageName") || "Village Name"}</label>
+                <input
+                  required
+                  type="text"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={editingMarket.villageName}
+                  onChange={(e) => setEditingMarket({ ...editingMarket, villageName: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t("description") || "Description"}</label>
+                <textarea
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={editingMarket.description || ""}
+                  onChange={(e) => setEditingMarket({ ...editingMarket, description: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t("operatingStatus") || "Operating Status"}</label>
+                <select
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                  value={editingMarket.operatingStatus || "always_open"}
+                  onChange={(e) => setEditingMarket({ ...editingMarket, operatingStatus: e.target.value })}
+                >
+                  <option value="always_open">{t("alwaysOpen") || "Always Open"}</option>
+                  <option value="scheduled">{t("scheduled") || "Scheduled"}</option>
+                  <option value="closed">{t("closed") || "Closed"}</option>
+                </select>
+              </div>
+              {editingMarket.operatingStatus === "scheduled" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">{t("validDates") || "Valid Dates"}</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 15-20 Aug, Weekends"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-brand-500 focus:border-brand-500"
+                    value={editingMarket.validDates || ""}
+                    onChange={(e) => setEditingMarket({ ...editingMarket, validDates: e.target.value })}
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t("coverImage") || "Cover Image"}</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+                  onChange={(e) => setMarketFile(e.target.files ? e.target.files[0] : null)}
+                />
+                {editingMarket.coverImage && !marketFile && (
+                  <img src={editingMarket.coverImage} alt="Current Cover" className="mt-2 h-20 w-auto rounded border" />
+                )}
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-4">
+                <button 
+                  type="button" 
+                  onClick={() => { setEditingMarket(null); setMarketFile(null); }}
+                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition"
+                >
+                  {t("cancel") || "Cancel"}
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={editingMarketLoading}
+                  className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {editingMarketLoading ? (t("saving") || "Saving...") : (t("saveChanges") || "Save Changes")}
                 </button>
               </div>
             </form>
