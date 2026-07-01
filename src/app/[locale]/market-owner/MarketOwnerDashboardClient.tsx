@@ -598,7 +598,7 @@ export default function MarketOwnerDashboardClient({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">{t("villageName") || "Village Name"}</label>
+                <label className="block text-sm font-medium text-gray-700">{t("villageName") || "Community Name"}</label>
                 <input
                   required
                   type="text"

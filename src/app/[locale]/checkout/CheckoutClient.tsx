@@ -31,7 +31,7 @@ export default function CheckoutClient({ userAddresses }: { userAddresses: strin
     try {
       const parsed = JSON.parse(addrStr);
       if (parsed.villageName !== undefined) {
-        let addr = `Village Name: ${parsed.villageName}\nHouse No.: ${parsed.houseNo}\nAddress: ${parsed.address}`;
+        let addr = `Community Name: ${parsed.villageName}\nHouse No.: ${parsed.houseNo}\nAddress: ${parsed.address}`;
         if (!hidePhone && parsed.telephone) {
           addr += `\nTelephone No.: ${parsed.telephone}`;
         }
