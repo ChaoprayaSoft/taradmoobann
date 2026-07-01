@@ -384,6 +384,7 @@ export default function MarketOwnerDashboardClient({
                   setFile(f);
                 }}
               />
+              <p className="text-xs text-gray-500 mt-1">Maximum file size: 4MB</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">{t("shopOwnerEmail")}</label>
@@ -664,6 +665,7 @@ export default function MarketOwnerDashboardClient({
                   setMarketFile(f);
                 }}
                 />
+                <p className="text-xs text-gray-500 mt-1">Maximum file size: 4MB</p>
                 {editingMarket.coverImage && !marketFile && (
                   <img src={editingMarket.coverImage} alt="Current Cover" className="mt-2 h-20 w-auto rounded border" />
                 )}

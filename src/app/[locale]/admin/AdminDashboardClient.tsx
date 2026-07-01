@@ -609,6 +609,7 @@ export default function AdminDashboardClient({
           }
           setAdFile(f);
         }} className="mt-1 block w-full text-sm text-gray-500" />
+        <p className="text-xs text-gray-500 mt-1">Maximum file size: 4MB</p>
         {editingAd && adFormData.imageUrl && <p className="text-xs text-gray-500 mt-1">{t("leaveEmptyKeep")}</p>}
       </div>
       <div className="flex gap-4">
@@ -809,6 +810,7 @@ export default function AdminDashboardClient({
                   setFile(f);
                 }}
               />
+              <p className="text-xs text-gray-500 mt-1">Maximum file size: 4MB</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">{t("marketOwnerEmail")}</label>

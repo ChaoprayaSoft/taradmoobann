@@ -1224,6 +1224,7 @@ export default function ShopperDashboardClient({
                       setFile(f);
                     }}
                   />
+                  <p className="text-xs text-gray-500 mt-1">Maximum file size: 4MB</p>
                 </div>
                 
                 <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-900">

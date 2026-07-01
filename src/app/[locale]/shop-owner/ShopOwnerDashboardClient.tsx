@@ -1252,6 +1252,7 @@ return (
                         onChange={handleFileChange}
                       />
                     )}
+                    <p className="text-xs text-gray-500 mt-1">Maximum file size: 4MB</p>
                     {files.length > 0 && (
                       <ul className="mt-3 space-y-2">
                         {files.map((f, idx) => (
@@ -2129,6 +2130,7 @@ return (
                     setShopReviseFile(f);
                   }}
                 />
+                <p className="text-xs text-gray-500 mt-1">Maximum file size: 4MB</p>
               </div>
 
               <div className="flex gap-2 pt-4 justify-end">
