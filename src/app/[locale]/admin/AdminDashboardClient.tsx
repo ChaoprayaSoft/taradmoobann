@@ -600,7 +600,15 @@ export default function AdminDashboardClient({
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">{t("adImageUpload")}</label>
-        <input type="file" accept="image/*" onChange={(e) => setAdFile(e.target.files ? e.target.files[0] : null)} className="mt-1 block w-full text-sm text-gray-500" />
+        <input type="file" accept="image/*" onChange={(e) => {
+          const f = e.target.files ? e.target.files[0] : null;
+          if (f && f.size > 4 * 1024 * 1024) {
+            alert("File size must be less than 4MB");
+            e.target.value = "";
+            return;
+          }
+          setAdFile(f);
+        }} className="mt-1 block w-full text-sm text-gray-500" />
         {editingAd && adFormData.imageUrl && <p className="text-xs text-gray-500 mt-1">{t("leaveEmptyKeep")}</p>}
       </div>
       <div className="flex gap-4">
@@ -791,7 +799,15 @@ export default function AdminDashboardClient({
                 type="file"
                 accept="image/*"
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
-                onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                onChange={(e) => {
+                  const f = e.target.files ? e.target.files[0] : null;
+                  if (f && f.size > 4 * 1024 * 1024) {
+                    alert("File size must be less than 4MB");
+                    e.target.value = "";
+                    return;
+                  }
+                  setFile(f);
+                }}
               />
             </div>
             <div>
