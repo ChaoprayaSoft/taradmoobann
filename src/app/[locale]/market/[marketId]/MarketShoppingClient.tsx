@@ -139,6 +139,35 @@ export default function MarketShoppingClient({
 
   const selectedShop = localShops.find(s => s.id === selectedShopId);
   
+  const handleShareShop = async (shop: any) => {
+    if (!session) {
+      setShowSignInModal(true);
+      return;
+    }
+    const shareUrl = `${window.location.origin}/market/${market.id}?shopId=${shop.id}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shop.name,
+          text: t("checkOutShop", { shopName: shop.name }),
+          url: shareUrl,
+        });
+        return; // Success with native share
+      } catch (err) {
+        console.error("Error sharing:", err);
+        // Fallback to clipboard if share was aborted/failed
+      }
+    }
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      alert(t("linkCopied", { defaultValue: "Link copied to clipboard!" }));
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
+  };
+
   // Extract all unique tags across all products for the category filter
   const allTags = Array.from(new Set(localProducts.flatMap((p: any) => p.tags || []))).sort();
   const filterOptions = [t("allCategories"), ...allTags];
@@ -495,21 +524,33 @@ export default function MarketShoppingClient({
                   <span className="bg-brand-100 text-brand-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                     {selectedShop.category}
                   </span>
-                  <button
-                    onClick={() => {
-                      if (!session) {
-                        setShowSignInModal(true);
-                      } else {
-                        setShowChatModal(true);
-                      }
-                    }}
-                    className="flex items-center gap-1 bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                    </svg>
-                    {t("chatWithShop")}
-                  </button>
+                  <div className="flex flex-wrap items-center justify-end gap-2 mt-1">
+                    <button
+                      onClick={() => handleShareShop(selectedShop)}
+                      className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-sm font-medium transition"
+                      title={t("shareShop")}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                      </svg>
+                      {t("shareShop", { defaultValue: "Share this shop" })}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!session) {
+                          setShowSignInModal(true);
+                        } else {
+                          setShowChatModal(true);
+                        }
+                      }}
+                      className="flex items-center gap-1 bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                      </svg>
+                      {t("chatWithShop")}
+                    </button>
+                  </div>
                 </div>
               </div>
 

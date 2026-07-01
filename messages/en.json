@@ -620,6 +620,8 @@
     "reviewsFor": "Reviews for {name}",
     "noReviewsYetPeriod": "No reviews yet.",
     "replyFromShopOwner": "Reply from Shop Owner:",
+    "shareShop": "Share this shop",
+    "linkCopied": "Link copied to clipboard!",
     "close": "Close"
   },
   "CartSidebar": {

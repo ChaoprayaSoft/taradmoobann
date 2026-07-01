@@ -648,6 +648,8 @@
     "reviewsFor": "รีวิวสำหรับ {name}",
     "noReviewsYetPeriod": "ยังไม่มีรีวิว",
     "replyFromShopOwner": "ตอบกลับจากเจ้าของร้าน:",
+    "shareShop": "แชร์ร้านค้านี้",
+    "linkCopied": "คัดลอกลิงก์ไปยังคลิปบอร์ดแล้ว!",
     "close": "ปิด"
   },
   "CartSidebar": {
