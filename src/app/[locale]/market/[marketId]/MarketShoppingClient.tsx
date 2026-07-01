@@ -527,7 +527,7 @@ export default function MarketShoppingClient({
                   <div className="flex flex-wrap items-center justify-end gap-2 mt-1">
                     <button
                       onClick={() => handleShareShop(selectedShop)}
-                      className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-sm font-medium transition"
+                      className="flex items-center gap-1 bg-orange-100 hover:bg-orange-200 text-orange-800 px-3 py-1.5 rounded text-sm font-medium transition"
                       title={t("shareShop")}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
