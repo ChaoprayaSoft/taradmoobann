@@ -31,7 +31,8 @@ export default function ShopperDashboardClient({
   userMaxShopSlots = 0,
   initialEmailNotificationsEnabled = true,
   initialPushNotificationsEnabled = true,
-  shopNamesMap
+  shopNamesMap,
+  isWalletEnabled = true
 }: {
   allMarkets: any[],
   initialShops?: any[],
@@ -41,7 +42,8 @@ export default function ShopperDashboardClient({
   userMaxShopSlots?: number,
   initialEmailNotificationsEnabled?: boolean,
   initialPushNotificationsEnabled?: boolean,
-  shopNamesMap?: Record<string, string>
+  shopNamesMap?: Record<string, string>,
+  isWalletEnabled?: boolean
 }) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -746,13 +748,29 @@ export default function ShopperDashboardClient({
             <span className="font-bold text-sm">{t("buyCoffee")}</span>
           </button>
 
-          <Link href="/shopper/wallet" className="flex items-center gap-2 bg-yellow-50 text-yellow-700 border border-yellow-200 px-4 py-2 rounded-md hover:bg-yellow-100 transition shadow-sm">
-            <Coins className="w-5 h-5 text-yellow-500" />
-            <div className="flex flex-col items-start leading-none">
-              <span className="text-xs uppercase tracking-wider font-semibold opacity-70">{t("wallet")}</span>
-              <span className="font-bold text-sm">{t("coins", { coins: userCoins })}</span>
+          {isWalletEnabled ? (
+            <Link href="/shopper/wallet" className="flex items-center gap-2 bg-yellow-50 text-yellow-700 border border-yellow-200 px-4 py-2 rounded-md hover:bg-yellow-100 transition shadow-sm">
+              <Coins className="w-5 h-5 text-yellow-500" />
+              <div className="flex flex-col items-start leading-none">
+                <span className="text-xs uppercase tracking-wider font-semibold opacity-70">{t("wallet")}</span>
+                <span className="font-bold text-sm">{t("coins", { coins: userCoins })}</span>
+              </div>
+            </Link>
+          ) : (
+            <div className="relative group inline-block">
+              <button disabled className="flex items-center gap-2 bg-gray-100 text-gray-400 border border-gray-200 px-4 py-2 rounded-md shadow-sm cursor-not-allowed">
+                <Coins className="w-5 h-5 text-gray-400" />
+                <div className="flex flex-col items-start leading-none">
+                  <span className="text-xs uppercase tracking-wider font-semibold opacity-70">{t("wallet")}</span>
+                  <span className="font-bold text-sm">{t("coins", { coins: userCoins })}</span>
+                </div>
+              </button>
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                Coming soon
+                <svg className="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255"><polygon className="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+              </div>
             </div>
-          </Link>
+          )}
           <div className="relative group h-full flex items-center">
             <div className="flex flex-col items-center">
               <button

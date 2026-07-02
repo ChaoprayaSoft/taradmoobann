@@ -19,7 +19,8 @@ export default function ShopOwnerDashboardClient({
   initialMarkets,
   initialOrders = [],
   initialCoins,
-  userMaxShopSlots = 1
+  userMaxShopSlots = 1,
+  isWalletEnabled = true
 }: {
   userEmail: string,
   initialShops: any[],
@@ -27,7 +28,8 @@ export default function ShopOwnerDashboardClient({
   initialMarkets?: any[],
   initialOrders?: any[],
   initialCoins?: number,
-  userMaxShopSlots?: number
+  userMaxShopSlots?: number,
+  isWalletEnabled?: boolean
 }) {
   const router = useRouter();
   const t = useTranslations("ShopOwnerDashboard");
@@ -998,16 +1000,35 @@ return (
                   {t("monthlyMaintenanceFee", { fee: maintenanceFee }) || `Monthly Maintenance: ${maintenanceFee} coins`}
                 </span>
 
-                <button
-                  onClick={() => router.push('/shopper/wallet')}
-                  className="flex items-center bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-2 rounded-full border border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition shadow-sm cursor-pointer group relative"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-1 text-yellow-500">
-                    <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.313.152-.68.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .302-.152.668-.579.991a2.534 2.534 0 01-.921.42z" />
-                    <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.464-1.112 2.428 0 .964.4 1.862 1.112 2.428.42.333.864.55 1.346.68V15.54a2.54 2.54 0 01-1.346-.68.75.75 0 00-1.06 1.06c.712.566 1.57.864 2.446.963V18a.75.75 0 001.5 0v-.816a3.836 3.836 0 001.72-.756c.712-.566 1.112-1.464 1.112-2.428 0-.964-.4-1.862-1.112-2.428a3.836 3.836 0 00-1.346-.68V7.46c.482.13.926.347 1.346.68a.75.75 0 001.06-1.06c-.712-.566-1.57-.864-2.446-.963V6z" clipRule="evenodd" />
-                  </svg>
-                  {t("coins", { coins: coins }) || `${coins} Coins`}
-                </button>
+                {isWalletEnabled ? (
+                  <button
+                    onClick={() => router.push('/shopper/wallet')}
+                    className="flex items-center bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-2 rounded-full border border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition shadow-sm cursor-pointer group relative"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-1 text-yellow-500">
+                      <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.313.152-.68.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .302-.152.668-.579.991a2.534 2.534 0 01-.921.42z" />
+                      <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.464-1.112 2.428 0 .964.4 1.862 1.112 2.428.42.333.864.55 1.346.68V15.54a2.54 2.54 0 01-1.346-.68.75.75 0 00-1.06 1.06c.712.566 1.57.864 2.446.963V18a.75.75 0 001.5 0v-.816a3.836 3.836 0 001.72-.756c.712-.566 1.112-1.464 1.112-2.428 0-.964-.4-1.862-1.112-2.428a3.836 3.836 0 00-1.346-.68V7.46c.482.13.926.347 1.346.68a.75.75 0 001.06-1.06c-.712-.566-1.57-.864-2.446-.963V6z" clipRule="evenodd" />
+                    </svg>
+                    {t("coins", { coins: coins }) || `${coins} Coins`}
+                  </button>
+                ) : (
+                  <div className="relative group inline-block">
+                    <button
+                      disabled
+                      className="flex items-center bg-gray-100 text-gray-400 text-xs font-bold px-3 py-2 rounded-full border border-gray-200 shadow-sm cursor-not-allowed group relative"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-1 text-gray-400">
+                        <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.313.152-.68.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .302-.152.668-.579.991a2.534 2.534 0 01-.921.42z" />
+                        <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.464-1.112 2.428 0 .964.4 1.862 1.112 2.428.42.333.864.55 1.346.68V15.54a2.54 2.54 0 01-1.346-.68.75.75 0 00-1.06 1.06c.712.566 1.57.864 2.446.963V18a.75.75 0 001.5 0v-.816a3.836 3.836 0 001.72-.756c.712-.566 1.112-1.464 1.112-2.428 0-.964-.4-1.862-1.112-2.428a3.836 3.836 0 00-1.346-.68V7.46c.482.13.926.347 1.346.68a.75.75 0 001.06-1.06c-.712-.566-1.57-.864-2.446-.963V6z" clipRule="evenodd" />
+                      </svg>
+                      {t("coins", { coins: coins }) || `${coins} Coins`}
+                    </button>
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                      Coming soon
+                      <svg className="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255"><polygon className="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                    </div>
+                  </div>
+                )}
 
                 <button
                   onClick={() => setShowCoffeeModal(true)}

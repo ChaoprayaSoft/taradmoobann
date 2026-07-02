@@ -23,6 +23,7 @@ export default async function ShopOwnerDashboard() {
   let orders: any[] = [];
   let initialCoins = 0;
   let userMaxShopSlots = 1;
+  let isWalletEnabled = true;
   
   try {
     const shopSnapshot = await adminDb
@@ -92,9 +93,14 @@ export default async function ShopOwnerDashboard() {
       }
     }
 
+    const platformSettingsDoc = await adminDb.collection("settings").doc("platform").get();
+    if (platformSettingsDoc.exists) {
+      isWalletEnabled = platformSettingsDoc.data()?.isWalletEnabled !== false;
+    }
+
   } catch (error) {
     console.error("Error fetching data for Shop Owner Dashboard:", error);
   }
 
-  return <ShopOwnerDashboardClient userEmail={userEmail} initialShops={ownedShops} initialProducts={products} initialMarkets={markets} initialOrders={orders} initialCoins={initialCoins} userMaxShopSlots={userMaxShopSlots} />;
+  return <ShopOwnerDashboardClient userEmail={userEmail} initialShops={ownedShops} initialProducts={products} initialMarkets={markets} initialOrders={orders} initialCoins={initialCoins} userMaxShopSlots={userMaxShopSlots} isWalletEnabled={isWalletEnabled} />;
 }

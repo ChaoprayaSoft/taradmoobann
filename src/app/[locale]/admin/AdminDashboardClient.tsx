@@ -16,7 +16,8 @@ export default function AdminDashboardClient({
   totalUsers = 0,
   initialFeedbacks = [],
   initialTermsOfUse = "",
-  initialUsers = []
+  initialUsers = [],
+  initialPlatformSettings = { isWalletEnabled: true }
 }: { 
   initialMarkets: any[],
   initialShops?: any[],
@@ -26,7 +27,8 @@ export default function AdminDashboardClient({
   totalUsers?: number,
   initialFeedbacks?: any[],
   initialTermsOfUse?: any,
-  initialUsers?: any[]
+  initialUsers?: any[],
+  initialPlatformSettings?: any
 }) {
   const t = useTranslations("AdminDashboard");
   const router = useRouter();
@@ -36,6 +38,9 @@ export default function AdminDashboardClient({
   const [marketToDelete, setMarketToDelete] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [platformSettings, setPlatformSettings] = useState(initialPlatformSettings);
+  const [platformSettingsLoading, setPlatformSettingsLoading] = useState(false);
 
   const [activeTab, setActiveTab] = useState<"markets" | "shops" | "chats" | "ads" | "feedback" | "terms" | "users">("markets");
 
@@ -583,6 +588,24 @@ export default function AdminDashboardClient({
     }
   };
 
+  const handleToggleWallet = async () => {
+    setPlatformSettingsLoading(true);
+    const newSettings = { ...platformSettings, isWalletEnabled: !platformSettings.isWalletEnabled };
+    try {
+      const res = await fetch("/api/admin/platform-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSettings)
+      });
+      if (!res.ok) throw new Error("Failed to update platform settings");
+      setPlatformSettings(newSettings);
+    } catch (err) {
+      alert("Failed to update platform settings");
+    } finally {
+      setPlatformSettingsLoading(false);
+    }
+  };
+
   const renderAdForm = () => (
     <form onSubmit={handleAdSubmit} className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6 space-y-4 max-w-xl">
       <h3 className="font-bold text-lg mb-4">{editingAd ? t("editAd") : t("newAd")}</h3>
@@ -907,6 +930,9 @@ export default function AdminDashboardClient({
                     <p className="text-sm text-gray-500 truncate">
                       {market.description || t("noDescription")}
                     </p>
+                    <p className="text-xs text-brand-600 mt-1 font-semibold">
+                      Total Shops: {initialShops.filter(s => s.marketId === market.id).length}
+                    </p>
                   </div>
                   <div className="text-right flex-shrink-0 mr-4">
                     <p className="text-sm font-medium text-gray-900">{t("owner")}</p>
@@ -981,7 +1007,22 @@ export default function AdminDashboardClient({
 
       {/* PLATFORM OVERVIEW */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-6">{t("platformOverview")}</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold">{t("platformOverview")}</h2>
+          <div className="flex items-center gap-4 bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+            <span className="text-sm font-medium text-gray-700">Top-up/Wallet Button:</span>
+            <button
+              onClick={handleToggleWallet}
+              disabled={platformSettingsLoading}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${platformSettings.isWalletEnabled ? 'bg-brand-600' : 'bg-gray-300'} disabled:opacity-50`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${platformSettings.isWalletEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
+            <span className="text-sm text-gray-500">
+              {platformSettings.isWalletEnabled ? "Enabled" : "Disabled"}
+            </span>
+          </div>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-gradient-to-br from-brand-50 to-brand-100 p-6 rounded-xl border border-brand-200">
@@ -1120,6 +1161,7 @@ export default function AdminDashboardClient({
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("villageName")}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("market")}</th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t("address") || "Address"}</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Coins</th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t("status") || "Status"}</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("createdDate") || "Created Date"}</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("actions") || "Actions"}</th>
@@ -1141,6 +1183,9 @@ export default function AdminDashboardClient({
                           >
                             {t("viewAddresses") || "View Addresses"}
                           </button>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-brand-700">
+                          {user.coins || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                           <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive === false ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
@@ -1173,7 +1218,7 @@ export default function AdminDashboardClient({
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                      <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
                         {t("noUsersFound") || "No users found."}
                       </td>
                     </tr>

@@ -24,6 +24,7 @@ export default async function ShopperDashboard() {
   let emailNotificationsEnabled: boolean = true;
   let pushNotificationsEnabled: boolean = true;
   let shopNamesMap: Record<string, string> = {};
+  let isWalletEnabled: boolean = true;
 
   try {
     const marketSnapshot = await adminDb.collection("markets").get();
@@ -87,6 +88,11 @@ export default async function ShopperDashboard() {
 
     rawAllShops.forEach(s => shopNamesMap[s.id] = s.name);
 
+    const platformSettingsDoc = await adminDb.collection("settings").doc("platform").get();
+    if (platformSettingsDoc.exists) {
+      isWalletEnabled = platformSettingsDoc.data()?.isWalletEnabled !== false;
+    }
+
   } catch (error) {
     console.error("Error fetching data for Shopper Dashboard:", error);
   }
@@ -102,6 +108,7 @@ export default async function ShopperDashboard() {
       initialEmailNotificationsEnabled={emailNotificationsEnabled}
       initialPushNotificationsEnabled={pushNotificationsEnabled}
       shopNamesMap={shopNamesMap}
+      isWalletEnabled={isWalletEnabled}
     />
   );
 }
