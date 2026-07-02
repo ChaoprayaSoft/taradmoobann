@@ -82,7 +82,7 @@ export default function SpinWheel({ onPlay, isProcessing }: Props) {
           disabled={isProcessing}
           className="px-8 py-3 bg-gradient-to-r from-pink-500 to-indigo-500 text-white rounded-full font-bold shadow-lg hover:scale-105 transition disabled:opacity-50"
         >
-          SPIN!
+          {t('spinAction')}
         </button>
       )}
 

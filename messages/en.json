@@ -728,6 +728,10 @@
     "mysteryChest": "Mystery Chests",
     "spinWheel": "Spin the Wheel",
     "scratchCard": "Scratch Card",
-    "scratchToWin": "Scratch 3 matching coins to win!"
+    "scratchToWin": "Scratch 3 matching coins to win!",
+    "login": "Login",
+    "back": "Back",
+    "spinAction": "SPIN!",
+    "scratchAction": "SCRATCH HERE"
   }
 }

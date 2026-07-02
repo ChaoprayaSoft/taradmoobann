@@ -41,9 +41,9 @@ export default function MiniGameContainer() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto my-12 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl shadow-sm border border-indigo-100">
+    <div className="w-full max-w-4xl mx-auto my-6 sm:my-12 p-4 sm:p-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl sm:rounded-3xl shadow-sm border border-indigo-100">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+        <h2 className="text-2xl sm:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
           {t('title')}
         </h2>
       </div>
@@ -52,7 +52,7 @@ export default function MiniGameContainer() {
         <div className="text-center py-8">
           <p className="text-lg text-gray-600 mb-6">{t('loginToPlay')}</p>
           <Link href="/auth/signin" className="inline-block px-8 py-3 bg-indigo-600 text-white rounded-full font-bold shadow-md hover:bg-indigo-700 transition hover:-translate-y-1">
-            Login
+            {t('login')}
           </Link>
         </div>
       ) : (
@@ -85,12 +85,12 @@ export default function MiniGameContainer() {
               </div>
             </div>
           ) : (
-            <div className="w-full relative bg-white p-6 rounded-2xl shadow-inner min-h-[300px]">
+            <div className="w-full relative bg-white p-4 sm:p-6 rounded-2xl shadow-inner min-h-[300px]">
               <button 
                 onClick={() => setSelectedGame(null)}
-                className="absolute top-4 left-4 text-gray-400 hover:text-gray-600 font-medium text-sm"
+                className="absolute top-2 sm:top-4 left-2 sm:left-4 p-2 text-gray-400 hover:text-gray-600 font-medium text-sm flex items-center"
               >
-                ← Back
+                ← {t('back')}
               </button>
               
               <div className="pt-8">

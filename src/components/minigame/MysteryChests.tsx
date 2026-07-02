@@ -39,7 +39,7 @@ export default function MysteryChests({ onPlay, isProcessing }: Props) {
     <div className="flex flex-col items-center justify-center p-4">
       <h3 className="text-xl font-bold mb-4">{t('mysteryChest')}</h3>
       
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
         {[0, 1, 2].map((index) => (
           <div
             key={index}
