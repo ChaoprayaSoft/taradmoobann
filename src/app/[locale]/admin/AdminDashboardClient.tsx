@@ -975,9 +975,20 @@ export default function AdminDashboardClient({
                     <p className="text-sm text-gray-500 truncate">
                       {market.description || t("noDescription")}
                     </p>
-                    <p className="text-xs text-brand-600 mt-1 font-semibold">
-                      Total Shops: {initialShops.filter(s => s.marketId === market.id).length}
-                    </p>
+                    <div className="relative group inline-block">
+                      <p className="text-xs text-brand-600 mt-1 font-semibold cursor-default">
+                        Total Shops: {initialShops.filter(s => s.marketId === market.id).length}
+                      </p>
+                      {initialShops.filter(s => s.marketId === market.id).length > 0 && (
+                        <div className="absolute left-0 bottom-full mb-1 w-max px-3 py-2 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition pointer-events-none z-10 max-h-48 overflow-y-auto">
+                          <ul className="list-disc pl-4 flex flex-col gap-1">
+                            {initialShops.filter(s => s.marketId === market.id).map(s => (
+                              <li key={s.id}>{s.name}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="text-right flex-shrink-0 mr-4">
                     <p className="text-sm font-medium text-gray-900">{t("owner")}</p>

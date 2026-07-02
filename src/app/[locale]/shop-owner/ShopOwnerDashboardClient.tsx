@@ -20,7 +20,8 @@ export default function ShopOwnerDashboardClient({
   initialOrders = [],
   initialCoins,
   userMaxShopSlots = 1,
-  isWalletEnabled = true
+  isWalletEnabled = true,
+  pendingTopupAmount = 0
 }: {
   userEmail: string,
   initialShops: any[],
@@ -29,7 +30,8 @@ export default function ShopOwnerDashboardClient({
   initialOrders?: any[],
   initialCoins?: number,
   userMaxShopSlots?: number,
-  isWalletEnabled?: boolean
+  isWalletEnabled?: boolean,
+  pendingTopupAmount?: number
 }) {
   const router = useRouter();
   const t = useTranslations("ShopOwnerDashboard");
@@ -1001,16 +1003,23 @@ return (
                 </span>
 
                 {isWalletEnabled ? (
-                  <button
-                    onClick={() => router.push('/shopper/wallet')}
-                    className="flex items-center bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-2 rounded-full border border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition shadow-sm cursor-pointer group relative"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-1 text-yellow-500">
-                      <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.313.152-.68.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .302-.152.668-.579.991a2.534 2.534 0 01-.921.42z" />
-                      <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.464-1.112 2.428 0 .964.4 1.862 1.112 2.428.42.333.864.55 1.346.68V15.54a2.54 2.54 0 01-1.346-.68.75.75 0 00-1.06 1.06c.712.566 1.57.864 2.446.963V18a.75.75 0 001.5 0v-.816a3.836 3.836 0 001.72-.756c.712-.566 1.112-1.464 1.112-2.428 0-.964-.4-1.862-1.112-2.428a3.836 3.836 0 00-1.346-.68V7.46c.482.13.926.347 1.346.68a.75.75 0 001.06-1.06c-.712-.566-1.57-.864-2.446-.963V6z" clipRule="evenodd" />
-                    </svg>
-                    {t("coins", { coins: coins }) || `${coins} Coins`}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => router.push('/shopper/wallet')}
+                      className="flex items-center bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-2 rounded-full border border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition shadow-sm cursor-pointer group relative"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-1 text-yellow-500">
+                        <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.313.152-.68.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .302-.152.668-.579.991a2.534 2.534 0 01-.921.42z" />
+                        <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.464-1.112 2.428 0 .964.4 1.862 1.112 2.428.42.333.864.55 1.346.68V15.54a2.54 2.54 0 01-1.346-.68.75.75 0 00-1.06 1.06c.712.566 1.57.864 2.446.963V18a.75.75 0 001.5 0v-.816a3.836 3.836 0 001.72-.756c.712-.566 1.112-1.464 1.112-2.428 0-.964-.4-1.862-1.112-2.428a3.836 3.836 0 00-1.346-.68V7.46c.482.13.926.347 1.346.68a.75.75 0 001.06-1.06c-.712-.566-1.57-.864-2.446-.963V6z" clipRule="evenodd" />
+                      </svg>
+                      {t("coins", { coins: coins }) || `${coins} Coins`}
+                    </button>
+                    {pendingTopupAmount > 0 && (
+                      <span className="text-xs text-orange-600 font-semibold bg-orange-50 px-2 py-1 rounded-full border border-orange-200">
+                        Pending: ฿{pendingTopupAmount}
+                      </span>
+                    )}
+                  </div>
                 ) : (
                   <div className="relative group inline-block">
                     <button

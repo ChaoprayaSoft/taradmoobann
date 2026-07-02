@@ -25,6 +25,7 @@ export default async function ShopperDashboard() {
   let pushNotificationsEnabled: boolean = true;
   let shopNamesMap: Record<string, string> = {};
   let isWalletEnabled: boolean = true;
+  let pendingTopupAmount: number = 0;
 
   try {
     const marketSnapshot = await adminDb.collection("markets").get();
@@ -93,6 +94,15 @@ export default async function ShopperDashboard() {
       isWalletEnabled = platformSettingsDoc.data()?.isWalletEnabled !== false;
     }
 
+    const pendingTopupsSnapshot = await adminDb.collection("topups")
+      .where("userEmail", "==", userEmail)
+      .where("status", "==", "pending")
+      .get();
+    
+    pendingTopupsSnapshot.docs.forEach((doc: any) => {
+      pendingTopupAmount += (doc.data().amountTHB || 0);
+    });
+
   } catch (error) {
     console.error("Error fetching data for Shopper Dashboard:", error);
   }
@@ -109,6 +119,7 @@ export default async function ShopperDashboard() {
       initialPushNotificationsEnabled={pushNotificationsEnabled}
       shopNamesMap={shopNamesMap}
       isWalletEnabled={isWalletEnabled}
+      pendingTopupAmount={pendingTopupAmount}
     />
   );
 }

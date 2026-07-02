@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { adminDb } from "@/lib/firebaseAdmin";
+import { sendNotificationToUser } from "@/lib/sendNotification";
 
 export async function POST(req: Request) {
   try {
@@ -31,6 +32,21 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
+
+    try {
+      const adminsSnapshot = await adminDb.collection("users").where("roles", "array-contains", "admin").get();
+      const notificationPromises = adminsSnapshot.docs.map(doc => {
+        const adminEmail = doc.id;
+        return sendNotificationToUser(
+          adminEmail,
+          "New Top-up Request",
+          `User ${session.user?.email} has requested a top-up of ฿${amountTHB}. Please review it in the Admin Dashboard.`
+        );
+      });
+      await Promise.all(notificationPromises);
+    } catch (notifErr) {
+      console.error("Failed to notify admins:", notifErr);
+    }
 
     return NextResponse.json({ success: true, id: topupRef.id });
 

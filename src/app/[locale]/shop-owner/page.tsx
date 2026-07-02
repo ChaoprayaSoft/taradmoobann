@@ -24,6 +24,7 @@ export default async function ShopOwnerDashboard() {
   let initialCoins = 0;
   let userMaxShopSlots = 1;
   let isWalletEnabled = true;
+  let pendingTopupAmount = 0;
   
   try {
     const shopSnapshot = await adminDb
@@ -98,9 +99,18 @@ export default async function ShopOwnerDashboard() {
       isWalletEnabled = platformSettingsDoc.data()?.isWalletEnabled !== false;
     }
 
+    const pendingTopupsSnapshot = await adminDb.collection("topups")
+      .where("userEmail", "==", userEmail)
+      .where("status", "==", "pending")
+      .get();
+    
+    pendingTopupsSnapshot.docs.forEach((doc: any) => {
+      pendingTopupAmount += (doc.data().amountTHB || 0);
+    });
+
   } catch (error) {
     console.error("Error fetching data for Shop Owner Dashboard:", error);
   }
 
-  return <ShopOwnerDashboardClient userEmail={userEmail} initialShops={ownedShops} initialProducts={products} initialMarkets={markets} initialOrders={orders} initialCoins={initialCoins} userMaxShopSlots={userMaxShopSlots} isWalletEnabled={isWalletEnabled} />;
+  return <ShopOwnerDashboardClient userEmail={userEmail} initialShops={ownedShops} initialProducts={products} initialMarkets={markets} initialOrders={orders} initialCoins={initialCoins} userMaxShopSlots={userMaxShopSlots} isWalletEnabled={isWalletEnabled} pendingTopupAmount={pendingTopupAmount} />;
 }
