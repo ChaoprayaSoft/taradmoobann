@@ -199,7 +199,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                 <Coins className="w-12 h-12 mx-auto mb-3 opacity-20" />
                 <p className="text-sm">{t("selectPackage") || "Please select a package"}</p>
               </div>
-            ) : !showQR ? (
+            ) : (
               <div className="space-y-6">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">{t("selectedPackage") || "Selected Package"}</span>
@@ -209,44 +209,45 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                   <span className="text-gray-600">{t("paymentMethod") || "Payment Method"}</span>
                   <span className="font-medium text-gray-900">PromptPay QR</span>
                 </div>
-                <div className="border-t border-gray-100 pt-4 flex justify-between items-end">
+                <div className="border-t border-gray-100 pt-4 flex justify-between items-end mb-2">
                   <span className="font-bold text-gray-900">Total</span>
                   <span className="text-2xl font-bold text-brand-600">฿{selectedPackage}</span>
                 </div>
 
-                <button
-                  onClick={handleGenerateQR}
-                  className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition flex justify-center items-center gap-2"
-                >
-                  {t("generateQr") || "Generate QR"}
-                </button>
-              </div>
-            ) : (
-              <div className="text-center space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="bg-white p-4 border-2 border-gray-100 rounded-xl inline-block mx-auto shadow-sm">
-                  <QRCodeSVG
-                    value={generatePayload("0909739266", { amount: selectedPackage })}
-                    size={192}
-                  />
-                </div>
-
-                <div className="space-y-1 mb-4">
-                  <p className="font-medium text-gray-900">{t("scanToPay", { amount: selectedPackage }) || `Scan to pay ฿${selectedPackage}`}</p>
-                  <p className="text-sm text-gray-500">Please scan using your banking app.</p>
-                </div>
-                
-                {!showUpload && (
+                <div className="flex flex-col gap-3">
                   <button
-                    onClick={() => setShowUpload(true)}
-                    className="w-full bg-brand-100 text-brand-800 font-bold py-3 rounded-xl hover:bg-brand-200 transition flex justify-center items-center gap-2 border border-brand-200 shadow-sm"
+                    onClick={() => { setShowQR(true); setShowUpload(false); }}
+                    className={`w-full font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 ${showQR ? 'bg-brand-700 text-white shadow-inner' : 'bg-brand-600 text-white hover:bg-brand-700 shadow-sm'}`}
+                  >
+                    {t("generateQr") || "Generate QR Code"}
+                  </button>
+                  <button
+                    onClick={() => { setShowUpload(true); setShowQR(false); }}
+                    className={`w-full font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 border ${showUpload ? 'bg-brand-200 text-brand-900 border-brand-300 shadow-inner' : 'bg-brand-50 text-brand-800 border-brand-200 hover:bg-brand-100 shadow-sm'}`}
                   >
                     <Upload className="w-5 h-5" />
                     Upload Payment Slip
                   </button>
-                )}
+                </div>
               </div>
             )}
           </div>
+
+          {showQR && (
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-500 text-center space-y-4">
+              <div className="bg-white p-4 border-2 border-gray-100 rounded-xl inline-block mx-auto shadow-sm">
+                <QRCodeSVG
+                  value={generatePayload("0909739266", { amount: selectedPackage || 0 })}
+                  size={192}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <p className="font-medium text-gray-900">{t("scanToPay", { amount: selectedPackage || 0 }) || `Scan to pay ฿${selectedPackage}`}</p>
+                <p className="text-sm text-gray-500">Please scan using your banking app.</p>
+              </div>
+            </div>
+          )}
 
           {showUpload && (
             <div className="bg-brand-50 rounded-2xl p-6 shadow-sm border border-brand-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
