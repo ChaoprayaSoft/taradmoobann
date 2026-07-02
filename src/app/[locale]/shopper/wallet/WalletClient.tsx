@@ -234,11 +234,11 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                 <div className="pt-4 border-t border-gray-100 mt-4 text-left">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Upload Payment Slip</label>
                   <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                        <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                        <p className="text-xs text-gray-500">PNG, JPG up to 4MB</p>
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 px-4">
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                        <p className="mb-1 text-sm text-gray-600"><span className="font-semibold">Click to upload slip</span></p>
+                        <p className="text-xs text-gray-500">PNG, JPG (Max 4MB)</p>
                       </div>
                       <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                     </label>
