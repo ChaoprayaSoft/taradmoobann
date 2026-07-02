@@ -186,7 +186,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
         </div>
 
         {/* Right Column: Checkout / QR Display */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-6">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-8">
             <h3 className="font-bold text-gray-900 text-lg mb-4">{t("paymentDetails") || "Payment Details"}</h3>
 
@@ -228,38 +228,43 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
 
                 <div className="space-y-1">
                   <p className="font-medium text-gray-900">{t("scanToPay", { amount: selectedPackage }) || `Scan to pay ฿${selectedPackage}`}</p>
-                  <p className="text-sm text-gray-500">Please upload your payment slip below for verification.</p>
-                </div>
-
-                <div className="pt-4 border-t border-gray-100 mt-4 text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Upload Payment Slip</label>
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 px-4">
-                      <div className="flex flex-col items-center justify-center text-center">
-                        <Upload className="w-6 h-6 text-gray-400 mb-2" />
-                        <p className="mb-1 text-sm text-gray-600"><span className="font-semibold">Click to upload slip</span></p>
-                        <p className="text-xs text-gray-500">PNG, JPG (Max 4MB)</p>
-                      </div>
-                      <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-                    </label>
-                  </div>
-                  {file && (
-                    <p className="mt-2 text-sm text-green-600 font-medium truncate flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> {file.name}
-                    </p>
-                  )}
-                  
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!file || isLoading}
-                    className="w-full mt-4 bg-gray-900 text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
-                  >
-                    {isLoading ? "Submitting..." : "Submit Payment Slip"}
-                  </button>
+                  <p className="text-sm text-gray-500">Please scan using your banking app.</p>
                 </div>
               </div>
             )}
           </div>
+
+          {showQR && (
+            <div className="bg-brand-50 rounded-2xl p-6 shadow-sm border border-brand-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <h3 className="font-bold text-brand-900 text-lg mb-2">Upload Payment Slip</h3>
+              <p className="text-sm text-brand-700 mb-4">Please upload your payment slip for verification.</p>
+              
+              <div className="flex items-center justify-center w-full">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-brand-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-brand-100 px-4 transition">
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <Upload className="w-6 h-6 text-brand-500 mb-2" />
+                    <p className="mb-1 text-sm text-brand-700"><span className="font-semibold">Click to upload slip</span></p>
+                    <p className="text-xs text-brand-500">PNG, JPG (Max 4MB)</p>
+                  </div>
+                  <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                </label>
+              </div>
+              
+              {file && (
+                <p className="mt-3 text-sm text-green-700 font-medium truncate flex items-center gap-1 bg-green-50 p-2 rounded-lg border border-green-200">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" /> {file.name}
+                </p>
+              )}
+              
+              <button
+                onClick={handleSubmit}
+                disabled={!file || isLoading}
+                className="w-full mt-4 bg-brand-600 text-white font-medium py-3 rounded-xl hover:bg-brand-700 transition disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed shadow-sm"
+              >
+                {isLoading ? "Submitting..." : "Submit Payment Slip"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
