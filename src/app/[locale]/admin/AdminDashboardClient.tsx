@@ -17,7 +17,8 @@ export default function AdminDashboardClient({
   initialFeedbacks = [],
   initialTermsOfUse = "",
   initialUsers = [],
-  initialPlatformSettings = { isWalletEnabled: true }
+  initialPlatformSettings = { isWalletEnabled: true },
+  initialTopups = []
 }: { 
   initialMarkets: any[],
   initialShops?: any[],
@@ -28,7 +29,8 @@ export default function AdminDashboardClient({
   initialFeedbacks?: any[],
   initialTermsOfUse?: any,
   initialUsers?: any[],
-  initialPlatformSettings?: any
+  initialPlatformSettings?: any,
+  initialTopups?: any[]
 }) {
   const t = useTranslations("AdminDashboard");
   const router = useRouter();
@@ -42,7 +44,7 @@ export default function AdminDashboardClient({
   const [platformSettings, setPlatformSettings] = useState(initialPlatformSettings);
   const [platformSettingsLoading, setPlatformSettingsLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"markets" | "shops" | "chats" | "ads" | "feedback" | "terms" | "users">("markets");
+  const [activeTab, setActiveTab] = useState<"markets" | "shops" | "chats" | "ads" | "feedback" | "terms" | "users" | "logs" | "topups">("markets");
 
   // Users Tab State
   const [userSearchQuery, setUserSearchQuery] = useState("");
@@ -132,6 +134,40 @@ export default function AdminDashboardClient({
   const [logsFilterAction, setLogsFilterAction] = useState("");
   const [logsStartDate, setLogsStartDate] = useState("");
   const [logsEndDate, setLogsEndDate] = useState("");
+
+  // Topups state
+  const [topupsList, setTopupsList] = useState(initialTopups || []);
+  const [rejectingTopup, setRejectingTopup] = useState<any | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [isTopupUpdating, setIsTopupUpdating] = useState(false);
+
+  const REJECTION_REASONS = [
+    "Invalid payment slip (Cannot read QR/details)",
+    "Payment amount does not match",
+    "Slip has already been used",
+    "Slip date is too old"
+  ];
+
+  const handleTopupAction = async (id: string, action: "approve" | "reject", reason?: string) => {
+    setIsTopupUpdating(true);
+    try {
+      const res = await fetch("/api/admin/topups", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action, reason })
+      });
+      if (!res.ok) throw new Error("Failed to process top-up");
+      
+      const updated = await res.json();
+      setTopupsList(prev => prev.map(t => t.id === id ? { ...t, status: action === "approve" ? "approved" : "rejected" } : t));
+      setRejectingTopup(null);
+      setRejectionReason("");
+    } catch (err) {
+      alert("Failed to process top-up");
+    } finally {
+      setIsTopupUpdating(false);
+    }
+  };
 
   const filteredLogs = useMemo(() => {
     return activityLogs.filter(log => {
@@ -692,6 +728,15 @@ export default function AdminDashboardClient({
             {t("marketsAndReports")}
           </button>
           <button
+            onClick={() => setActiveTab("topups")}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "topups" ? "bg-white text-purple-700 shadow-sm border border-purple-200" : "text-purple-600 hover:bg-white/50 hover:text-purple-900 border border-transparent"}`}
+          >
+            Pending Top-ups
+            {topupsList.filter(t => t.status === "pending").length > 0 && (
+              <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{topupsList.filter(t => t.status === "pending").length}</span>
+            )}
+          </button>
+          <button
             onClick={() => setActiveTab("users")}
             className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === "users" ? "bg-white text-purple-700 shadow-sm border border-purple-200" : "text-purple-600 hover:bg-white/50 hover:text-purple-900 border border-transparent"}`}
           >
@@ -1102,6 +1147,143 @@ export default function AdminDashboardClient({
         )}
       </div>
       </>
+      )}
+
+      {/* TOPUPS TAB */}
+      {activeTab === "topups" && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-xl font-semibold mb-4">Pending Top-ups</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Email</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (THB)</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Slip Image</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {topupsList.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                        No top-up requests found.
+                      </td>
+                    </tr>
+                  ) : (
+                    topupsList.map((topup) => (
+                      <tr key={topup.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(topup.createdAt).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {topup.userEmail}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
+                          ฿{topup.amountTHB}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <a href={topup.slipImageUrl} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline font-medium text-sm">
+                            View Slip
+                          </a>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                            topup.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            topup.status === 'approved' ? 'bg-green-100 text-green-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {topup.status.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          {topup.status === 'pending' && (
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => handleTopupAction(topup.id, 'approve')}
+                                disabled={isTopupUpdating}
+                                className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition disabled:opacity-50"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => setRejectingTopup(topup)}
+                                disabled={isTopupUpdating}
+                                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition disabled:opacity-50"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Topup Modal */}
+      {rejectingTopup && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between">
+              <h2 className="text-xl font-bold text-gray-900">Reject Top-up</h2>
+              <button onClick={() => setRejectingTopup(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div className="p-6">
+              <p className="mb-4 text-gray-700">Please provide a reason for rejecting the top-up of ฿{rejectingTopup.amountTHB} from {rejectingTopup.userEmail}. This will be emailed to the user.</p>
+              
+              <div className="space-y-2 mb-4">
+                <label className="text-sm font-semibold text-gray-700">Quick Reasons:</label>
+                <div className="flex flex-wrap gap-2">
+                  {REJECTION_REASONS.map(r => (
+                    <button 
+                      key={r}
+                      onClick={() => setRejectionReason(r)}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded border border-gray-300"
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-gray-700 mb-1 block">Custom Reason:</label>
+                <textarea
+                  className="w-full border border-gray-300 rounded p-2 focus:ring-brand-500"
+                  rows={3}
+                  value={rejectionReason}
+                  onChange={e => setRejectionReason(e.target.value)}
+                  placeholder="Type a reason..."
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => setRejectingTopup(null)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleTopupAction(rejectingTopup.id, 'reject', rejectionReason)}
+                  disabled={!rejectionReason || isTopupUpdating}
+                  className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 disabled:opacity-50"
+                >
+                  Confirm Reject
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Users Tab UI */}

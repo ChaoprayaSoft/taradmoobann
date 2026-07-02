@@ -24,6 +24,7 @@ export default async function AdminDashboard() {
   let feedbacks: any[] = [];
   let initialTermsOfUse: any = null;
   let initialPlatformSettings: any = { isWalletEnabled: true };
+  let topups: any[] = [];
   
   try {
     const snapshot = await adminDb.collection("markets").orderBy("createdAt", "desc").get();
@@ -59,9 +60,13 @@ export default async function AdminDashboard() {
     if (platformSettingsDoc.exists) {
       initialPlatformSettings = { isWalletEnabled: true, ...platformSettingsDoc.data() };
     }
+    
+    const topupsSnapshot = await adminDb.collection("topups").orderBy("createdAt", "desc").get();
+    topups = topupsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+
   } catch (error) {
     console.error("Error fetching data for Admin Dashboard:", error);
   }
 
-  return <AdminDashboardClient initialMarkets={markets} initialShops={shops} initialOrders={orders} initialAds={ads} initialAdsSettings={adsSettings} totalUsers={totalUsers} initialUsers={initialUsers} initialFeedbacks={feedbacks} initialTermsOfUse={initialTermsOfUse} initialPlatformSettings={initialPlatformSettings} />;
+  return <AdminDashboardClient initialMarkets={markets} initialShops={shops} initialOrders={orders} initialAds={ads} initialAdsSettings={adsSettings} totalUsers={totalUsers} initialUsers={initialUsers} initialFeedbacks={feedbacks} initialTermsOfUse={initialTermsOfUse} initialPlatformSettings={initialPlatformSettings} initialTopups={topups} />;
 }
