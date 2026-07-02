@@ -716,5 +716,19 @@
     "newChatMessageTitle": "ข้อความใหม่จาก {sender}",
     "orderCancelledByShopTitle": "คำสั่งซื้อถูกยกเลิกโดยร้านค้า",
     "orderCancelledByShopBody": "คำสั่งซื้อของคุณถูกยกเลิกโดย {shopName} เหตุผล: {cancelReason}"
+  },
+  "minigame": {
+    "title": "มินิเกมประจำวัน",
+    "loginToPlay": "เข้าสู่ระบบเพื่อเล่นมินิเกมและรับเหรียญฟรี!",
+    "playFree": "เล่นฟรี (รายวัน)",
+    "playForCoin": "เล่น 1 เหรียญ",
+    "youWon": "ยินดีด้วย! คุณได้รับ {coins} เหรียญ!",
+    "youLost": "ขอให้โชคดีในครั้งต่อไป!",
+    "tryAgain": "ลองอีกครั้ง (1 เหรียญ)",
+    "selectGame": "เลือกเกมที่จะเล่น",
+    "mysteryChest": "หีบสมบัติปริศนา",
+    "spinWheel": "วงล้อเสี่ยงโชค",
+    "scratchCard": "บัตรขูด",
+    "scratchToWin": "ขูดให้ตรงกัน 3 เหรียญเพื่อรับรางวัล!"
   }
 }

@@ -715,5 +715,19 @@
     "newChatMessageTitle": "New message from {sender}",
     "orderCancelledByShopTitle": "Order Cancelled by Shop",
     "orderCancelledByShopBody": "Your order was cancelled by {shopName}. Reason: {cancelReason}"
+  },
+  "minigame": {
+    "title": "Daily Mini-Games",
+    "loginToPlay": "Login to play daily mini-games and win free coins!",
+    "playFree": "Play for Free (Daily)",
+    "playForCoin": "Play for 1 Coin",
+    "youWon": "Congratulations! You won {coins} coins!",
+    "youLost": "Better luck next time!",
+    "tryAgain": "Try Again (1 Coin)",
+    "selectGame": "Select a Game to Play",
+    "mysteryChest": "Mystery Chests",
+    "spinWheel": "Spin the Wheel",
+    "scratchCard": "Scratch Card",
+    "scratchToWin": "Scratch 3 matching coins to win!"
   }
 }

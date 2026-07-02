@@ -6,6 +6,7 @@ import { decryptAddress } from "@/lib/encryption";
 import AdsSection from "@/components/AdsSection";
 import Logo from "@/components/Logo";
 import HomePageMarketsClient from "./HomePageMarketsClient";
+import MiniGameContainer from "@/components/minigame/MiniGameContainer";
 
 import { getTranslations } from "next-intl/server";
 
@@ -212,6 +213,8 @@ export default async function Home() {
         spotlightProducts={spotlightProducts}
         whatsUpTodayProducts={globalActiveProducts}
       />
+
+      <MiniGameContainer />
 
       <AdsSection ads={activeAds} />
     </div>
