@@ -14,6 +14,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
   
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [showQR, setShowQR] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
   
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +30,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
   const handleGenerateQR = () => {
     if (!selectedPackage) return;
     setShowQR(true);
+    setShowUpload(false);
     setFile(null);
     setError("");
     setSuccess(false);
@@ -92,6 +94,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
 
       setSuccess(true);
       setShowQR(false);
+      setShowUpload(false);
       setFile(null);
       setSelectedPackage(null);
       
@@ -152,6 +155,7 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                   onClick={() => {
                     setSelectedPackage(pkg.price);
                     setShowQR(false);
+                    setShowUpload(false);
                     setSuccess(false);
                   }}
                   className={`
@@ -226,15 +230,25 @@ export default function WalletClient({ currentCoins }: { currentCoins: number })
                   />
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1 mb-4">
                   <p className="font-medium text-gray-900">{t("scanToPay", { amount: selectedPackage }) || `Scan to pay ฿${selectedPackage}`}</p>
                   <p className="text-sm text-gray-500">Please scan using your banking app.</p>
                 </div>
+                
+                {!showUpload && (
+                  <button
+                    onClick={() => setShowUpload(true)}
+                    className="w-full bg-brand-100 text-brand-800 font-bold py-3 rounded-xl hover:bg-brand-200 transition flex justify-center items-center gap-2 border border-brand-200 shadow-sm"
+                  >
+                    <Upload className="w-5 h-5" />
+                    Upload Payment Slip
+                  </button>
+                )}
               </div>
             )}
           </div>
 
-          {showQR && (
+          {showUpload && (
             <div className="bg-brand-50 rounded-2xl p-6 shadow-sm border border-brand-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <h3 className="font-bold text-brand-900 text-lg mb-2">Upload Payment Slip</h3>
               <p className="text-sm text-brand-700 mb-4">Please upload your payment slip for verification.</p>
